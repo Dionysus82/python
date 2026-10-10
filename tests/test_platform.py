@@ -189,6 +189,36 @@ def test_audit_rows_cannot_be_updated(db):
         db.commit()
 
 
+def test_customer_history_survives_display_formatting(db):
+    """Customer 360 stores dates as DD MMM YYYY strings. Charts must still read them."""
+    from datetime import date
+
+    from app.domain.dates import coerce_date, format_date
+    from app.services.serialise import jsonable
+
+    assert format_date("30 Sep 2026") == "30 Sep 2026"
+    assert format_date("2026-09-30") == "30 Sep 2026"
+    assert coerce_date("30 Sep 2026") == date(2026, 9, 30)
+    assert format_date(date(2026, 9, 30)).endswith("2026")
+
+    principal = load_principal(db, "cro.shum")
+    payload = jsonable(analytics.customer_360(db, principal, "CUS-AHTL-0001"))
+    drawn = payload["histories"]["drawn_exposure"]
+    assert len(drawn) >= 18
+    assert len(payload["histories"]["utilisation_pct"]) >= 18
+    assert len(payload["histories"]["internal_rating"]) >= 18
+    assert len(payload["histories"]["liquidity_ratio"]) >= 18
+    for row in drawn:
+        assert coerce_date(row["as_of_date"]) is not None
+        assert format_date(row["as_of_date"]) != "—"
+        if row["value"] is not None:
+            float(row["value"])
+    board = analytics.dashboard(db, principal)
+    assert len(board["exposure_history"]) >= 18
+    assert board["industry_hkd"]
+    assert board["customer_count"] >= 23
+
+
 def test_dataset_has_the_required_book(db):
     count = len(db.scalars(select(Customer)).all())
     assert count >= 23
