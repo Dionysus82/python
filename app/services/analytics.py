@@ -524,9 +524,11 @@ def _facility_rows(session: Session, customer_id: str) -> list[dict]:
 def _metric_histories(session: Session, customer_id: str, principal: Principal) -> dict:
     charts: dict[str, list] = {
         "drawn_exposure": [],
+        "utilisation_pct": [],
         "deposits": [],
         "liquidity_ratio": [],
         "cash_reserves": [],
+        "internal_rating": [],
     }
     snapshots = session.scalars(
         select(models.FacilitySnapshot)
@@ -538,15 +540,32 @@ def _metric_histories(session: Session, customer_id: str, principal: Principal) 
         by_date[row.as_of_date].append(row)
     for as_of, rows in by_date.items():
         usable = [row for row in rows if row.hkd_drawn is not None and row.data_quality == "ok"]
+        drawn_total = sum_hkd([row.hkd_drawn for row in usable]) if usable else None
+        utilisation = None
+        if usable and all(row.hkd_committed not in (None, ZERO) for row in usable) and drawn_total is not None:
+            committed_total = sum_hkd([row.hkd_committed for row in usable])
+            if committed_total not in (None, ZERO):
+                utilisation = (drawn_total / committed_total * Decimal("100")).quantize(Decimal("0.01"))
         charts["drawn_exposure"].append(
             {
                 "as_of_date": as_of,
-                "value": sum_hkd([row.hkd_drawn for row in usable]) if usable else None,
+                "value": drawn_total,
                 "source_system": rows[0].source_system,
                 "currency": "HKD",
                 "unit": "HKD",
                 "calculation_basis": "Sum of stored HKD drawn amounts with data quality ok.",
                 "data_quality": "ok" if len(usable) == len(rows) else "incomplete",
+            }
+        )
+        charts["utilisation_pct"].append(
+            {
+                "as_of_date": as_of,
+                "value": utilisation,
+                "source_system": rows[0].source_system,
+                "currency": "n/a",
+                "unit": "percent",
+                "calculation_basis": "Sum of stored HKD drawn amounts divided by sum of stored HKD committed limits, for facilities with data quality ok.",
+                "data_quality": "ok" if utilisation is not None else "incomplete",
             }
         )
     deposits = session.scalars(
@@ -587,6 +606,18 @@ def _metric_histories(session: Session, customer_id: str, principal: Principal) 
                 "unit": metric.unit,
                 "calculation_basis": metric.calculation_basis,
                 "data_quality": metric.data_quality,
+            }
+        )
+    for rating in _ratings(session, customer_id):
+        charts["internal_rating"].append(
+            {
+                "as_of_date": rating.as_of_date,
+                "value": rating.rating,
+                "source_system": rating.source_system,
+                "currency": "n/a",
+                "unit": "rating notch",
+                "calculation_basis": rating.scale_note,
+                "data_quality": "ok",
             }
         )
     return charts
@@ -893,11 +924,22 @@ def dashboard(session: Session, principal: Principal) -> dict:
     breaches = []
     near = []
     high_risk = []
+    industry_totals: dict[str, Decimal] = defaultdict(lambda: ZERO)
+    jurisdiction_totals: dict[str, Decimal] = defaultdict(lambda: ZERO)
+    rating_counts: dict[str, int] = defaultdict(int)
+    class_counts: dict[str, int] = defaultdict(int)
+    book_by_date: dict[date, Decimal] = defaultdict(lambda: ZERO)
     for customer in customers:
         rows = _latest_rows(session, customer.customer_id)
         position = _position(rows)
         ratings = _ratings(session, customer.customer_id)
         exposures.append((customer, position))
+        class_counts[customer.customer_risk_classification] += 1
+        if ratings:
+            rating_counts[str(ratings[-1].rating)] += 1
+        if position["total_exposure_hkd"] is not None:
+            industry_totals[customer.industry] += position["total_exposure_hkd"]
+            jurisdiction_totals[customer.jurisdiction] += position["total_exposure_hkd"]
         if len(ratings) >= 2 and ratings[-1].rating - ratings[0].rating >= int(SCORE["deterioration_notches"]):
             deteriorating.append({"customer_id": customer.customer_id, "legal_name": customer.legal_name, "trend": _trend(ratings)})
         history = session.scalars(
@@ -908,6 +950,8 @@ def dashboard(session: Session, principal: Principal) -> dict:
         first: dict[str, models.FacilitySnapshot] = {}
         for row in history:
             first.setdefault(row.facility_id, row)
+            if row.data_quality == "ok" and row.hkd_drawn is not None:
+                book_by_date[row.as_of_date] += row.hkd_drawn
         for row in rows:
             opening = first.get(row.facility_id)
             if (
@@ -1022,6 +1066,25 @@ def dashboard(session: Session, principal: Principal) -> dict:
         "high_risk_classifications": high_risk,
         "early_warnings": [_ewi(row) for row in ewis],
         "risk_domain_distribution": dict(sorted(domain_counts.items())),
+        "customer_count": len(customers),
+        "open_ewi_count": len(ewis),
+        "overdue_review_count": len(overdue_reviews),
+        "industry_hkd": dict(sorted(industry_totals.items(), key=lambda item: item[1], reverse=True)),
+        "jurisdiction_hkd": dict(sorted(jurisdiction_totals.items(), key=lambda item: item[1], reverse=True)),
+        "rating_distribution": dict(sorted(rating_counts.items(), key=lambda item: int(item[0]))),
+        "classification_distribution": dict(sorted(class_counts.items())),
+        "exposure_history": [
+            {
+                "as_of_date": as_of,
+                "value": amount,
+                "currency": "HKD",
+                "unit": "HKD",
+                "source_system": "HMB Facility Subledger (synthetic)",
+                "calculation_basis": "Sum of authorised HKD drawn amounts with data quality ok. Missing amounts are excluded, not treated as zero.",
+                "data_quality": "ok",
+            }
+            for as_of, amount in sorted(book_by_date.items())
+        ],
     }
 
 
