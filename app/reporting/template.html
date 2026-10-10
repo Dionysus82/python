@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <title>{{ title }}</title>
+  <style>
+    body { font-family: "Segoe UI", "Helvetica Neue", sans-serif; color: #1c2834; margin: 0; background: #f4f6f8; }
+    header, main { padding: 24px 32px; }
+    .banner { background: #7a1f1f; color: #fff; padding: 12px 16px; font-weight: 700; letter-spacing: 0.02em; }
+    h1 { font-size: 1.6rem; margin-bottom: 0.2rem; }
+    h2 { font-size: 1.1rem; border-bottom: 2px solid #0b3a5b; padding-bottom: 4px; margin-top: 1.6rem; }
+    .meta { color: #445; }
+    .notice { background: #fff4e5; border-left: 4px solid #9a6700; padding: 10px 12px; }
+    .fact { background: #fff; border: 1px solid #d5dde5; padding: 10px 12px; margin: 8px 0; }
+    .tag { display: inline-block; background: #0b3a5b; color: #fff; font-size: 0.75rem; padding: 2px 6px; margin-right: 6px; }
+    .cite { color: #0b3a5b; font-size: 0.9rem; }
+    table { border-collapse: collapse; width: 100%; background: #fff; }
+    th, td { border: 1px solid #d5dde5; padding: 6px 8px; text-align: left; vertical-align: top; }
+    th { background: #e7eef4; }
+  </style>
+</head>
+<body>
+  <div class="banner">{{ banner }}</div>
+  <header>
+    <h1>{{ title }}</h1>
+    <p class="meta">{{ bank }} — fictional institution, not an HKMA-authorised institution.</p>
+    <p class="meta">Generated {{ generated_at }} · Hong Kong time · Report {{ report_id }}</p>
+    <p class="notice">{{ human_review }} Approval status: {{ approval_status }}</p>
+    <p class="notice">{{ regulatory }}</p>
+  </header>
+  <main>
+    {% for section in sections %}
+    <h2>{{ section.title }}</h2>
+    {% if section.narrative %}<p>{{ section.narrative }}</p>{% endif %}
+    {% if section.rows %}
+    <table>
+      <thead><tr>{% for head in section.headers %}<th>{{ head }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% for row in section.rows %}
+        <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+    {% for fact in section.facts %}
+    <div class="fact">
+      <span class="tag">{{ fact.kind }}</span>
+      <span>{{ fact.text }}</span>
+      {% for citation in fact.citations %}
+      <div class="cite">
+        {% if citation.document_id %}
+        <a href="/source?document_id={{ citation.document_id }}">{{ citation.label }}</a>
+        {% else %}
+        {{ citation.label }}
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+    {% endfor %}
+  </main>
+</body>
+</html>
