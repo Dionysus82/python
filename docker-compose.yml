@@ -1,0 +1,19 @@
+services:
+  risk-intelligence:
+    build: .
+    ports:
+      - "8501:8501"
+      - "8000:8000"
+    environment:
+      APP_ENV: local
+      DATABASE_URL: sqlite:///./data/harbour_meridian.db
+      DATA_DIR: /app/data
+      EXTERNAL_LLM_ENABLED: "false"
+      LLM_PROVIDER: disabled
+      DEMO_PASSWORD: Harbour-Demo-2026
+      SECRET_KEY: hackathon-only-not-a-secret
+    volumes:
+      - hmb-data:/app/data
+
+volumes:
+  hmb-data:

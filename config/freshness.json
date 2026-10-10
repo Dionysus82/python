@@ -1,0 +1,11 @@
+{
+  "credit_review_days": 365,
+  "interim_review_days": 180,
+  "liquidity_assessment_days": 90,
+  "cdd_days": 365,
+  "aml_periodic_review_days": 365,
+  "metric_days": 45,
+  "facility_snapshot_days": 45,
+  "market_report_days": 90,
+  "default_document_days": 365
+}

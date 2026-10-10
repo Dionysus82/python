@@ -1,0 +1,189 @@
+[
+  {
+    "reference_id": "HKMA-SPM-IC-1",
+    "name": "Supervisory Policy Manual IC-1 Risk Management Framework",
+    "issuing_authority": "Hong Kong Monetary Authority",
+    "version_or_issue_date": "06 Oct 2017 (BRDR listing observed as current; confirm the in-force revision before any reliance)",
+    "risk_domain": "Enterprise risk management",
+    "design_consideration": "Informs the prototype's three-lines-of-defence roles, risk taxonomy and the separation between evidence and management reporting. It is a design input only.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic platform administrator, Harbour Meridian Bank Limited (fictional)",
+    "validation_requirement": "Formal legal, compliance and regulatory review required"
+  },
+  {
+    "reference_id": "HKMA-SPM-SA-1",
+    "name": "Supervisory Policy Manual SA-1 Risk-based Supervisory Approach",
+    "issuing_authority": "Hong Kong Monetary Authority",
+    "version_or_issue_date": "23 Dec 2022 (BRDR listing observed as current; confirm the in-force revision before any reliance)",
+    "risk_domain": "Supervisory context",
+    "design_consideration": "Informs why the prototype organises information by risk and materiality for a management reader. It does not implement a supervisory process.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic chief risk officer role (fictional user cro.shum)",
+    "validation_requirement": "Formal legal, compliance and regulatory review required"
+  },
+  {
+    "reference_id": "HKMA-SPM-CR-G-1",
+    "name": "Supervisory Policy Manual CR-G-1 General Principles of Credit Risk Management",
+    "issuing_authority": "Hong Kong Monetary Authority",
+    "version_or_issue_date": "19 Jan 2001 (BRDR listing observed as current; confirm the in-force revision before any reliance)",
+    "risk_domain": "Credit risk",
+    "design_consideration": "Informs customer, facility, limit, collateral, review and early-warning displays. Demonstration calculations are not credit decisions.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic credit-risk function (fictional)",
+    "validation_requirement": "Formal legal, compliance and regulatory review required"
+  },
+  {
+    "reference_id": "HKMA-SPM-CR-G-13",
+    "name": "Supervisory Policy Manual CR-G-13 Counterparty Credit Risk Management",
+    "issuing_authority": "Hong Kong Monetary Authority",
+    "version_or_issue_date": "03 Jul 2018 (BRDR listing observed as current; confirm the in-force revision before any reliance)",
+    "risk_domain": "Counterparty credit risk",
+    "design_consideration": "Informs the separate display of demonstration counterparty credit exposure. The prototype does not calculate regulatory capital.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic market-risk function (fictional)",
+    "validation_requirement": "Formal legal, compliance and regulatory review required"
+  },
+  {
+    "reference_id": "HKMA-SPM-LM-2",
+    "name": "Supervisory Policy Manual LM-2 Sound Systems and Controls for Liquidity Risk Management",
+    "issuing_authority": "Hong Kong Monetary Authority",
+    "version_or_issue_date": "V.2 dated 25 Nov 2016 in secondary summaries; confirm the in-force revision on the HKMA BRDR before any reliance",
+    "risk_domain": "Liquidity risk",
+    "design_consideration": "Informs separate liquidity metrics, early-warning indicators and the instruction not to treat liquidity stress as credit default.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic liquidity-risk function (fictional)",
+    "validation_requirement": "Formal legal, compliance and regulatory review required"
+  },
+  {
+    "reference_id": "HKMA-SPM-OR-1",
+    "name": "Supervisory Policy Manual OR-1 Operational Risk Management",
+    "issuing_authority": "Hong Kong Monetary Authority",
+    "version_or_issue_date": "25 Jul 2022 (BRDR listing observed as current; confirm the in-force revision before any reliance)",
+    "risk_domain": "Operational risk",
+    "design_consideration": "Informs operational and cyber incident records and the distinction between an incident summary and a risk acceptance.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic operational-risk function (fictional)",
+    "validation_requirement": "Formal legal, compliance and regulatory review required"
+  },
+  {
+    "reference_id": "HKMA-SPM-TM-G-1",
+    "name": "Supervisory Policy Manual TM-G-1 General Principles for Technology Risk Management",
+    "issuing_authority": "Hong Kong Monetary Authority",
+    "version_or_issue_date": "24 Jun 2003 (BRDR cross-reference observed as current; confirm the in-force revision before any reliance)",
+    "risk_domain": "Technology risk",
+    "design_consideration": "Informs upload validation, access control, logging and the documented production-control gap. The prototype is not a technology-risk-compliant system.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic platform administrator (fictional)",
+    "validation_requirement": "Formal legal, compliance, cybersecurity and regulatory review required"
+  },
+  {
+    "reference_id": "HKMA-AI-PRINCIPLES-2019",
+    "name": "High-level Principles on Artificial Intelligence",
+    "issuing_authority": "Hong Kong Monetary Authority",
+    "version_or_issue_date": "01 Nov 2019 (HKMA document identifier 20191101; confirm before any reliance)",
+    "risk_domain": "Model risk",
+    "design_consideration": "Informs governance, accountability, data-quality labelling, transparency and the prohibition on presenting model text as a decision.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic model administrator (fictional)",
+    "validation_requirement": "Formal model-risk, legal, compliance and regulatory review required"
+  },
+  {
+    "reference_id": "HKMA-GENAI-CP-2024",
+    "name": "Consumer Protection in respect of Use of Generative Artificial Intelligence",
+    "issuing_authority": "Hong Kong Monetary Authority",
+    "version_or_issue_date": "07 Nov 2024, with a related document dated 25 Nov 2024 (confirm before any reliance)",
+    "risk_domain": "Conduct risk",
+    "design_consideration": "Informs disclosure that commentary is model-generated, human oversight, and the default refusal to send data to an external model.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic model administrator (fictional)",
+    "validation_requirement": "Formal legal, compliance and regulatory review required"
+  },
+  {
+    "reference_id": "HKMA-AML-GUIDELINE",
+    "name": "Guideline on Anti-Money Laundering and Counter-Financing of Terrorism (For Authorized Institutions)",
+    "issuing_authority": "Hong Kong Monetary Authority",
+    "version_or_issue_date": "Current HKMA guideline; exact revision to be confirmed on the HKMA BRDR before any reliance",
+    "risk_domain": "AML risk",
+    "design_consideration": "Informs restricted access to synthetic financial-crime indicators and the ban on suspicious-transaction-reporting or exit decisions.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic financial-crime compliance role (fictional)",
+    "validation_requirement": "Formal legal, compliance and regulatory review required"
+  },
+  {
+    "reference_id": "BO-CAP-155",
+    "name": "Banking Ordinance (Cap. 155)",
+    "issuing_authority": "Hong Kong SAR",
+    "version_or_issue_date": "Cap. 155, as amended from time to time; confirm the in-force text before any reliance",
+    "risk_domain": "Institutional context",
+    "design_consideration": "Explains why the fictional bank is not described as an authorised institution and why the prototype cannot be used for banking business.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic senior management role (fictional)",
+    "validation_requirement": "Formal legal, compliance and regulatory review required"
+  },
+  {
+    "reference_id": "AMLO-CAP-615",
+    "name": "Anti-Money Laundering and Counter-Terrorist Financing Ordinance (Cap. 615)",
+    "issuing_authority": "Hong Kong SAR",
+    "version_or_issue_date": "Cap. 615, as amended from time to time; confirm the in-force text before any reliance",
+    "risk_domain": "AML risk",
+    "design_consideration": "Informs the boundary that the prototype retrieves synthetic indicators and does not file, simulate or decide a suspicious transaction report.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic financial-crime compliance role (fictional)",
+    "validation_requirement": "Formal legal, compliance and regulatory review required"
+  },
+  {
+    "reference_id": "PDPO-CAP-486",
+    "name": "Personal Data (Privacy) Ordinance (Cap. 486)",
+    "issuing_authority": "Hong Kong SAR",
+    "version_or_issue_date": "Cap. 486, as amended from time to time; confirm the in-force text before any reliance",
+    "risk_domain": "Data risk",
+    "design_consideration": "Informs purpose limitation, access control, retention labels and the synthetic-data-only constraint. No real personal data is processed.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic data-governance reviewer (fictional)",
+    "validation_requirement": "Formal legal, privacy and compliance review required"
+  },
+  {
+    "reference_id": "PCPD-AI-2021",
+    "name": "Guidance on the Ethical Development and Use of Artificial Intelligence",
+    "issuing_authority": "Office of the Privacy Commissioner for Personal Data, Hong Kong",
+    "version_or_issue_date": "18 Aug 2021 (confirm before any reliance)",
+    "risk_domain": "Data risk",
+    "design_consideration": "Informs accountability, human oversight, transparency and data-minimisation language in the AI governance record.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic data-governance reviewer (fictional)",
+    "validation_requirement": "Formal privacy, legal and compliance review required"
+  },
+  {
+    "reference_id": "PCPD-AI-FRAMEWORK-2024",
+    "name": "Artificial Intelligence: Model Personal Data Protection Framework",
+    "issuing_authority": "Office of the Privacy Commissioner for Personal Data, Hong Kong",
+    "version_or_issue_date": "11 Jun 2024 (confirm before any reliance)",
+    "risk_domain": "Data risk",
+    "design_consideration": "Informs the privacy-impact and AI-impact templates. The dataset is synthetic and the templates are not completed assessments.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic data-governance reviewer (fictional)",
+    "validation_requirement": "Formal privacy, legal and compliance review required"
+  },
+  {
+    "reference_id": "HKMA-SPM-GS-1",
+    "name": "Supervisory Policy Manual GS-1 Climate Risk Management",
+    "issuing_authority": "Hong Kong Monetary Authority",
+    "version_or_issue_date": "30 Dec 2021 (BRDR listing observed as current; confirm the in-force revision before any reliance)",
+    "risk_domain": "Climate risk",
+    "design_consideration": "Informs the separate climate-risk indicator. The prototype does not perform climate-risk capital or scenario analysis.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic enterprise-risk role (fictional)",
+    "validation_requirement": "Formal legal, compliance and regulatory review required"
+  },
+  {
+    "reference_id": "BCBS-RISK-PRINCIPLES",
+    "name": "Basel Committee principles for credit, liquidity, operational and related risk management",
+    "issuing_authority": "Basel Committee on Banking Supervision",
+    "version_or_issue_date": "Specific papers and revision dates to be confirmed at formal review",
+    "risk_domain": "Cross-risk",
+    "design_consideration": "Informs vocabulary for exposure, limits, operational incidents and governance. No Basel ratio or capital figure is presented as a regulatory measure.",
+    "implementation_status": "Design input only — not implemented as a compliance control",
+    "application_owner": "Synthetic chief risk officer role (fictional user cro.shum)",
+    "validation_requirement": "Formal legal, compliance and regulatory review required"
+  }
+]

@@ -1,0 +1,151 @@
+{
+  "permissions": [
+    "customer.read",
+    "customer.search",
+    "document.read",
+    "document.upload",
+    "document.download",
+    "aml.read",
+    "ask.use",
+    "report.generate",
+    "report.review",
+    "portfolio.read",
+    "portfolio.enterprise",
+    "audit.read",
+    "evaluation.read",
+    "evaluation.run",
+    "admin.users",
+    "admin.demo_mode",
+    "model.admin",
+    "governance.read",
+    "data_quality.read"
+  ],
+  "roles": {
+    "relationship_manager": {
+      "line": "first",
+      "label": "Relationship manager",
+      "read_only": false,
+      "portfolios": "assigned",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.upload", "document.download", "ask.use", "report.generate", "portfolio.read", "data_quality.read"]
+    },
+    "corporate_banking_officer": {
+      "line": "first",
+      "label": "Corporate banking officer",
+      "read_only": false,
+      "portfolios": "assigned",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.upload", "document.download", "ask.use", "report.generate", "portfolio.read", "data_quality.read"]
+    },
+    "product_specialist": {
+      "line": "first",
+      "label": "Product specialist",
+      "read_only": false,
+      "portfolios": "assigned",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.download", "ask.use", "portfolio.read", "data_quality.read"]
+    },
+    "credit_originator": {
+      "line": "first",
+      "label": "Credit originator",
+      "read_only": false,
+      "portfolios": "assigned",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.upload", "document.download", "ask.use", "report.generate", "portfolio.read", "data_quality.read"]
+    },
+    "credit_risk_analyst": {
+      "line": "second",
+      "label": "Credit-risk analyst",
+      "read_only": false,
+      "portfolios": "all",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.upload", "document.download", "ask.use", "report.generate", "portfolio.read", "portfolio.enterprise", "data_quality.read", "evaluation.read"]
+    },
+    "market_risk_analyst": {
+      "line": "second",
+      "label": "Market-risk analyst",
+      "read_only": false,
+      "portfolios": "all",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.download", "ask.use", "report.generate", "portfolio.read", "portfolio.enterprise", "data_quality.read"]
+    },
+    "liquidity_risk_analyst": {
+      "line": "second",
+      "label": "Liquidity-risk analyst",
+      "read_only": false,
+      "portfolios": "all",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.download", "ask.use", "report.generate", "portfolio.read", "portfolio.enterprise", "data_quality.read"]
+    },
+    "operational_risk_analyst": {
+      "line": "second",
+      "label": "Operational-risk analyst",
+      "read_only": false,
+      "portfolios": "all",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.upload", "document.download", "ask.use", "report.generate", "portfolio.read", "portfolio.enterprise", "data_quality.read"]
+    },
+    "financial_crime_compliance_analyst": {
+      "line": "second",
+      "label": "Financial-crime compliance analyst",
+      "read_only": false,
+      "portfolios": "all",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.upload", "document.download", "aml.read", "ask.use", "report.generate", "portfolio.read", "portfolio.enterprise", "data_quality.read", "audit.read"]
+    },
+    "enterprise_risk_manager": {
+      "line": "second",
+      "label": "Enterprise-risk manager",
+      "read_only": false,
+      "portfolios": "all",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.download", "ask.use", "report.generate", "portfolio.read", "portfolio.enterprise", "governance.read", "data_quality.read", "evaluation.read"]
+    },
+    "model_risk_reviewer": {
+      "line": "second",
+      "label": "Model-risk reviewer",
+      "read_only": true,
+      "portfolios": "all",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.download", "ask.use", "portfolio.read", "portfolio.enterprise", "governance.read", "evaluation.read", "evaluation.run", "data_quality.read"]
+    },
+    "data_governance_reviewer": {
+      "line": "second",
+      "label": "Data-governance reviewer",
+      "read_only": true,
+      "portfolios": "all",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.download", "portfolio.read", "portfolio.enterprise", "data_quality.read", "governance.read", "audit.read"]
+    },
+    "internal_auditor": {
+      "line": "third",
+      "label": "Internal auditor",
+      "read_only": true,
+      "portfolios": "all",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.download", "aml.read", "ask.use", "portfolio.read", "portfolio.enterprise", "audit.read", "evaluation.read", "governance.read", "data_quality.read"]
+    },
+    "chief_risk_officer": {
+      "line": "management",
+      "label": "Chief risk officer",
+      "read_only": false,
+      "portfolios": "all",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.download", "aml.read", "ask.use", "report.generate", "report.review", "portfolio.read", "portfolio.enterprise", "audit.read", "evaluation.read", "evaluation.run", "governance.read", "data_quality.read"]
+    },
+    "senior_management": {
+      "line": "management",
+      "label": "Senior management",
+      "read_only": false,
+      "portfolios": "all",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.download", "aml.read", "ask.use", "report.generate", "report.review", "portfolio.read", "portfolio.enterprise", "audit.read", "governance.read", "data_quality.read", "evaluation.read"]
+    },
+    "risk_committee_secretariat": {
+      "line": "management",
+      "label": "Risk committee secretariat",
+      "read_only": false,
+      "portfolios": "all",
+      "permissions": ["customer.read", "customer.search", "document.read", "document.download", "aml.read", "ask.use", "report.generate", "report.review", "portfolio.read", "portfolio.enterprise", "audit.read", "governance.read", "data_quality.read", "evaluation.read"]
+    },
+    "platform_administrator": {
+      "line": "administration",
+      "label": "Platform administrator",
+      "read_only": false,
+      "portfolios": "none",
+      "permissions": ["admin.users", "admin.demo_mode", "audit.read", "data_quality.read", "document.upload", "governance.read"]
+    },
+    "model_administrator": {
+      "line": "administration",
+      "label": "Model administrator",
+      "read_only": false,
+      "portfolios": "none",
+      "permissions": ["model.admin", "governance.read", "evaluation.read", "evaluation.run", "audit.read"]
+    }
+  }
+}
