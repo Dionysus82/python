@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BEA AI · Risk Intelligence Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange: #E36F1E;
+  --orange-deep: #C45112;
+  --red: #B42318;
+  --red-wash: #F8E8E4;
+  --ink: #2C2825;
+  --title: #8C3E16;
+  --muted: #6F6862;
+  --line: #E4DDD6;
+  --ground: #F3EFEA;
+  --card: #FFFCF9;
+  --soft: #F7F4F0;
+  --rail: #3A342F;
+  --rail-text: #E7E0D8;
+  --stable: #3E6B45;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: var(--ground);
+}
+button, select { font: inherit; color: inherit; }
+.shell { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+.rail {
+  background: var(--rail);
+  color: var(--rail-text);
+  padding: 28px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.mark { font-family: "Source Serif 4", Georgia, serif; color: #fff; font-size: 1.45rem; letter-spacing: 0.01em; line-height: 1; }
+.mark span { color: var(--orange); }
+.mark small { display: block; margin-top: 8px; font-family: "Source Sans 3", sans-serif; font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: #C8BEB4; font-weight: 600; }
+.role { margin: 28px 0 22px; }
+.role label { display: block; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: #C8BEB4; margin-bottom: 8px; }
+.role select { width: 100%; background: #2A2522; color: #fff; border: 1px solid #5A514A; border-radius: 8px; padding: 10px 12px; }
+.nav-btn {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  background: transparent; border: 0; color: var(--rail-text);
+  padding: 11px 12px; border-radius: 8px; cursor: pointer; margin-bottom: 4px;
+  border-left: 3px solid transparent;
+}
+.nav-btn .idx { font-size: 0.72rem; color: #A89E94; width: 16px; }
+.nav-btn.active { background: rgba(227, 111, 30, 0.18); color: #fff; border-left-color: var(--orange); }
+.nav-btn.active .idx { color: var(--orange); }
+.rail .foot { margin-top: auto; font-size: 0.82rem; color: #C8BEB4; line-height: 1.45; padding-top: 18px; border-top: 1px solid #4A433E; }
+.main { padding: 28px 36px 56px; min-width: 0; }
+.top { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; margin-bottom: 18px; }
+.kicker { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--orange-deep); font-weight: 700; }
+h1 { font-family: "Source Serif 4", Georgia, serif; color: var(--title); font-size: 2.15rem; font-weight: 600; margin: 6px 0 8px; letter-spacing: -0.02em; }
+h2 { font-family: "Source Serif 4", Georgia, serif; color: var(--title); font-size: 1.35rem; font-weight: 600; margin: 0 0 12px; }
+.lead { margin: 0; color: var(--muted); max-width: 680px; line-height: 1.5; }
+.asof { text-align: right; min-width: 160px; }
+.asof .label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.asof .date { font-family: "Source Serif 4", Georgia, serif; color: var(--title); font-size: 1.25rem; margin-top: 2px; }
+.pill { display: inline-block; margin-top: 8px; background: var(--soft); border: 1px solid var(--line); color: var(--muted); border-radius: 999px; padding: 3px 10px; font-size: 0.75rem; font-weight: 650; }
+.ribbon { display: flex; align-items: stretch; gap: 0; margin: 0 0 18px; }
+.box {
+  flex: 1; background: var(--orange); color: #fff; padding: 10px 12px 11px;
+  min-width: 0;
+}
+.box:first-child { border-radius: 8px 0 0 8px; }
+.box:last-child { border-radius: 0 8px 8px 0; }
+.box b { display: block; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; font-weight: 600; }
+.box span { display: block; font-size: 0.86rem; font-weight: 700; margin-top: 2px; line-height: 1.25; }
+.arrow { width: 22px; background: var(--orange-deep); color: #fff; display: grid; place-items: center; font-size: 0.85rem; flex: none; }
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+.metric { border-top: 3px solid var(--orange); }
+.metric.alert { border-top-color: var(--red); }
+.metric .label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 650; }
+.metric .value { font-size: 1.55rem; font-weight: 700; margin-top: 8px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.metric .note { color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
+.sample-bars { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 14px; }
+.sample-bars .card { min-width: 0; }
+.sample-bars h3 { margin: 0; font-size: 0.95rem; font-weight: 700; }
+.sample-bars .amt { text-align: left; margin: 6px 0 8px; color: var(--ink); font-weight: 700; }
+.table-wrap { margin-top: 14px; overflow-x: auto; }
+.section-title { margin: 0 0 12px; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--title); font-weight: 700; }
+table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+th { text-align: left; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 0 8px 10px; border-bottom: 1px solid var(--line); font-weight: 650; }
+td { padding: 13px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tr.click { cursor: pointer; }
+tr.click:hover td { background: #FBF7F2; }
+tr.click td:first-child { font-weight: 650; }
+.sub { color: var(--muted); font-size: 0.8rem; font-weight: 500; margin-top: 2px; }
+.tag { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 650; white-space: nowrap; }
+.tag-red { background: var(--red-wash); color: var(--red); }
+.tag-grey { background: var(--soft); color: var(--stable); border: 1px solid var(--line); }
+.tag-orange { background: #FDE8D4; color: var(--orange-deep); }
+.bar-row { display: grid; grid-template-columns: 148px 1fr 108px; gap: 10px; align-items: center; margin: 10px 0; font-size: 0.86rem; }
+.track { height: 8px; background: var(--soft); border-radius: 99px; overflow: hidden; }
+.fill { height: 100%; background: var(--orange); border-radius: 99px; }
+.fill.hot { background: var(--red); }
+.fill.calm { background: #A39A92; }
+.amt { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.8rem; }
+.split { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 16px; align-items: start; }
+.split.with-cite { grid-template-columns: 220px minmax(0, 1fr) 300px; }
+.toc button {
+  display: block; width: 100%; text-align: left; background: transparent; border: 0;
+  border-left: 3px solid var(--line); padding: 9px 12px; cursor: pointer; color: var(--muted);
+}
+.toc button.on { border-left-color: var(--orange); color: var(--ink); font-weight: 650; background: #FBF7F2; }
+.toc .n { color: var(--orange-deep); font-size: 0.72rem; margin-right: 6px; font-weight: 700; }
+.prose p { margin: 0 0 14px; line-height: 1.6; }
+.cite {
+  display: inline-block; margin: 0 4px 0 0; padding: 1px 8px; border-radius: 999px;
+  background: #FDE8D4; color: var(--orange-deep); font-weight: 700; font-size: 0.72rem;
+  letter-spacing: 0.02em; cursor: pointer; border: 0;
+}
+.cite:hover { background: #F6D3B0; }
+.facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 14px 0 16px; }
+.fact { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.fact .label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 650; }
+.fact .value { margin-top: 4px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.fact .value em { font-style: normal; color: var(--red); }
+.actions { display: flex; gap: 8px; margin-top: 6px; }
+.btn { border: 0; border-radius: 8px; padding: 10px 14px; cursor: pointer; font-weight: 700; }
+.btn-primary { background: var(--orange); color: #fff; }
+.btn-primary:hover { background: var(--orange-deep); }
+.btn-ghost { background: var(--soft); border: 1px solid var(--line); }
+.stamp { margin-top: 12px; border: 1px solid var(--line); background: var(--soft); border-radius: 10px; padding: 10px 12px; color: var(--ink); }
+.stamp b { color: var(--orange-deep); }
+.banner { background: var(--red-wash); color: var(--red); border-radius: 10px; padding: 10px 12px; font-size: 0.86rem; margin-bottom: 12px; }
+.cite-card { position: sticky; top: 16px; }
+.drawer h3 { font-family: "Source Serif 4", Georgia, serif; color: var(--title); margin: 10px 0 6px; font-size: 1.45rem; }
+.quote { border-left: 3px solid var(--orange); padding: 4px 0 4px 12px; line-height: 1.55; margin: 12px 0; }
+.meta { color: var(--muted); font-size: 0.86rem; }
+.parallel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.agent-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.agent-card header { background: var(--orange); color: #fff; padding: 10px 14px; font-weight: 700; }
+.agent-card.serial header { background: var(--red); }
+.agent-card.watch header { background: #6F6862; }
+.agent-card .body { padding: 14px; }
+.agent-card .src { color: var(--muted); font-size: 0.82rem; margin-bottom: 8px; }
+.handoff { text-align: center; color: var(--orange-deep); font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; margin: 12px 0; }
+.stack { display: grid; gap: 12px; margin-top: 0; }
+.timeline { border-left: 2px solid var(--line); margin: 8px 0 0 10px; }
+.tl { padding: 0 0 18px 18px; position: relative; }
+.tl::before { content: ""; position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--orange); border: 2px solid var(--card); }
+.tl strong { display: block; }
+.tl div { color: var(--muted); margin-top: 3px; }
+@media (max-width: 980px) {
+  .shell { grid-template-columns: 1fr; }
+  .rail { position: relative; height: auto; }
+  .metrics, .facts, .parallel, .sample-bars, .split, .split.with-cite { grid-template-columns: 1fr; }
+  .ribbon { flex-direction: column; }
+  .box, .box:first-child, .box:last-child { border-radius: 8px; }
+  .arrow { width: auto; height: 16px; }
+  .top { flex-direction: column; }
+  .asof { text-align: left; }
+  .bar-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail">
+    <div class="mark">BEA <span>AI</span><small>Risk intelligence</small></div>
+    <div class="role">
+      <label for="role">Signed in as</label>
+      <select id="role">
+        <option value="cro">CRO · portfolio view</option>
+        <option value="committee">Credit committee</option>
+        <option value="rm">Relationship manager</option>
+      </select>
+    </div>
+    <nav id="nav"></nav>
+    <div class="foot">Illustrative sample for the GCPE011 rebuild. Figures are not live bank records, and nothing on this screen is a credit approval.</div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+<script id="data" type="application/json">
+{"as_of":"30 Sep 2026","portfolio":{"exposure_hkd":18640000000,"enhanced_monitoring":7,"migrated_this_quarter":4,"open_warnings":11},"groups":[{"group_id":"GRP-PLG","legal_name":"Pacific Lantern Group","rm":"Casey Chan","stage":"Stage 2","rating":{"current":6,"prior":4},"exposure_hkd":1250000000,"warning":"Rating migration and a cross-guarantee","entitled_roles":["cro","committee","rm"]},{"group_id":"GRP-NSH","legal_name":"North Shore Holdings","rm":"Elena Mok","stage":"Stage 1","rating":{"current":3,"prior":3},"exposure_hkd":860000000,"warning":"Stable","entitled_roles":["cro","committee"]},{"group_id":"GRP-KWR","legal_name":"Kowloon Wharf Retail","rm":"Casey Chan","stage":"Stage 2","rating":{"current":5,"prior":5},"exposure_hkd":640000000,"warning":"Utilisation above 80 percent","entitled_roles":["cro","committee","rm"]}]}
+</script>
+<script>
+const DATA = JSON.parse(document.getElementById("data").textContent);
+const PACK = {
+  group_id: "GRP-PLG",
+  booking: "Onshore borrower in Hong Kong, offshore holdco in Singapore",
+  ubo: "Lantern Family Trust, 62 percent, through two holding companies",
+  exposure: { outstanding_hkd: 980000000, limit_hkd: 1250000000, deposits_hkd: 146000000, investments_hkd: 52000000, accrued_interest_hkd: 4100000 },
+  sections: [
+    ["integrated_risk","Integrated risk summary",[
+      ["Credit quality has weakened since the March review. The internal rating moved from 4 to 6, and the group is now Stage 2.", ["SRC-RDS-RATING","SRC-IS9-STAGE"]],
+      ["The onshore operating company remains current on scheduled repayment. The concern is the offshore holdco guarantee, which links the Hong Kong limit to a Singapore entity whose cash flow is not in the onshore statements.", ["SRC-CWS-GUARANTEE","SRC-PDF-P12"]]
+    ]],
+    ["relationship","Relationship summary",[
+      ["Outstanding exposure is HKD 980,000,000 against a group limit of HKD 1,250,000,000. Headroom is HKD 270,000,000.", ["SRC-RDW-LIMIT"]],
+      ["Deposits are HKD 146,000,000 and investment holdings are HKD 52,000,000. Accrued interest is HKD 4,100,000. Balances are relationship context. They are not deducted from exposure.", ["SRC-RDS-DEPOSIT"]]
+    ]],
+    ["developments","Latest account developments",[
+      ["Since 30 Jun 2026 the revolving tranche utilisation rose from 71 percent to 84 percent. No payment is past due.", ["SRC-RDW-UTIL","SRC-IS9-DPD"]],
+      ["The July credit proposal notes a delayed receivable from a mainland distributor. The proposal does not quantify a loss.", ["SRC-PDF-P12"]]
+    ]],
+    ["mitigants","Credit risk mitigants",[
+      ["Eligible collateral is a first charge over a Kowloon commercial unit, valued at HKD 410,000,000 on 15 Aug 2026. Coverage of outstanding exposure is 0.42.", ["SRC-CWS-COLL"]],
+      ["A corporate guarantee from Pacific Lantern International Pte. Ltd. covers the shortfall. Enforceability has not been reconfirmed in this review. Collateral and the guarantee mitigate risk. They do not eliminate it.", ["SRC-CWS-GUARANTEE"]]
+    ]],
+    ["deterioration","Credit deterioration indicators",[
+      ["Two indicators are open: a two-notch rating migration, and utilisation sustained above 80 percent for two month-ends.", ["SRC-EWS-01","SRC-EWS-02"]],
+      ["Moody's has not changed the public rating this quarter. A trade-press item on 18 Sep 2026 reports slower orders at the distributor. It is an external signal, not a covenant breach.", ["SRC-MOODYS","SRC-WEB-18SEP"]]
+    ]],
+    ["portfolio","Portfolio analysis",[
+      ["The group sits in wholesale trade. It is 6.7 percent of the illustrative CRO book. Two other trade names are on Stage 2, so a sector discussion belongs in the committee pack.", ["SRC-RDS-SECTOR"]]
+    ]],
+    ["monitoring","Proposed monitoring plan",[
+      ["Ask the relationship manager for a monthly receivable ageing, and bring the guarantee back to legal for an enforceability check before the next annual review.", ["SRC-AGENT4"]],
+      ["Recommended frequency is monthly until utilisation is back under 75 percent or the rating stabilises. Escalation is to the credit committee if a payment falls past due, or if the offshore guarantor reports a loss.", ["SRC-AGENT4"]]
+    ]]
+  ],
+  citations: {
+    "SRC-RDS-RATING": ["RDS","Agent 1","30 Sep 2026","Internal rating 6. Prior rating on 31 Mar 2026 was 4."],
+    "SRC-IS9-STAGE": ["IS9","Agent 1","30 Sep 2026","Staging flag Stage 2, reason: rating migration of two notches."],
+    "SRC-CWS-GUARANTEE": ["CWS","Agent 2","12 May 2025","All-monies guarantee by Pacific Lantern International Pte. Ltd. Last legal confirmation 12 May 2025."],
+    "SRC-PDF-P12": ["Credit proposal PDF, page 12","Agent 2","18 Jul 2026","Distributor receipts slipped by about six weeks. Management expects collection in the December quarter. No specific-loss figure is stated."],
+    "SRC-RDW-LIMIT": ["RDW","Agent 1","30 Sep 2026","Group limit HKD 1,250,000,000. Outstanding HKD 980,000,000. Headroom = limit − outstanding."],
+    "SRC-RDS-DEPOSIT": ["RDS","Agent 1","30 Sep 2026","Deposits HKD 146,000,000. Investment holdings HKD 52,000,000. Accrued interest HKD 4,100,000. Not netted against exposure."],
+    "SRC-RDW-UTIL": ["RDW","Agent 1","30 Sep 2026","Revolving tranche utilisation 84 percent. Prior month-end 30 Jun 2026 was 71 percent."],
+    "SRC-IS9-DPD": ["IS9","Agent 1","30 Sep 2026","Days past due: 0."],
+    "SRC-CWS-COLL": ["CWS","Agent 2","15 Aug 2026","Commercial unit, Kowloon, open-market value HKD 410,000,000. Coverage = 410,000,000 / 980,000,000 = 0.42."],
+    "SRC-EWS-01": ["Early-warning register","Agent 1","30 Sep 2026","EWI open: rating migration of two notches since 31 Mar 2026."],
+    "SRC-EWS-02": ["Early-warning register","Agent 1","30 Sep 2026","EWI open: utilisation above 80 percent at two consecutive month-ends."],
+    "SRC-MOODYS": ["Moody's","Agent 3","30 Sep 2026","No public rating action on the group this quarter."],
+    "SRC-WEB-18SEP": ["Trade press","Agent 3","18 Sep 2026","Report of slower orders at the named distributor. No primary financial statement attached."],
+    "SRC-RDS-SECTOR": ["RDS","Agent 1","30 Sep 2026","Industry: wholesale trade. Share of illustrative book: 6.7 percent."],
+    "SRC-AGENT4": ["Agent 4 recommendation","Agent 4","14 Oct 2026","Recommendation only. It is not a credit approval."]
+  }
+};
+const state = { role: "cro", page: "portfolio", section: "integrated_risk", cite: null, plan: null, group: "GRP-PLG" };
+const money = n => "HKD " + Number(n).toLocaleString("en-HK");
+const compact = n => n >= 1e9 ? "HKD " + (n / 1e9).toFixed(2) + " bn" : "HKD " + (n / 1e6).toFixed(0) + " m";
+const esc = s => String(s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function visibleGroups() {
+  return DATA.groups.filter(g => g.entitled_roles.includes(state.role));
+}
+function groupById(id) {
+  return DATA.groups.find(g => g.group_id === id);
+}
+function go(page, section) {
+  state.page = page;
+  if (section) state.section = section;
+  state.cite = null;
+  render();
+}
+function openCite(id) { state.cite = id; render(); }
+function render() {
+  const nav = [["portfolio","Portfolio"],["pack","Group pack"],["agents","Agents"],["audit","Audit trajectory"]];
+  document.getElementById("nav").innerHTML = nav.map(([id,label], i) =>
+    `<button class="nav-btn ${state.page===id?"active":""}" data-page="${id}"><span class="idx">0${i+1}</span>${label}</button>`).join("");
+  document.querySelectorAll(".nav-btn").forEach(b => b.onclick = () => go(b.dataset.page));
+  const pages = { portfolio: pagePortfolio, pack: pagePack, agents: pageAgents, audit: pageAudit };
+  document.getElementById("main").innerHTML = pages[state.page]();
+  bind();
+}
+function ribbon() {
+  const steps = [
+    ["01","Trigger","Group and action"],
+    ["02","Sources","RDW, RDS, IS9, documents"],
+    ["03","Agents","Three in parallel"],
+    ["04","Pack","Seven sections"],
+    ["05","Access","Role filters the view"]
+  ];
+  return `<div class="ribbon">${steps.map((s,i) =>
+    `${i ? '<div class="arrow">›</div>' : ""}<div class="box"><b>${s[0]}</b><span>${s[1]}</span></div>`).join("")}</div>`;
+}
+function asof() {
+  return `<div class="asof"><div class="label">Position date</div><div class="date">${DATA.as_of}</div><div class="pill">Illustrative</div></div>`;
+}
+function pagePortfolio() {
+  const rows = visibleGroups();
+  const hidden = DATA.groups.length - rows.length;
+  const book = state.role === "rm";
+  const exposure = book ? rows.reduce((s,g) => s + g.exposure_hkd, 0) : DATA.portfolio.exposure_hkd;
+  const stage2 = rows.filter(g => g.stage === "Stage 2").length;
+  const signals = rows.filter(g => g.warning !== "Stable").length;
+  const max = Math.max(...rows.map(g => g.exposure_hkd));
+  const lead = state.role === "cro"
+    ? "High-level book for the chief risk officer. The three names below are the worked sample. The book totals are the illustrative portfolio, not the sum of those rows."
+    : state.role === "rm"
+    ? "Groups on your entitlement. North Shore Holdings is held by another officer and is omitted from this list and from the totals."
+    : "Groups proposed for the next credit committee. Open a name to read the pack.";
+  const metrics = book
+    ? [
+      ["Your exposure", compact(exposure), money(exposure), ""],
+      ["Your groups", String(rows.length), "Entitled names in this sample", ""],
+      ["Stage 2", String(stage2), "On your list", "alert"],
+      ["Open signals", String(signals), "Not marked stable", "alert"]
+    ]
+    : [
+      ["Illustrative exposure", compact(exposure), money(exposure), ""],
+      ["Enhanced monitoring", String(DATA.portfolio.enhanced_monitoring), "Groups", ""],
+      ["Migrated this quarter", String(DATA.portfolio.migrated_this_quarter), "Weaker internal rating", "alert"],
+      ["Open warnings", String(DATA.portfolio.open_warnings), "Early-warning register", ""]
+    ];
+  return `<div class="top"><div>
+      <div class="kicker">${state.role === "rm" ? "Relationship manager" : state.role === "committee" ? "Credit committee" : "Chief risk officer"}</div>
+      <h1>${book ? "Your groups" : "Portfolio"}</h1>
+      <p class="lead">${lead}</p>
+    </div>${asof()}</div>
+    ${ribbon()}
+    <div class="metrics">${metrics.map(m => `<div class="card metric ${m[3]}"><div class="label">${m[0]}</div><div class="value" ${m[3]?'style="color:var(--red)"':""}>${m[1]}</div><div class="note">${m[2]}</div></div>`).join("")}</div>
+    <div class="sample-bars">${rows.map(g => {
+      const calm = g.warning === "Stable";
+      return `<div class="card"><div class="section-title">${esc(g.legal_name)}</div><div class="amt">${compact(g.exposure_hkd)}</div><div class="track"><div class="fill ${calm ? "calm" : "hot"}" style="width:${Math.round(g.exposure_hkd / max * 100)}%"></div></div></div>`;
+    }).join("")}</div>
+    <div class="card table-wrap">
+      <div class="section-title">Groups for attention</div>
+      ${hidden ? `<div class="banner">${hidden} group is outside this role and is omitted.</div>` : ""}
+      <table><thead><tr><th>Group</th><th>Stage</th><th>Rating</th><th>Exposure</th><th>Signal</th></tr></thead>
+      <tbody>${rows.map(g => `<tr class="click" data-group="${g.group_id}"><td>${esc(g.legal_name)}<div class="sub">${esc(g.rm)}</div></td><td><span class="tag ${g.stage==="Stage 2"?"tag-orange":"tag-grey"}">${esc(g.stage)}</span></td><td>${g.rating.prior} → ${g.rating.current === g.rating.prior ? g.rating.current : `<span style="color:var(--red);font-weight:700">${g.rating.current}</span>`}</td><td>${money(g.exposure_hkd)}</td><td>${g.warning==="Stable" ? `<span class="tag tag-grey">Stable</span>` : `<span class="tag tag-red">${esc(g.warning)}</span>`}</td></tr>`).join("")}</tbody></table>
+    </div>`;
+}
+function pagePack() {
+  const g = groupById(state.group) || groupById("GRP-PLG");
+  if (!g.entitled_roles.includes(state.role)) {
+    return `<div class="top"><div><div class="kicker">Entitlement</div><h1>Outside your portfolio</h1><p class="lead">This group is not on your list. The pack is not retrieved.</p></div>${asof()}</div>`;
+  }
+  if (g.group_id !== PACK.group_id) {
+    return `<div class="top"><div><div class="kicker">Committee pack · illustrative</div><h1>${esc(g.legal_name)}</h1>
+      <p class="lead">Relationship manager ${esc(g.rm)}. ${esc(g.stage)}. Rating ${g.rating.prior} to ${g.rating.current}. Exposure ${money(g.exposure_hkd)}.</p>
+      </div>${asof()}</div>
+      <div class="card prose"><p>This sample lists the name so entitlement and portfolio mix can be shown. The full seven-section pack, with citations, is prepared for Pacific Lantern Group.</p>
+      <div class="actions"><button class="btn btn-primary" id="open-plg">Open Pacific Lantern Group</button></div></div>`;
+  }
+  const sec = PACK.sections.find(s => s[0]===state.section) || PACK.sections[0];
+  const idx = PACK.sections.findIndex(s => s[0]===sec[0]);
+  const paras = sec[2].map(([text, cites]) => `<p>${esc(text)} ${cites.map(id => `<button class="cite" data-cite="${id}">${esc(id)}</button>`).join(" ")}</p>`).join("");
+  const plan = state.section==="monitoring" ? `<div class="actions">
+      <button class="btn btn-primary" id="accept">Accept for discussion</button>
+      <button class="btn btn-ghost" id="return">Return to RM</button>
+    </div>
+    ${state.plan ? `<div class="stamp"><b>Minute.</b> ${esc(state.plan)}</div>` : `<p class="lead" style="margin-top:12px">A person accepts or returns this recommendation. The model does not approve the limit.</p>`}` : "";
+  return `<div class="top"><div>
+      <div class="kicker">Committee pack · illustrative</div>
+      <h1>Pacific Lantern Group</h1>
+      <p class="lead">${esc(PACK.booking)}. UBO: ${esc(PACK.ubo)}.</p>
+    </div>${asof()}</div>
+    <div class="facts">
+      <div class="fact"><div class="label">Rating</div><div class="value">4 → <em>6</em></div></div>
+      <div class="fact"><div class="label">Stage</div><div class="value">Stage 2</div></div>
+      <div class="fact"><div class="label">Outstanding</div><div class="value">${compact(PACK.exposure.outstanding_hkd)}</div></div>
+      <div class="fact"><div class="label">Headroom</div><div class="value">${compact(PACK.exposure.limit_hkd - PACK.exposure.outstanding_hkd)}</div></div>
+    </div>
+    <div class="split ${state.cite ? "with-cite" : ""}">
+      <div class="card toc">${PACK.sections.map((s,i) => `<button class="${s[0]===state.section?"on":""}" data-sec="${s[0]}"><span class="n">0${i+1}</span>${esc(s[1])}</button>`).join("")}</div>
+      <div class="card prose"><div class="kicker">Section 0${idx+1}</div><h2>${esc(sec[1])}</h2>${paras}${plan}</div>
+      ${citeCard()}
+    </div>`;
+}
+function pageAgents() {
+  const cards = [
+    ["1","Structured data consolidator","RDW, RDS, IS9","Limits, outstanding, deposits, accrued interest, rating, staging and days past due.","", "Parallel"],
+    ["2","Unstructured data reader","Credit proposal, CWS","Ownership, the guarantee, collateral, and the page 12 extract.","", "Parallel"],
+    ["3","External market searcher","Moody's, web search","No Moody's action. One trade-press item, kept as a signal.","", "Parallel"]
+  ];
+  return `<div class="top"><div><div class="kicker">Orchestration</div><h1>Five agents</h1>
+    <p class="lead">Agents 1, 2 and 3 run together. Agent 4 writes the pack only after they finish. Agent 5 records the trajectory and does not delete it.</p></div>${asof()}</div>
+    ${ribbon()}
+    <div class="parallel">${cards.map(a => `<article class="agent-card"><header>Agent ${a[0]} · ${a[5]}</header><div class="body"><strong>${esc(a[1])}</strong><div class="src">${esc(a[2])}</div><div>${esc(a[3])}</div></div></article>`).join("")}</div>
+    <div class="handoff">Hand-off · Agent 4 starts here</div>
+    <div class="stack">
+      <article class="agent-card serial"><header>Agent 4 · After the parallel run</header><div class="body"><strong>Report generator</strong><div class="src">Outputs of agents 1 to 3</div><div>Seven-section pack. No figure is added outside the tool outputs. Citations stay attached to the sentence.</div></div></article>
+      <article class="agent-card watch"><header>Agent 5 · Beside every step</header><div class="body"><strong>Audit and compliance</strong><div class="src">Every tool call</div><div>Append-only trajectory. A person accepts or returns the plan. Earlier lines stay as written.</div></div></article>
+    </div>`;
+}
+function pageAudit() {
+  const lines = [
+    ["14 Oct 2026 09:12","Casey Chan","Trigger","Group review requested for Pacific Lantern Group."],
+    ["14 Oct 2026 09:12","Agent 1","Tool","Read RDW, RDS and IS9. Headroom formula stored."],
+    ["14 Oct 2026 09:13","Agent 2","Read","Credit proposal page 12, CWS guarantee and valuation."],
+    ["14 Oct 2026 09:13","Agent 3","Search","Moody's: no action. Web item dated 18 Sep 2026."],
+    ["14 Oct 2026 09:14","Agent 4","Draft","Pack issued. No figure added outside the tool outputs."],
+    ["14 Oct 2026 09:14","Agent 5","Log","Trajectory sealed. A later human decision is appended, not edited."]
+  ];
+  const extra = state.plan ? `<div class="tl"><strong>14 Oct 2026 09:20 · ${esc(state.role)} · Decision</strong><div>${esc(state.plan)}</div></div>` : "";
+  return `<div class="top"><div><div class="kicker">Agent 5</div><h1>Audit trajectory</h1>
+    <p class="lead">From the request to the draft. A human decision is appended underneath. Earlier lines stay as written.</p></div>${asof()}</div>
+    <div class="card"><div class="timeline">${lines.map(e => `<div class="tl"><strong>${esc(e[0])} · ${esc(e[1])} · ${esc(e[2])}</strong><div>${esc(e[3])}</div></div>`).join("")}${extra}</div></div>`;
+}
+function citeCard() {
+  if (!state.cite) return "";
+  const c = PACK.citations[state.cite];
+  if (!c) return "";
+  return `<aside class="card cite-card" role="dialog" aria-label="Citation"><button class="btn btn-ghost" id="close-cite">Close</button>
+    <div class="kicker" style="margin-top:14px">${esc(state.cite)}</div>
+    <h3>${esc(c[0])}</h3>
+    <div class="meta">${esc(c[1])} · ${esc(c[2])}</div>
+    <p class="quote">${esc(c[3])}</p>
+    <p class="meta">The passage stays beside the sentence.</p></aside>`;
+}
+function bind() {
+  document.querySelectorAll("[data-group]").forEach(row => row.onclick = () => {
+    state.group = row.dataset.group;
+    state.section = "integrated_risk";
+    go("pack");
+  });
+  document.querySelectorAll("[data-sec]").forEach(b => b.onclick = () => go("pack", b.dataset.sec));
+  document.querySelectorAll("[data-cite]").forEach(b => b.onclick = () => openCite(b.dataset.cite));
+  const close = document.getElementById("close-cite");
+  if (close) close.onclick = () => { state.cite = null; render(); };
+  const accept = document.getElementById("accept");
+  const ret = document.getElementById("return");
+  if (accept) accept.onclick = () => { state.plan = "Monitoring plan accepted for discussion. Not a credit approval."; render(); };
+  if (ret) ret.onclick = () => { state.plan = "Monitoring plan returned to the relationship manager."; render(); };
+  const plg = document.getElementById("open-plg");
+  if (plg) plg.onclick = () => { state.group = "GRP-PLG"; state.section = "integrated_risk"; go("pack"); };
+}
+document.getElementById("role").onchange = e => {
+  state.role = e.target.value;
+  const current = groupById(state.group);
+  if (!current || !current.entitled_roles.includes(state.role)) state.group = "GRP-PLG";
+  if (state.role === "committee") {
+    state.page = "pack";
+    state.group = "GRP-PLG";
+    state.section = "integrated_risk";
+  } else if (state.role === "rm") {
+    state.page = "portfolio";
+    state.section = "monitoring";
+  } else {
+    state.page = "portfolio";
+  }
+  render();
+};
+render();
+</script>
+</body>
+</html>

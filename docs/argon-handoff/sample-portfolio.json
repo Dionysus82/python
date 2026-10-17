@@ -1,0 +1,186 @@
+{
+  "as_of": "30 Sep 2026",
+  "illustrative": true,
+  "portfolio": {
+    "exposure_hkd": 18640000000,
+    "enhanced_monitoring": 7,
+    "migrated_this_quarter": 4,
+    "open_warnings": 11
+  },
+  "groups": [
+    {
+      "group_id": "GRP-PLG",
+      "legal_name": "Pacific Lantern Group",
+      "rm": "Casey Chan",
+      "stage": "Stage 2",
+      "rating": { "current": 6, "prior": 4 },
+      "exposure_hkd": 1250000000,
+      "warning": "Rating migration and a cross-guarantee",
+      "entitled_roles": ["cro", "committee", "rm"]
+    },
+    {
+      "group_id": "GRP-NSH",
+      "legal_name": "North Shore Holdings",
+      "rm": "Elena Mok",
+      "stage": "Stage 1",
+      "rating": { "current": 3, "prior": 3 },
+      "exposure_hkd": 860000000,
+      "warning": "Stable",
+      "entitled_roles": ["cro", "committee"]
+    },
+    {
+      "group_id": "GRP-KWR",
+      "legal_name": "Kowloon Wharf Retail",
+      "rm": "Casey Chan",
+      "stage": "Stage 2",
+      "rating": { "current": 5, "prior": 5 },
+      "exposure_hkd": 640000000,
+      "warning": "Utilisation above 80 percent",
+      "entitled_roles": ["cro", "committee", "rm"]
+    }
+  ],
+  "pack": {
+    "group_id": "GRP-PLG",
+    "legal_name": "Pacific Lantern Group",
+    "rm": "Casey Chan",
+    "stage": "Stage 2",
+    "booking": "Onshore borrower in Hong Kong, offshore holdco in Singapore",
+    "ubo": "Lantern Family Trust, 62 percent, through two holding companies",
+    "rating": { "current": 6, "prior": 4, "as_of": "30 Sep 2026" },
+    "exposure": {
+      "outstanding_hkd": 980000000,
+      "limit_hkd": 1250000000,
+      "deposits_hkd": 146000000,
+      "investments_hkd": 52000000,
+      "accrued_interest_hkd": 4100000
+    },
+    "sections": [
+      {
+        "id": "integrated_risk",
+        "title": "Integrated risk summary",
+        "paragraphs": [
+          {
+            "text": "Credit quality has weakened since the March review. The internal rating moved from 4 to 6, and the group is now Stage 2.",
+            "citations": ["SRC-RDS-RATING", "SRC-IS9-STAGE"]
+          },
+          {
+            "text": "The onshore operating company remains current on scheduled repayment. The concern is the offshore holdco guarantee, which links the Hong Kong limit to a Singapore entity whose cash flow is not in the onshore statements.",
+            "citations": ["SRC-CWS-GUARANTEE", "SRC-PDF-P12"]
+          }
+        ]
+      },
+      {
+        "id": "relationship",
+        "title": "Relationship summary",
+        "paragraphs": [
+          {
+            "text": "Outstanding exposure is HKD 980,000,000 against a group limit of HKD 1,250,000,000. Headroom is HKD 270,000,000.",
+            "citations": ["SRC-RDW-LIMIT"]
+          },
+          {
+            "text": "Deposits are HKD 146,000,000 and investment holdings are HKD 52,000,000. These balances are relationship context. They are not deducted from exposure.",
+            "citations": ["SRC-RDS-DEPOSIT"]
+          }
+        ]
+      },
+      {
+        "id": "developments",
+        "title": "Latest account developments",
+        "paragraphs": [
+          {
+            "text": "Since 30 Jun 2026 the revolving tranche utilisation rose from 71 percent to 84 percent. No payment is past due.",
+            "citations": ["SRC-RDW-UTIL", "SRC-IS9-DPD"]
+          },
+          {
+            "text": "The July credit proposal notes a delayed receivable from a mainland distributor. The proposal does not quantify a loss.",
+            "citations": ["SRC-PDF-P12"]
+          }
+        ]
+      },
+      {
+        "id": "mitigants",
+        "title": "Credit risk mitigants",
+        "paragraphs": [
+          {
+            "text": "Eligible collateral is a first charge over a Kowloon commercial unit, valued at HKD 410,000,000 on 15 Aug 2026. Coverage of outstanding exposure is 0.42.",
+            "citations": ["SRC-CWS-COLL"]
+          },
+          {
+            "text": "A corporate guarantee from Pacific Lantern International Pte. Ltd. covers the shortfall. Enforceability has not been reconfirmed in this review. Collateral and the guarantee mitigate risk. They do not eliminate it.",
+            "citations": ["SRC-CWS-GUARANTEE"]
+          }
+        ]
+      },
+      {
+        "id": "deterioration",
+        "title": "Credit deterioration indicators",
+        "paragraphs": [
+          {
+            "text": "Two indicators are open: a two-notch rating migration, and utilisation sustained above 80 percent for two month-ends.",
+            "citations": ["SRC-EWS-01", "SRC-EWS-02"]
+          },
+          {
+            "text": "Moody's has not changed the public rating this quarter. A trade-press item on 18 Sep 2026 reports slower orders at the distributor. It is an external signal, not a covenant breach.",
+            "citations": ["SRC-MOODYS", "SRC-WEB-18SEP"]
+          }
+        ]
+      },
+      {
+        "id": "portfolio",
+        "title": "Portfolio analysis",
+        "paragraphs": [
+          {
+            "text": "The group sits in wholesale trade. It is 6.7 percent of the illustrative CRO book. Two other trade names are on Stage 2, so a sector discussion belongs in the committee pack.",
+            "citations": ["SRC-RDS-SECTOR"]
+          }
+        ]
+      },
+      {
+        "id": "monitoring",
+        "title": "Proposed monitoring plan",
+        "paragraphs": [
+          {
+            "text": "Ask the relationship manager for a monthly receivable ageing, and bring the guarantee back to legal for an enforceability check before the next annual review.",
+            "citations": ["SRC-AGENT4"]
+          },
+          {
+            "text": "Recommended frequency is monthly until utilisation is back under 75 percent or the rating stabilises. Escalation is to the credit committee if a payment falls past due, or if the offshore guarantor reports a loss.",
+            "citations": ["SRC-AGENT4"]
+          }
+        ]
+      }
+    ],
+    "citations": {
+      "SRC-RDS-RATING": { "source": "RDS", "agent": "Agent 1", "as_of": "30 Sep 2026", "passage": "Internal rating 6. Prior rating on 31 Mar 2026 was 4." },
+      "SRC-IS9-STAGE": { "source": "IS9", "agent": "Agent 1", "as_of": "30 Sep 2026", "passage": "Staging flag Stage 2, reason: rating migration of two notches." },
+      "SRC-CWS-GUARANTEE": { "source": "CWS", "agent": "Agent 2", "as_of": "12 May 2025", "passage": "All-monies guarantee by Pacific Lantern International Pte. Ltd. Last legal confirmation 12 May 2025." },
+      "SRC-PDF-P12": { "source": "Credit proposal PDF, page 12", "agent": "Agent 2", "as_of": "18 Jul 2026", "passage": "Distributor receipts slipped by about six weeks. Management expects collection in the December quarter. No specific-loss figure is stated." },
+      "SRC-RDW-LIMIT": { "source": "RDW", "agent": "Agent 1", "as_of": "30 Sep 2026", "passage": "Group limit HKD 1,250,000,000. Outstanding HKD 980,000,000. Formula: headroom = limit − outstanding." },
+      "SRC-RDS-DEPOSIT": { "source": "RDS", "agent": "Agent 1", "as_of": "30 Sep 2026", "passage": "Deposits HKD 146,000,000. Investment holdings HKD 52,000,000. Not netted against exposure." },
+      "SRC-RDW-UTIL": { "source": "RDW", "agent": "Agent 1", "as_of": "30 Sep 2026", "passage": "Revolving tranche utilisation 84 percent. Prior month-end 30 Jun 2026 was 71 percent." },
+      "SRC-IS9-DPD": { "source": "IS9", "agent": "Agent 1", "as_of": "30 Sep 2026", "passage": "Days past due: 0." },
+      "SRC-CWS-COLL": { "source": "CWS", "agent": "Agent 2", "as_of": "15 Aug 2026", "passage": "Commercial unit, Kowloon, open-market value HKD 410,000,000. Coverage = 410,000,000 / 980,000,000 = 0.42." },
+      "SRC-EWS-01": { "source": "Early-warning register", "agent": "Agent 1", "as_of": "30 Sep 2026", "passage": "EWI open: rating migration of two notches since 31 Mar 2026." },
+      "SRC-EWS-02": { "source": "Early-warning register", "agent": "Agent 1", "as_of": "30 Sep 2026", "passage": "EWI open: utilisation above 80 percent at two consecutive month-ends." },
+      "SRC-MOODYS": { "source": "Moody's", "agent": "Agent 3", "as_of": "30 Sep 2026", "passage": "No public rating action on the group this quarter." },
+      "SRC-WEB-18SEP": { "source": "Trade press, retrieved 18 Sep 2026", "agent": "Agent 3", "as_of": "18 Sep 2026", "passage": "Report of slower orders at the named distributor. No primary financial statement attached." },
+      "SRC-RDS-SECTOR": { "source": "RDS", "agent": "Agent 1", "as_of": "30 Sep 2026", "passage": "Industry: wholesale trade. Share of illustrative book: 6.7 percent." },
+      "SRC-AGENT4": { "source": "Agent 4 recommendation", "agent": "Agent 4", "as_of": "14 Oct 2026", "passage": "Recommendation only. It is not a credit approval. Inputs are the citations listed in this pack." }
+    },
+    "agents": [
+      { "id": "1", "name": "Structured data consolidator", "parallel": true, "status": "Complete", "sources": ["RDW", "RDS", "IS9"], "output": "Limits, outstanding, deposits, rating, staging, days past due." },
+      { "id": "2", "name": "Unstructured data reader", "parallel": true, "status": "Complete", "sources": ["Credit proposal PDF", "CWS"], "output": "Ownership narrative, guarantee, collateral, proposal extract on page 12." },
+      { "id": "3", "name": "External market searcher", "parallel": true, "status": "Complete", "sources": ["Moody's", "Web search"], "output": "No Moody's action. One trade-press item, kept as an unverified signal." },
+      { "id": "4", "name": "Consolidation and report generator", "parallel": false, "status": "Complete", "sources": ["Agents 1–3"], "output": "Seven-section pack with citations." },
+      { "id": "5", "name": "Audit and compliance", "parallel": false, "status": "Recording", "sources": ["All tool calls"], "output": "Trajectory below. Append only." }
+    ],
+    "audit": [
+      { "at": "14 Oct 2026 09:12", "actor": "Casey Chan", "event": "Trigger", "detail": "Group review requested for Pacific Lantern Group." },
+      { "at": "14 Oct 2026 09:12", "actor": "Agent 1", "event": "Tool", "detail": "Read RDW, RDS and IS9 for GRP-PLG. Headroom formula stored." },
+      { "at": "14 Oct 2026 09:13", "actor": "Agent 2", "event": "Read", "detail": "Credit proposal, page 12. CWS guarantee and collateral valuation." },
+      { "at": "14 Oct 2026 09:13", "actor": "Agent 3", "event": "Search", "detail": "Moody's: no action. Web: one trade-press item on 18 Sep 2026." },
+      { "at": "14 Oct 2026 09:14", "actor": "Agent 4", "event": "Draft", "detail": "Pack issued. No figure added outside the tool outputs." },
+      { "at": "14 Oct 2026 09:14", "actor": "Agent 5", "event": "Log", "detail": "Trajectory sealed for this run. Later human action is appended." }
+    ]
+  }
+}
