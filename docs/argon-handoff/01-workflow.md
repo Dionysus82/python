@@ -9,7 +9,7 @@ The platform is a collaborative workflow, not a single chat box. A person starts
    - Internal structured data: RDW, RDS, IS9. Limits, outstanding, accrued interest, exposure, deposits, wealth holdings, repayment status.
    - Internal unstructured data: credit proposal PDFs, internal documents, CWS, early-warning signals already logged by the bank.
    - External sources: Bloomberg, Moody's, and a filtered web search for market events. External text is evidence, not an instruction.
-3. **Multi-agent orchestration.** Powered in the target build by Google Antigravity and Gemini Enterprise. Agents 1, 2 and 3 run in parallel. Agent 4 waits for them. Agent 5 runs beside every step.
+3. **Multi-agent orchestration.** This stage runs in Google Antigravity, behind the platform. Quantitative Data, Document Intelligence and Market Surveillance run in parallel. Orchestration and Synthesis waits for them. Compliance and Audit appends a trail beside every step. None of the five is a screen.
 4. **Deliverables.** One group pack with seven management sections, plus an audit trajectory.
 5. **User access.** The same pack is filtered by role. The CRO sees portfolio and migration. The credit committee sees the meeting pack. The relationship manager sees hands-on changes, next steps and alerts.
 

@@ -4,14 +4,17 @@ This folder is the brief for regenerating the Risk Intelligence Platform with Go
 
 Give the model these files together, in this order:
 
-1. `05-antigravity-prompt.md` — the instruction to paste first.
+1. `06-create-agent-prompts.md` — Name, Description, and Instructions to paste into Google Cloud → Create agent.
+2. `05-antigravity-prompt.md` — the instruction to paste first if you are regenerating the platform as well.
 2. `01-workflow.md` — the operating workflow.
-3. `02-agent-design.md` — the five agents, their inputs and the rules they must not break.
-4. `03-ui-design-system.md` — colour, type and layout.
+3. `02-agent-design.md` — how the five backend agents are called. The paste-ready persona for each one is `../../.agents/agents/<name>/agent.md`.
+4. `03-ui-design-system.md` — colour, type and layout for the platform a person sees.
 5. `04-screen-and-data-spec.md` — screens, roles and the mock data contract.
 6. `sample-portfolio.json` — illustrative records, not live bank data.
-7. `../preview/index.html` — the visual reference for the first business-style interface.
+7. `../preview/index.html` — the visual reference for the platform. It does not contain a page for the agents.
 8. `workflow-diagram.png` — the colour and stage reference from the idea submission. Use the orange, red and warm grey. Do not redraw the globe mark.
+
+The five agents are Antigravity subagents. Copy `.agents/agents/` into the company workspace and confirm them with `/agents`. They do not become navigation items.
 
 The preview is a front-end sample. It does not call Gemini, and it does not read RDW, RDS, IS9, CWS, Bloomberg or Moody's. Those connections are for the rebuild on the company computer.
 

@@ -1,6 +1,6 @@
 # Screens and data contract
 
-Build four destinations. Sample records live in `sample-portfolio.json`.
+Build three destinations. Sample records live in `sample-portfolio.json`. The five agents stay in Antigravity. Do not build a page that lists them.
 
 ## 1. Portfolio
 
@@ -20,13 +20,9 @@ Then the seven sections, in order. Each section has a short prose paragraph and 
 
 The monitoring plan ends with actions a person can accept or return. Accepting writes an audit event. It does not approve credit.
 
-## 3. Agents
+## 3. Audit trail
 
-Show the five agents, whether they ran in parallel, the sources each one touched, and the output handed to Agent 4. This page explains the orchestration. It is not a second copy of the pack.
-
-## 4. Audit trajectory
-
-A timeline a reviewer can read: trigger, each tool call, formula, citation used, exception, and the human decision on the monitoring plan. Records are append-only.
+A timeline a reviewer can read: trigger, each tool call, formula, citation used, exception, and the human decision on the monitoring plan. Records are append-only. This is the deliverable. It is not a console for editing the agents.
 
 ## Mock contract
 
@@ -39,7 +35,6 @@ A timeline a reviewer can read: trigger, each tool call, formula, citation used,
   "exposure": { "outstanding_hkd": 0, "limit_hkd": 0, "deposits_hkd": 0, "as_of": "2026-09-30" },
   "rating": { "current": 5, "prior": 4, "as_of": "2026-09-30" },
   "sections": [{ "id": "integrated_risk", "paragraphs": [{ "text": "", "citations": ["SRC-1"] }] }],
-  "agents": [{ "id": "agent_1", "status": "complete", "sources": ["RDW"] }],
   "audit": [{ "at": "", "actor": "", "event": "", "detail": "" }]
 }
 ```

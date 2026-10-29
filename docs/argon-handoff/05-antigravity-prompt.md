@@ -10,7 +10,7 @@ Recreate the operating model, not a generic chatbot.
 
 - A user triggers a group review or a portfolio scan.
 - Read internal structured data (RDW, RDS, IS9), internal documents (credit proposals, CWS, early-warning signals) and external sources (Bloomberg, Moody's, web search).
-- Run five agents. Structured consolidator, unstructured reader and market searcher run in parallel. The report generator starts only when those three have finished. The audit agent logs every step and cannot delete history.
+- Install the five personas in `.agents/agents/` as Antigravity subagents. Quantitative Data, Document Intelligence and Market Surveillance run in parallel. Orchestration and Synthesis starts only when those three have finished. Compliance and Audit appends every step and cannot delete history. Do not put these agents on a platform page.
 - Produce the seven sections in the submission: integrated risk summary, relationship summary, latest account developments, credit risk mitigants, credit deterioration indicators, portfolio analysis, and a proposed monitoring plan. Add the audit trajectory.
 - All financial figures come from tools or cited records. The model explains them and does not calculate by prose.
 - Every material claim has a clickable citation to the passage, record or formula.
@@ -27,6 +27,6 @@ Acceptance for the first build:
 
 1. Portfolio page for a CRO, with groups that open a pack.
 2. Group pack with the seven sections and working citation panels.
-3. Agent page showing the parallel run and the hand-off to the report generator.
-4. Audit page with an append-only trajectory, including a human accept or return of the monitoring plan.
-5. A relationship-manager session that cannot open a group outside entitlement.
+3. Audit trail with an append-only record, including a human accept or return of the monitoring plan.
+4. A relationship-manager session that cannot open a group outside entitlement.
+5. The five personas available to `invoke_subagent`, and absent from the platform navigation.

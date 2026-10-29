@@ -259,11 +259,11 @@ function go(page, section) {
 }
 function openCite(id) { state.cite = id; render(); }
 function render() {
-  const nav = [["portfolio","Portfolio"],["pack","Group pack"],["agents","Agents"],["audit","Audit trajectory"]];
+  const nav = [["portfolio","Portfolio"],["pack","Group pack"],["audit","Audit trail"]];
   document.getElementById("nav").innerHTML = nav.map(([id,label], i) =>
     `<button class="nav-btn ${state.page===id?"active":""}" data-page="${id}"><span class="idx">0${i+1}</span>${label}</button>`).join("");
   document.querySelectorAll(".nav-btn").forEach(b => b.onclick = () => go(b.dataset.page));
-  const pages = { portfolio: pagePortfolio, pack: pagePack, agents: pageAgents, audit: pageAudit };
+  const pages = { portfolio: pagePortfolio, pack: pagePack, audit: pageAudit };
   document.getElementById("main").innerHTML = pages[state.page]();
   bind();
 }
@@ -271,7 +271,7 @@ function ribbon() {
   const steps = [
     ["01","Trigger","Group and action"],
     ["02","Sources","RDW, RDS, IS9, documents"],
-    ["03","Agents","Three in parallel"],
+    ["03","Evidence","Internal and external"],
     ["04","Pack","Seven sections"],
     ["05","Access","Role filters the view"]
   ];
@@ -362,22 +362,6 @@ function pagePack() {
       ${citeCard()}
     </div>`;
 }
-function pageAgents() {
-  const cards = [
-    ["1","Structured data consolidator","RDW, RDS, IS9","Limits, outstanding, deposits, accrued interest, rating, staging and days past due.","", "Parallel"],
-    ["2","Unstructured data reader","Credit proposal, CWS","Ownership, the guarantee, collateral, and the page 12 extract.","", "Parallel"],
-    ["3","External market searcher","Moody's, web search","No Moody's action. One trade-press item, kept as a signal.","", "Parallel"]
-  ];
-  return `<div class="top"><div><div class="kicker">Orchestration</div><h1>Five agents</h1>
-    <p class="lead">Agents 1, 2 and 3 run together. Agent 4 writes the pack only after they finish. Agent 5 records the trajectory and does not delete it.</p></div>${asof()}</div>
-    ${ribbon()}
-    <div class="parallel">${cards.map(a => `<article class="agent-card"><header>Agent ${a[0]} · ${a[5]}</header><div class="body"><strong>${esc(a[1])}</strong><div class="src">${esc(a[2])}</div><div>${esc(a[3])}</div></div></article>`).join("")}</div>
-    <div class="handoff">Hand-off · Agent 4 starts here</div>
-    <div class="stack">
-      <article class="agent-card serial"><header>Agent 4 · After the parallel run</header><div class="body"><strong>Report generator</strong><div class="src">Outputs of agents 1 to 3</div><div>Seven-section pack. No figure is added outside the tool outputs. Citations stay attached to the sentence.</div></div></article>
-      <article class="agent-card watch"><header>Agent 5 · Beside every step</header><div class="body"><strong>Audit and compliance</strong><div class="src">Every tool call</div><div>Append-only trajectory. A person accepts or returns the plan. Earlier lines stay as written.</div></div></article>
-    </div>`;
-}
 function pageAudit() {
   const lines = [
     ["14 Oct 2026 09:12","Casey Chan","Trigger","Group review requested for Pacific Lantern Group."],
@@ -388,7 +372,7 @@ function pageAudit() {
     ["14 Oct 2026 09:14","Agent 5","Log","Trajectory sealed. A later human decision is appended, not edited."]
   ];
   const extra = state.plan ? `<div class="tl"><strong>14 Oct 2026 09:20 · ${esc(state.role)} · Decision</strong><div>${esc(state.plan)}</div></div>` : "";
-  return `<div class="top"><div><div class="kicker">Agent 5</div><h1>Audit trajectory</h1>
+  return `<div class="top"><div><div class="kicker">Review log</div><h1>Audit trail</h1>
     <p class="lead">From the request to the draft. A human decision is appended underneath. Earlier lines stay as written.</p></div>${asof()}</div>
     <div class="card"><div class="timeline">${lines.map(e => `<div class="tl"><strong>${esc(e[0])} · ${esc(e[1])} · ${esc(e[2])}</strong><div>${esc(e[3])}</div></div>`).join("")}${extra}</div></div>`;
 }
