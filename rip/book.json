@@ -1,0 +1,3915 @@
+{
+  "as_of": "2026-09-30",
+  "threshold_hkd": 5000000,
+  "notify_to": "yiyangyao2@gmail.com",
+  "banner": "SYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING",
+  "customers": [
+    {
+      "customer_id": "CUS-G042",
+      "legal_name": "Aberdeen Netting Limited",
+      "industry": "Marine supplies",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-NORTH",
+      "group_name": "North Point Marine Group",
+      "summary": "Fictional marine supplies customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 9500000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 3,
+      "prior_rating": 3,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Receivables",
+      "collateral_hkd": 3325000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        41040000.0,
+        38000000.0,
+        35720000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 20,
+      "next_due_hkd": 760000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 34200.0,
+      "prior_ecl_hkd": 30780.0,
+      "provision_hkd": 34200.0,
+      "ltv": 2.86,
+      "coverage_ratio": 0.35,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Aberdeen Netting Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group North Point Marine Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Aberdeen Netting Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 3 on 2025-04-30 to 3 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Aberdeen Netting Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 41,040,000, 38,000,000, 35,720,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Aberdeen Netting Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 760,000 in 20 days, sourced from the credit proposal. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G029",
+      "legal_name": "Amber Dock Property Holdings Limited",
+      "industry": "Property holding",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Casey Chan",
+      "group_id": "GRP-APEX",
+      "group_name": "Apex Harbour Group",
+      "summary": "Fictional property holding customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 6250000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 5,
+      "prior_rating": 5,
+      "prior_rating_date": "2025-04-30",
+      "stage": 2,
+      "prior_stage": 2,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Deposit",
+      "collateral_hkd": 2937500.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        27000000.0,
+        25000000.0,
+        23500000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 27,
+      "next_due_hkd": 500000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 98438.0,
+      "prior_ecl_hkd": 88594.0,
+      "provision_hkd": 98438.0,
+      "ltv": 2.13,
+      "coverage_ratio": 0.47,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Amber Dock Property Holdings Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Apex Harbour Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Amber Dock Property Holdings Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 5 on 2025-04-30 to 5 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Amber Dock Property Holdings Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 27,000,000, 25,000,000, 23,500,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Amber Dock Property Holdings Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 500,000 in 27 days, sourced from the watchlist. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-AHLL-0002",
+      "legal_name": "Apex Harbour Logistics Limited",
+      "industry": "Logistics",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Casey Chan",
+      "group_id": "GRP-APEX",
+      "group_name": "Apex Harbour Group",
+      "summary": "Fictional logistics subsidiary of the Apex Harbour Group.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 6000000.0,
+      "committed_hkd": 8000000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Commercial property",
+      "collateral_hkd": 3540000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        25920000.0,
+        24000000.0,
+        22560000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 34,
+      "next_due_hkd": 480000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 40500.0,
+      "prior_ecl_hkd": 36450.0,
+      "provision_hkd": 40500.0,
+      "ltv": 1.69,
+      "coverage_ratio": 0.59,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Apex Harbour Logistics Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Apex Harbour Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Apex Harbour Logistics Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Apex Harbour Logistics Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 25,920,000, 24,000,000, 22,560,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Apex Harbour Logistics Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 480,000 in 34 days, sourced from the credit proposal. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-AHTL-0001",
+      "legal_name": "Apex Harbour Trading Limited",
+      "industry": "Wholesale trade",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Casey Chan",
+      "group_id": "GRP-APEX",
+      "group_name": "Apex Harbour Group",
+      "summary": "Fictional Hong Kong trading company buying and selling consumer goods. The demonstration book shows weaker cash flow, higher revolving utilisation and an overdue annual review.",
+      "watchlist": "enhanced_monitoring",
+      "drawn_hkd": 84800000.0,
+      "committed_hkd": 105000000.0,
+      "rating": 6,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 2,
+      "prior_stage": 1,
+      "warnings": [
+        {
+          "code": "EWI-RATING-MIGRATION",
+          "description": "Internal credit rating has worsened by at least two notches since 30 Apr 2025.",
+          "status": "open",
+          "observed": "2 notches"
+        },
+        {
+          "code": "EWI-REVOLVING-UTILISATION",
+          "description": "Revolving credit utilisation is at or above 85.00 percent.",
+          "status": "open",
+          "observed": "91.00 percent"
+        }
+      ],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Receivables",
+      "collateral_hkd": 36000000,
+      "guarantor": null,
+      "revenue_hkd": [
+        420000000,
+        390000000,
+        348000000
+      ],
+      "margin_pct": [
+        11.4,
+        9.8,
+        7.6
+      ],
+      "liquidity_ratio": [
+        1.45,
+        1.22,
+        1.05
+      ],
+      "leverage": [
+        1.8,
+        2.2,
+        2.7
+      ],
+      "interest_coverage": [
+        3.1,
+        2.4,
+        2.2
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 74,
+      "next_due_hkd": 12000000,
+      "next_due_source": "Credit proposal",
+      "refinancing": true,
+      "ecl_hkd": 2671200.0,
+      "prior_ecl_hkd": 515160.0,
+      "provision_hkd": 2671200.0,
+      "ltv": 2.36,
+      "coverage_ratio": 0.42,
+      "full_file": true,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Apex Harbour Trading Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Apex Harbour Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Apex Harbour Trading Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 6 on 30 Sep 2026. The review records weaker cash flow and higher revolving utilisation."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Apex Harbour Trading Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 420,000,000, 390,000,000, 348,000,000. Margin 11.4%, 9.8%, 7.6%. Interest coverage 3.1x, 2.4x, 2.2x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Apex Harbour Trading Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 12,000,000 in 74 days, sourced from the credit proposal. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G035",
+      "legal_name": "Birch Anchor Commercial Limited",
+      "industry": "Commercial services",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-STAR",
+      "group_name": "Star Ferry Commodities Group",
+      "summary": "Fictional commercial services customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 7750000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 5,
+      "prior_rating": 5,
+      "prior_rating_date": "2025-04-30",
+      "stage": 2,
+      "prior_stage": 2,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Receivables",
+      "collateral_hkd": 6432500.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        33480000.0,
+        31000000.0,
+        29140000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 48,
+      "next_due_hkd": 620000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 122062.0,
+      "prior_ecl_hkd": 109856.0,
+      "provision_hkd": 122062.0,
+      "ltv": 1.2,
+      "coverage_ratio": 0.83,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Birch Anchor Commercial Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Star Ferry Commodities Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Birch Anchor Commercial Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 5 on 2025-04-30 to 5 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Birch Anchor Commercial Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 33,480,000, 31,000,000, 29,140,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Birch Anchor Commercial Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 620,000 in 48 days, sourced from the credit proposal. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G024",
+      "legal_name": "Blue Sampan Foods Limited",
+      "industry": "Food import",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-SME",
+      "group_name": "Harbour Lantern SME Collective",
+      "summary": "Fictional food import customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 5000000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 3,
+      "prior_rating": 3,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Deposit",
+      "collateral_hkd": 1750000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        21600000.0,
+        20000000.0,
+        18800000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 55,
+      "next_due_hkd": 400000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 18000.0,
+      "prior_ecl_hkd": 16200.0,
+      "provision_hkd": 18000.0,
+      "ltv": 2.86,
+      "coverage_ratio": 0.35,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Blue Sampan Foods Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Harbour Lantern SME Collective."
+        },
+        "review": {
+          "title": "Credit review \u2014 Blue Sampan Foods Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 3 on 2025-04-30 to 3 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Blue Sampan Foods Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 21,600,000, 20,000,000, 18,800,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Blue Sampan Foods Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 400,000 in 55 days, sourced from the watchlist. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-CCTL-0023",
+      "legal_name": "Cedar Channel Trading Limited",
+      "industry": "Wholesale trade",
+      "jurisdiction": "Japan",
+      "rm": "Jordan Tam",
+      "group_id": "GRP-ORCHID",
+      "group_name": "Orchid Channel Group",
+      "summary": "Fictional trading company with yen-denominated exposure.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 5200000.0,
+      "committed_hkd": 7800000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 12,
+      "dpd_component": "principal",
+      "collateral_type": "Commercial property",
+      "collateral_hkd": 2444000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        22464000.0,
+        20800000.0,
+        19552000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 62,
+      "next_due_hkd": 416000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 35100.0,
+      "prior_ecl_hkd": 31590.0,
+      "provision_hkd": 35100.0,
+      "ltv": 2.13,
+      "coverage_ratio": 0.47,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Cedar Channel Trading Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Orchid Channel Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Cedar Channel Trading Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Cedar Channel Trading Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 22,464,000, 20,800,000, 19,552,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Cedar Channel Trading Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 416,000 in 62 days, sourced from the credit proposal. Days past due: 12 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-CLSL-0015",
+      "legal_name": "Central Ledger Services Limited",
+      "industry": "Commercial services",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Casey Chan",
+      "group_id": "GRP-CLEAR",
+      "group_name": "Clearwater Group",
+      "summary": "Fictional low-risk services company with modest utilisation and a current review.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 6000000.0,
+      "committed_hkd": 22000000.0,
+      "rating": 2,
+      "prior_rating": 2,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 18,
+      "dpd_component": "principal",
+      "collateral_type": "Guarantee",
+      "collateral_hkd": 3540000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        25920000.0,
+        24000000.0,
+        22560000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 69,
+      "next_due_hkd": 480000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 10800.0,
+      "prior_ecl_hkd": 9720.0,
+      "provision_hkd": 10800.0,
+      "ltv": 1.69,
+      "coverage_ratio": 0.59,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Central Ledger Services Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Clearwater Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Central Ledger Services Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 2 on 2025-04-30 to 2 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Central Ledger Services Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 25,920,000, 24,000,000, 22,560,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Central Ledger Services Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 480,000 in 69 days, sourced from the watchlist. Days past due: 18 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-CWEL-0014",
+      "legal_name": "Clearwater Engineering Limited",
+      "industry": "Engineering",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Casey Chan",
+      "group_id": "GRP-CLEAR",
+      "group_name": "Clearwater Group",
+      "summary": "Fictional engineering company whose demonstration rating and utilisation have improved.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 12000000.0,
+      "committed_hkd": 30000000.0,
+      "rating": 4,
+      "prior_rating": 6,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 2,
+      "warnings": [],
+      "dpd": 27,
+      "dpd_component": "principal",
+      "collateral_type": "Receivables",
+      "collateral_hkd": 8520000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        51840000.0,
+        48000000.0,
+        45120000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 76,
+      "next_due_hkd": 960000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 81000.0,
+      "prior_ecl_hkd": 340200.0,
+      "provision_hkd": 81000.0,
+      "ltv": 1.41,
+      "coverage_ratio": 0.71,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Clearwater Engineering Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Clearwater Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Clearwater Engineering Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 6 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Clearwater Engineering Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 51,840,000, 48,000,000, 45,120,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Clearwater Engineering Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 960,000 in 76 days, sourced from the credit proposal. Days past due: 27 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G026",
+      "legal_name": "Copper Bell Materials Limited",
+      "industry": "Construction materials",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-RED",
+      "group_name": "Red Junk Group",
+      "summary": "Fictional construction materials customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 5500000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 5,
+      "prior_rating": 5,
+      "prior_rating_date": "2025-04-30",
+      "stage": 2,
+      "prior_stage": 2,
+      "warnings": [],
+      "dpd": 34,
+      "dpd_component": "principal",
+      "collateral_type": "Deposit",
+      "collateral_hkd": 4565000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        23760000.0,
+        22000000.0,
+        20680000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 83,
+      "next_due_hkd": 440000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 86625.0,
+      "prior_ecl_hkd": 77963.0,
+      "provision_hkd": 86625.0,
+      "ltv": 1.2,
+      "coverage_ratio": 0.83,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Copper Bell Materials Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Red Junk Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Copper Bell Materials Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 5 on 2025-04-30 to 5 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Copper Bell Materials Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 23,760,000, 22,000,000, 20,680,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Copper Bell Materials Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 440,000 in 83 days, sourced from the watchlist. Days past due: 34 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G030",
+      "legal_name": "Crimson Buoy Retail Limited",
+      "industry": "Retail",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-SME",
+      "group_name": "Harbour Lantern SME Collective",
+      "summary": "Fictional retail customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 6500000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 3,
+      "prior_rating": 3,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 66,
+      "dpd_component": "principal",
+      "collateral_type": "Commercial property",
+      "collateral_hkd": 2275000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        28080000.0,
+        26000000.0,
+        24440000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 90,
+      "next_due_hkd": 520000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 23400.0,
+      "prior_ecl_hkd": 21060.0,
+      "provision_hkd": 23400.0,
+      "ltv": 2.86,
+      "coverage_ratio": 0.35,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Crimson Buoy Retail Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Harbour Lantern SME Collective."
+        },
+        "review": {
+          "title": "Credit review \u2014 Crimson Buoy Retail Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 3 on 2025-04-30 to 3 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Crimson Buoy Retail Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 28,080,000, 26,000,000, 24,440,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Crimson Buoy Retail Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 520,000 in 90 days, sourced from the credit proposal. Days past due: 66 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-EGTC-0022",
+      "legal_name": "Elm Gate Treasury Client Limited",
+      "industry": "Commercial services",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Avery Cheung",
+      "group_id": "GRP-CLEAR",
+      "group_name": "Clearwater Group",
+      "summary": "Fictional Hong Kong customer with a euro-denominated bilateral loan.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 16900000.0,
+      "committed_hkd": 25350000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 95,
+      "dpd_component": "principal",
+      "collateral_type": "Guarantee",
+      "collateral_hkd": 7943000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        73008000.0,
+        67600000.0,
+        63544000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 97,
+      "next_due_hkd": 1352000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 114075.0,
+      "prior_ecl_hkd": 102668.0,
+      "provision_hkd": 114075.0,
+      "ltv": 2.13,
+      "coverage_ratio": 0.47,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Elm Gate Treasury Client Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Clearwater Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Elm Gate Treasury Client Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Elm Gate Treasury Client Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 73,008,000, 67,600,000, 63,544,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Elm Gate Treasury Client Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 1,352,000 in 97 days, sourced from the watchlist. Days past due: 95 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-GBRL-0009",
+      "legal_name": "Golden Bauhinia Remittance Limited",
+      "industry": "Money services",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Casey Chan",
+      "group_id": "GRP-BAUHINIA",
+      "group_name": "Golden Bauhinia Group",
+      "summary": "Fictional money-services company with synthetic high AML classification, open monitoring alerts and an overdue periodic review.",
+      "watchlist": "enhanced_monitoring",
+      "drawn_hkd": 1000000.0,
+      "committed_hkd": 5000000.0,
+      "rating": 5,
+      "prior_rating": 5,
+      "prior_rating_date": "2025-04-30",
+      "stage": 2,
+      "prior_stage": 2,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Receivables",
+      "collateral_hkd": 590000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        21600000.0,
+        20000000,
+        18800000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 104,
+      "next_due_hkd": 400000,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 15750.0,
+      "prior_ecl_hkd": 14175.0,
+      "provision_hkd": 15750.0,
+      "ltv": 1.69,
+      "coverage_ratio": 0.59,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Golden Bauhinia Remittance Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Golden Bauhinia Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Golden Bauhinia Remittance Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 5 on 2025-04-30 to 5 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Golden Bauhinia Remittance Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 21,600,000, 20,000,000, 18,800,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Golden Bauhinia Remittance Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 400,000 in 104 days, sourced from the credit proposal. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-HPIL-0021",
+      "legal_name": "Hazel Pier Import Limited",
+      "industry": "Wholesale trade",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-SME",
+      "group_name": "Harbour Lantern SME Collective",
+      "summary": "Fictional importer whose revolving utilisation is close to the limit but not over it.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 26400000.0,
+      "committed_hkd": 30000000.0,
+      "rating": 5,
+      "prior_rating": 5,
+      "prior_rating_date": "2025-04-30",
+      "stage": 2,
+      "prior_stage": 2,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Deposit",
+      "collateral_hkd": 18744000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        114048000.0,
+        105600000.0,
+        99264000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 111,
+      "next_due_hkd": 2112000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 415800.0,
+      "prior_ecl_hkd": 374220.0,
+      "provision_hkd": 415800.0,
+      "ltv": 1.41,
+      "coverage_ratio": 0.71,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Hazel Pier Import Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Harbour Lantern SME Collective."
+        },
+        "review": {
+          "title": "Credit review \u2014 Hazel Pier Import Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 5 on 2025-04-30 to 5 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Hazel Pier Import Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 114,048,000, 105,600,000, 99,264,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Hazel Pier Import Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 2,112,000 in 111 days, sourced from the watchlist. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G031",
+      "legal_name": "Ivory Crane Trading Limited",
+      "industry": "Wholesale trade",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-LANTERN",
+      "group_name": "Lantern Ferry Group",
+      "summary": "Fictional wholesale trade customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 6750000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Commercial property",
+      "collateral_hkd": 5602500.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        29160000.0,
+        27000000.0,
+        25380000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 118,
+      "next_due_hkd": 540000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 45562.0,
+      "prior_ecl_hkd": 41006.0,
+      "provision_hkd": 45562.0,
+      "ltv": 1.2,
+      "coverage_ratio": 0.83,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Ivory Crane Trading Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Lantern Ferry Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Ivory Crane Trading Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Ivory Crane Trading Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 29,160,000, 27,000,000, 25,380,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Ivory Crane Trading Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 540,000 in 118 days, sourced from the credit proposal. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G028",
+      "legal_name": "Jade Ladder Renewables Limited",
+      "industry": "Renewable equipment",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Casey Chan",
+      "group_id": "GRP-PACKET",
+      "group_name": "Packet Wharf Group",
+      "summary": "Fictional renewable equipment customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 6000000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Guarantee",
+      "collateral_hkd": 2100000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        25920000.0,
+        24000000.0,
+        22560000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 125,
+      "next_due_hkd": 480000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 40500.0,
+      "prior_ecl_hkd": 36450.0,
+      "provision_hkd": 40500.0,
+      "ltv": 2.86,
+      "coverage_ratio": 0.35,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Jade Ladder Renewables Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Packet Wharf Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Jade Ladder Renewables Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Jade Ladder Renewables Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 25,920,000, 24,000,000, 22,560,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Jade Ladder Renewables Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 480,000 in 125 days, sourced from the watchlist. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-KMTL-0005",
+      "legal_name": "Kowloon Meridian Textiles Limited",
+      "industry": "Textiles",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Casey Chan",
+      "group_id": "GRP-KOWLOON",
+      "group_name": "Kowloon Loom Group",
+      "summary": "Fictional textile wholesaler whose current credit review and exposure workbook disagree on utilisation.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 0.0,
+      "committed_hkd": 0.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Receivables",
+      "collateral_hkd": 0.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        21600000.0,
+        20000000,
+        18800000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 132,
+      "next_due_hkd": 400000,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 0.0,
+      "prior_ecl_hkd": 0.0,
+      "provision_hkd": 0.0,
+      "ltv": null,
+      "coverage_ratio": null,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Kowloon Meridian Textiles Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Kowloon Loom Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Kowloon Meridian Textiles Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Kowloon Meridian Textiles Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 21,600,000, 20,000,000, 18,800,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Kowloon Meridian Textiles Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 400,000 in 132 days, sourced from the credit proposal. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G039",
+      "legal_name": "Lantau Wind Components Limited",
+      "industry": "Renewable equipment",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Casey Chan",
+      "group_id": "GRP-PACKET",
+      "group_name": "Packet Wharf Group",
+      "summary": "Fictional renewable equipment customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 8750000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 3,
+      "prior_rating": 3,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Deposit",
+      "collateral_hkd": 5162500.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        37800000.0,
+        35000000.0,
+        32900000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 139,
+      "next_due_hkd": 700000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 31500.0,
+      "prior_ecl_hkd": 28350.0,
+      "provision_hkd": 31500.0,
+      "ltv": 1.69,
+      "coverage_ratio": 0.59,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Lantau Wind Components Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Packet Wharf Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Lantau Wind Components Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 3 on 2025-04-30 to 3 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Lantau Wind Components Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 37,800,000, 35,000,000, 32,900,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Lantau Wind Components Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 700,000 in 139 days, sourced from the watchlist. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-LFLL-0003",
+      "legal_name": "Lantern Ferry Logistics Limited",
+      "industry": "Logistics",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-LANTERN",
+      "group_name": "Lantern Ferry Group",
+      "summary": "Fictional logistics company that remains current on repayments. Deposits and cash have fallen while short-term borrowing has risen.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 45000000.0,
+      "committed_hkd": 50000000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [
+        {
+          "code": "EWI-LIQUIDITY-RATIO",
+          "description": "Demonstration liquidity ratio is below 1.20. Repayments are recorded as current.",
+          "status": "open",
+          "observed": "1.05"
+        }
+      ],
+      "dpd": 22,
+      "dpd_component": "interest",
+      "collateral_type": "Deposit",
+      "collateral_hkd": 18000000,
+      "guarantor": "Lantern Ferry Holdings Limited",
+      "revenue_hkd": [
+        210000000,
+        206000000,
+        198000000
+      ],
+      "margin_pct": [
+        8.2,
+        7.9,
+        7.1
+      ],
+      "liquidity_ratio": [
+        1.4,
+        1.22,
+        1.05
+      ],
+      "leverage": [
+        2.1,
+        2.3,
+        2.6
+      ],
+      "interest_coverage": [
+        2.8,
+        2.5,
+        2.3
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 18,
+      "next_due_hkd": 8000000,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 303750.0,
+      "prior_ecl_hkd": 273375.0,
+      "provision_hkd": 303750.0,
+      "ltv": 2.5,
+      "coverage_ratio": 0.4,
+      "full_file": true,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Lantern Ferry Logistics Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Lantern Ferry Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Lantern Ferry Logistics Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Lantern Ferry Logistics Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 210,000,000, 206,000,000, 198,000,000. Margin 8.2%, 7.9%, 7.1%. Interest coverage 2.8x, 2.5x, 2.3x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Lantern Ferry Logistics Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 8,000,000 in 18 days, sourced from the watchlist. Days past due: 22 (interest)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-MCBH-0010",
+      "legal_name": "Meridian Cross-Border (Hong Kong) Limited",
+      "industry": "Cross-border trading",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Casey Chan",
+      "group_id": "GRP-MCB",
+      "group_name": "Meridian Cross-Border Holdings",
+      "summary": "Fictional Hong Kong entity in the Meridian Cross-Border group. Exposure is denominated in HKD.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 50000000.0,
+      "committed_hkd": 70000000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 18,
+      "dpd_component": "principal",
+      "collateral_type": "Guarantee",
+      "collateral_hkd": 41500000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        216000000.0,
+        200000000.0,
+        188000000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 33,
+      "next_due_hkd": 4000000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 337500.0,
+      "prior_ecl_hkd": 303750.0,
+      "provision_hkd": 337500.0,
+      "ltv": 1.2,
+      "coverage_ratio": 0.83,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Meridian Cross-Border (Hong Kong) Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Meridian Cross-Border Holdings."
+        },
+        "review": {
+          "title": "Credit review \u2014 Meridian Cross-Border (Hong Kong) Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Meridian Cross-Border (Hong Kong) Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 216,000,000, 200,000,000, 188,000,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Meridian Cross-Border (Hong Kong) Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 4,000,000 in 33 days, sourced from the watchlist. Days past due: 18 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-MCBQ-0011",
+      "legal_name": "Meridian Cross-Border (Qianhai) Limited",
+      "industry": "Cross-border trading",
+      "jurisdiction": "Mainland China",
+      "rm": "Jordan Tam",
+      "group_id": "GRP-MCB",
+      "group_name": "Meridian Cross-Border Holdings",
+      "summary": "Fictional cross-border entity. Lending exposure is denominated in CNY.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 21600000.0,
+      "committed_hkd": 32400000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 27,
+      "dpd_component": "principal",
+      "collateral_type": "Receivables",
+      "collateral_hkd": 7560000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        93312000.0,
+        86400000.0,
+        81216000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 40,
+      "next_due_hkd": 1728000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 145800.0,
+      "prior_ecl_hkd": 131220.0,
+      "provision_hkd": 145800.0,
+      "ltv": 2.86,
+      "coverage_ratio": 0.35,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Meridian Cross-Border (Qianhai) Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Meridian Cross-Border Holdings."
+        },
+        "review": {
+          "title": "Credit review \u2014 Meridian Cross-Border (Qianhai) Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Meridian Cross-Border (Qianhai) Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 93,312,000, 86,400,000, 81,216,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Meridian Cross-Border (Qianhai) Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 1,728,000 in 40 days, sourced from the credit proposal. Days past due: 27 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-MCBT-0012",
+      "legal_name": "Meridian Cross-Border Treasury Limited",
+      "industry": "Treasury",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Avery Cheung",
+      "group_id": "GRP-MCB",
+      "group_name": "Meridian Cross-Border Holdings",
+      "summary": "Fictional treasury entity. Exposure is denominated in USD.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 23400000.0,
+      "committed_hkd": 39000000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 34,
+      "dpd_component": "principal",
+      "collateral_type": "Deposit",
+      "collateral_hkd": 10998000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        101088000.0,
+        93600000.0,
+        87984000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 47,
+      "next_due_hkd": 1872000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 157950.0,
+      "prior_ecl_hkd": 142155.0,
+      "provision_hkd": 157950.0,
+      "ltv": 2.13,
+      "coverage_ratio": 0.47,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Meridian Cross-Border Treasury Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Meridian Cross-Border Holdings."
+        },
+        "review": {
+          "title": "Credit review \u2014 Meridian Cross-Border Treasury Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Meridian Cross-Border Treasury Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 101,088,000, 93,600,000, 87,984,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Meridian Cross-Border Treasury Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 1,872,000 in 47 days, sourced from the watchlist. Days past due: 34 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-MHCL-0019",
+      "legal_name": "Mist Harbour Consulting Limited",
+      "industry": "Commercial services",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-SME",
+      "group_name": "Harbour Lantern SME Collective",
+      "summary": "Fictional consulting company whose latest credit memorandum is marked incomplete.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 7000000.0,
+      "committed_hkd": 10000000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 66,
+      "dpd_component": "principal",
+      "collateral_type": "Commercial property",
+      "collateral_hkd": 4130000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        30240000.0,
+        28000000.0,
+        26320000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 54,
+      "next_due_hkd": 560000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 47250.0,
+      "prior_ecl_hkd": 42525.0,
+      "provision_hkd": 47250.0,
+      "ltv": 1.69,
+      "coverage_ratio": 0.59,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Mist Harbour Consulting Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Harbour Lantern SME Collective."
+        },
+        "review": {
+          "title": "Credit review \u2014 Mist Harbour Consulting Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Mist Harbour Consulting Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 30,240,000, 28,000,000, 26,320,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Mist Harbour Consulting Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 560,000 in 54 days, sourced from the credit proposal. Days past due: 66 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G032",
+      "legal_name": "Moss Gate Logistics Limited",
+      "industry": "Logistics",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-LANTERN",
+      "group_name": "Lantern Ferry Group",
+      "summary": "Fictional logistics customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 7000000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 5,
+      "prior_rating": 5,
+      "prior_rating_date": "2025-04-30",
+      "stage": 2,
+      "prior_stage": 2,
+      "warnings": [],
+      "dpd": 95,
+      "dpd_component": "principal",
+      "collateral_type": "Guarantee",
+      "collateral_hkd": 4970000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        30240000.0,
+        28000000.0,
+        26320000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 61,
+      "next_due_hkd": 560000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 110250.0,
+      "prior_ecl_hkd": 99225.0,
+      "provision_hkd": 110250.0,
+      "ltv": 1.41,
+      "coverage_ratio": 0.71,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Moss Gate Logistics Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Lantern Ferry Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Moss Gate Logistics Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 5 on 2025-04-30 to 5 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Moss Gate Logistics Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 30,240,000, 28,000,000, 26,320,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Moss Gate Logistics Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 560,000 in 61 days, sourced from the watchlist. Days past due: 95 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-NPMS-0007",
+      "legal_name": "North Point Marine Services Limited",
+      "industry": "Marine services",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-NORTH",
+      "group_name": "North Point Marine Group",
+      "summary": "Fictional marine-services company. One synthetic document contains instruction-like text that must be ignored.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 9000000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Receivables",
+      "collateral_hkd": 7470000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        38880000.0,
+        36000000.0,
+        33840000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 68,
+      "next_due_hkd": 720000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 60750.0,
+      "prior_ecl_hkd": 54675.0,
+      "provision_hkd": 60750.0,
+      "ltv": 1.2,
+      "coverage_ratio": 0.83,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 North Point Marine Services Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group North Point Marine Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 North Point Marine Services Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 North Point Marine Services Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 38,880,000, 36,000,000, 33,840,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 North Point Marine Services Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 720,000 in 68 days, sourced from the credit proposal. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-OPPL-0018",
+      "legal_name": "Old Pier Provisions Limited",
+      "industry": "Food import",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-SME",
+      "group_name": "Harbour Lantern SME Collective",
+      "summary": "Fictional food importer with an overdue annual credit review and a stale customer due-diligence record.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 9000000.0,
+      "committed_hkd": 12000000.0,
+      "rating": 5,
+      "prior_rating": 5,
+      "prior_rating_date": "2025-04-30",
+      "stage": 2,
+      "prior_stage": 2,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Deposit",
+      "collateral_hkd": 3150000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        38880000.0,
+        36000000.0,
+        33840000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 75,
+      "next_due_hkd": 720000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 141750.0,
+      "prior_ecl_hkd": 127575.0,
+      "provision_hkd": 141750.0,
+      "ltv": 2.86,
+      "coverage_ratio": 0.35,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Old Pier Provisions Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Harbour Lantern SME Collective."
+        },
+        "review": {
+          "title": "Credit review \u2014 Old Pier Provisions Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 5 on 2025-04-30 to 5 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Old Pier Provisions Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 38,880,000, 36,000,000, 33,840,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Old Pier Provisions Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 720,000 in 75 days, sourced from the watchlist. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-OCTL-0017",
+      "legal_name": "Orchid Channel Trading Limited",
+      "industry": "Wholesale trade",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-ORCHID",
+      "group_name": "Orchid Channel Group",
+      "summary": "Fictional trading company. A synthetic sanctions alert is recorded as a human-reviewed false positive.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 16000000.0,
+      "committed_hkd": 20000000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Commercial property",
+      "collateral_hkd": 7520000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        69120000.0,
+        64000000.0,
+        60160000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 82,
+      "next_due_hkd": 1280000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 108000.0,
+      "prior_ecl_hkd": 97200.0,
+      "provision_hkd": 108000.0,
+      "ltv": 2.13,
+      "coverage_ratio": 0.47,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Orchid Channel Trading Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Orchid Channel Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Orchid Channel Trading Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Orchid Channel Trading Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 69,120,000, 64,000,000, 60,160,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Orchid Channel Trading Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 1,280,000 in 82 days, sourced from the credit proposal. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-PWTL-0016",
+      "legal_name": "Packet Wharf Technology Limited",
+      "industry": "Technology services",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Casey Chan",
+      "group_id": "GRP-PACKET",
+      "group_name": "Packet Wharf Group",
+      "summary": "Fictional technology company. A synthetic operational report records a contained phishing incident.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 12000000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 3,
+      "prior_rating": 3,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Guarantee",
+      "collateral_hkd": 7080000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        51840000.0,
+        48000000.0,
+        45120000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 89,
+      "next_due_hkd": 960000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 43200.0,
+      "prior_ecl_hkd": 38880.0,
+      "provision_hkd": 43200.0,
+      "ltv": 1.69,
+      "coverage_ratio": 0.59,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Packet Wharf Technology Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Packet Wharf Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Packet Wharf Technology Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 3 on 2025-04-30 to 3 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Packet Wharf Technology Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 51,840,000, 48,000,000, 45,120,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Packet Wharf Technology Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 960,000 in 89 days, sourced from the watchlist. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-PDCL-0004",
+      "legal_name": "Pearl Delta Components Limited",
+      "industry": "Electronics manufacturing",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Casey Chan",
+      "group_id": "GRP-PEARL",
+      "group_name": "Pearl Delta Industrials",
+      "summary": "Fictional electronics manufacturer with foreign-exchange forwards, an interest-rate swap and eligible collateral.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 55000000.0,
+      "committed_hkd": 100000000.0,
+      "rating": 3,
+      "prior_rating": 3,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Receivables",
+      "collateral_hkd": 39050000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        237600000.0,
+        220000000.0,
+        206800000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 96,
+      "next_due_hkd": 4400000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 198000.0,
+      "prior_ecl_hkd": 178200.0,
+      "provision_hkd": 198000.0,
+      "ltv": 1.41,
+      "coverage_ratio": 0.71,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Pearl Delta Components Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Pearl Delta Industrials."
+        },
+        "review": {
+          "title": "Credit review \u2014 Pearl Delta Components Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 3 on 2025-04-30 to 3 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Pearl Delta Components Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 237,600,000, 220,000,000, 206,800,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Pearl Delta Components Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 4,400,000 in 96 days, sourced from the credit proposal. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G033",
+      "legal_name": "Pine Wharf Services Limited",
+      "industry": "Commercial services",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-SME",
+      "group_name": "Harbour Lantern SME Collective",
+      "summary": "Fictional commercial services customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 7250000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 3,
+      "prior_rating": 3,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Deposit",
+      "collateral_hkd": 6017500.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        31320000.0,
+        29000000.0,
+        27260000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 103,
+      "next_due_hkd": 580000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 26100.0,
+      "prior_ecl_hkd": 23490.0,
+      "provision_hkd": 26100.0,
+      "ltv": 1.2,
+      "coverage_ratio": 0.83,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Pine Wharf Services Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Harbour Lantern SME Collective."
+        },
+        "review": {
+          "title": "Credit review \u2014 Pine Wharf Services Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 3 on 2025-04-30 to 3 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Pine Wharf Services Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 31,320,000, 29,000,000, 27,260,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Pine Wharf Services Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 580,000 in 103 days, sourced from the watchlist. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G034",
+      "legal_name": "Quartz Reef Electronics Limited",
+      "industry": "Electronics manufacturing",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Casey Chan",
+      "group_id": "GRP-PEARL",
+      "group_name": "Pearl Delta Industrials",
+      "summary": "Fictional electronics manufacturing customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 7500000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 12,
+      "dpd_component": "principal",
+      "collateral_type": "Commercial property",
+      "collateral_hkd": 2625000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        32400000.0,
+        30000000.0,
+        28200000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 110,
+      "next_due_hkd": 600000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 50625.0,
+      "prior_ecl_hkd": 45562.0,
+      "provision_hkd": 50625.0,
+      "ltv": 2.86,
+      "coverage_ratio": 0.35,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Quartz Reef Electronics Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Pearl Delta Industrials."
+        },
+        "review": {
+          "title": "Credit review \u2014 Quartz Reef Electronics Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Quartz Reef Electronics Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 32,400,000, 30,000,000, 28,200,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Quartz Reef Electronics Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 600,000 in 110 days, sourced from the credit proposal. Days past due: 12 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-RJCL-0020",
+      "legal_name": "Red Junk Construction Limited",
+      "industry": "Construction",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-RED",
+      "group_name": "Red Junk Group",
+      "summary": "Fictional construction company whose term loan is drawn above the committed limit in the subledger.",
+      "watchlist": "watch",
+      "drawn_hkd": 43200000.0,
+      "committed_hkd": 40000000.0,
+      "rating": 5,
+      "prior_rating": 5,
+      "prior_rating_date": "2025-04-30",
+      "stage": 2,
+      "prior_stage": 2,
+      "warnings": [],
+      "dpd": 18,
+      "dpd_component": "principal",
+      "collateral_type": "Guarantee",
+      "collateral_hkd": 20304000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        186624000.0,
+        172800000.0,
+        162432000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 117,
+      "next_due_hkd": 3456000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 680400.0,
+      "prior_ecl_hkd": 612360.0,
+      "provision_hkd": 680400.0,
+      "ltv": 2.13,
+      "coverage_ratio": 0.47,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Red Junk Construction Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Red Junk Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Red Junk Construction Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 5 on 2025-04-30 to 5 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Red Junk Construction Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 186,624,000, 172,800,000, 162,432,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Red Junk Construction Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 3,456,000 in 117 days, sourced from the watchlist. Days past due: 18 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-RBFL-0013",
+      "legal_name": "Repulse Bay Furnishings Limited",
+      "industry": "Wholesale trade",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-SME",
+      "group_name": "Harbour Lantern SME Collective",
+      "summary": "Fictional furnishings wholesaler with eligible collateral below drawn exposure.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 20000000.0,
+      "committed_hkd": 25000000.0,
+      "rating": 6,
+      "prior_rating": 6,
+      "prior_rating_date": "2025-04-30",
+      "stage": 2,
+      "prior_stage": 2,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Receivables",
+      "collateral_hkd": 7500000,
+      "guarantor": null,
+      "revenue_hkd": [
+        96000000,
+        88000000,
+        74000000
+      ],
+      "margin_pct": [
+        9.0,
+        7.4,
+        5.5
+      ],
+      "liquidity_ratio": [
+        1.3,
+        1.15,
+        1.02
+      ],
+      "leverage": [
+        2.4,
+        2.8,
+        3.3
+      ],
+      "interest_coverage": [
+        2.2,
+        1.9,
+        1.6
+      ],
+      "coverage_assumption": 2.2,
+      "coverage_threshold": 2.0,
+      "next_due_days": 40,
+      "next_due_hkd": 6500000,
+      "next_due_source": "Credit proposal",
+      "refinancing": true,
+      "ecl_hkd": 630000.0,
+      "prior_ecl_hkd": 567000.0,
+      "provision_hkd": 630000.0,
+      "ltv": 2.67,
+      "coverage_ratio": 0.38,
+      "full_file": true,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Repulse Bay Furnishings Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.2 times. Group Harbour Lantern SME Collective."
+        },
+        "review": {
+          "title": "Credit review \u2014 Repulse Bay Furnishings Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 6 on 2025-04-30 to 6 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Repulse Bay Furnishings Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 96,000,000, 88,000,000, 74,000,000. Margin 9.0%, 7.4%, 5.5%. Interest coverage 2.2x, 1.9x, 1.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Repulse Bay Furnishings Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 6,500,000 in 40 days, sourced from the credit proposal. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G038",
+      "legal_name": "Rowan Reach Textiles Limited",
+      "industry": "Textiles",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-KOWLOON",
+      "group_name": "Kowloon Loom Group",
+      "summary": "Fictional textiles customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 8500000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 5,
+      "prior_rating": 5,
+      "prior_rating_date": "2025-04-30",
+      "stage": 2,
+      "prior_stage": 2,
+      "warnings": [],
+      "dpd": 34,
+      "dpd_component": "principal",
+      "collateral_type": "Deposit",
+      "collateral_hkd": 6035000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        36720000.0,
+        34000000.0,
+        31960000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 131,
+      "next_due_hkd": 680000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 133875.0,
+      "prior_ecl_hkd": 120488.0,
+      "provision_hkd": 133875.0,
+      "ltv": 1.41,
+      "coverage_ratio": 0.71,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Rowan Reach Textiles Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Kowloon Loom Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Rowan Reach Textiles Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 5 on 2025-04-30 to 5 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Rowan Reach Textiles Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 36,720,000, 34,000,000, 31,960,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Rowan Reach Textiles Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 680,000 in 131 days, sourced from the watchlist. Days past due: 34 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-SKAL-0008",
+      "legal_name": "Sai Kung Aquaculture Limited",
+      "industry": "Aquaculture",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Jordan Tam",
+      "group_id": "GRP-SAI",
+      "group_name": "Sai Kung Coastal Group",
+      "summary": "Fictional aquaculture company held only in the cross-border portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 3141593.0,
+      "committed_hkd": 5000000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 66,
+      "dpd_component": "principal",
+      "collateral_type": "Commercial property",
+      "collateral_hkd": 2607522.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        21600000.0,
+        20000000,
+        18800000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 138,
+      "next_due_hkd": 400000,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 21206.0,
+      "prior_ecl_hkd": 19085.0,
+      "provision_hkd": 21206.0,
+      "ltv": 1.2,
+      "coverage_ratio": 0.83,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Sai Kung Aquaculture Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Sai Kung Coastal Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Sai Kung Aquaculture Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Sai Kung Aquaculture Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 21,600,000, 20,000,000, 18,800,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Sai Kung Aquaculture Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 400,000 in 138 days, sourced from the credit proposal. Days past due: 66 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G040",
+      "legal_name": "Shek O Ceramics Limited",
+      "industry": "Light manufacturing",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-SME",
+      "group_name": "Harbour Lantern SME Collective",
+      "summary": "Fictional light manufacturing customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 9000000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 95,
+      "dpd_component": "principal",
+      "collateral_type": "Guarantee",
+      "collateral_hkd": 3150000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        38880000.0,
+        36000000.0,
+        33840000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 25,
+      "next_due_hkd": 720000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 60750.0,
+      "prior_ecl_hkd": 54675.0,
+      "provision_hkd": 60750.0,
+      "ltv": 2.86,
+      "coverage_ratio": 0.35,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Shek O Ceramics Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Harbour Lantern SME Collective."
+        },
+        "review": {
+          "title": "Credit review \u2014 Shek O Ceramics Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Shek O Ceramics Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 38,880,000, 36,000,000, 33,840,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Shek O Ceramics Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 720,000 in 25 days, sourced from the watchlist. Days past due: 95 (principal)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G027",
+      "legal_name": "Silver Sampan Aviation Services Limited",
+      "industry": "Aviation services",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Casey Chan",
+      "group_id": "GRP-CLEAR",
+      "group_name": "Clearwater Group",
+      "summary": "Fictional aviation services customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 5750000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 3,
+      "prior_rating": 3,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Receivables",
+      "collateral_hkd": 2702500.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        24840000.0,
+        23000000.0,
+        21620000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 32,
+      "next_due_hkd": 460000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 20700.0,
+      "prior_ecl_hkd": 18630.0,
+      "provision_hkd": 20700.0,
+      "ltv": 2.13,
+      "coverage_ratio": 0.47,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Silver Sampan Aviation Services Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Clearwater Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Silver Sampan Aviation Services Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 3 on 2025-04-30 to 3 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Silver Sampan Aviation Services Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 24,840,000, 23,000,000, 21,620,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Silver Sampan Aviation Services Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 460,000 in 32 days, sourced from the credit proposal. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G036",
+      "legal_name": "Spruce Basin Foods Limited",
+      "industry": "Food import",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-SME",
+      "group_name": "Harbour Lantern SME Collective",
+      "summary": "Fictional food import customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 8000000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 3,
+      "prior_rating": 3,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Deposit",
+      "collateral_hkd": 4720000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        34560000.0,
+        32000000.0,
+        30080000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 39,
+      "next_due_hkd": 640000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 28800.0,
+      "prior_ecl_hkd": 25920.0,
+      "provision_hkd": 28800.0,
+      "ltv": 1.69,
+      "coverage_ratio": 0.59,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Spruce Basin Foods Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Harbour Lantern SME Collective."
+        },
+        "review": {
+          "title": "Credit review \u2014 Spruce Basin Foods Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 3 on 2025-04-30 to 3 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Spruce Basin Foods Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 34,560,000, 32,000,000, 30,080,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Spruce Basin Foods Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 640,000 in 39 days, sourced from the watchlist. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-SFCL-0006",
+      "legal_name": "Star Ferry Commodities Limited",
+      "industry": "Commodities trading",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-STAR",
+      "group_name": "Star Ferry Commodities Group",
+      "summary": "Fictional commodities trader. The September 2026 interim review supersedes the December 2025 annual review.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 15000000.0,
+      "committed_hkd": 30000000.0,
+      "rating": 5,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 2,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Commercial property",
+      "collateral_hkd": 10650000.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        64800000.0,
+        60000000.0,
+        56400000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 46,
+      "next_due_hkd": 1200000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 236250.0,
+      "prior_ecl_hkd": 91125.0,
+      "provision_hkd": 236250.0,
+      "ltv": 1.41,
+      "coverage_ratio": 0.71,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Star Ferry Commodities Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Star Ferry Commodities Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Star Ferry Commodities Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 5 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Star Ferry Commodities Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 64,800,000, 60,000,000, 56,400,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Star Ferry Commodities Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 1,200,000 in 46 days, sourced from the credit proposal. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G041",
+      "legal_name": "Tai Tam Supplies Limited",
+      "industry": "Wholesale trade",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-NORTH",
+      "group_name": "North Point Marine Group",
+      "summary": "Fictional wholesale trade customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 9250000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 5,
+      "prior_rating": 5,
+      "prior_rating_date": "2025-04-30",
+      "stage": 2,
+      "prior_stage": 2,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Guarantee",
+      "collateral_hkd": 7677500.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        39960000.0,
+        37000000.0,
+        34780000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 53,
+      "next_due_hkd": 740000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 145688.0,
+      "prior_ecl_hkd": 131119.0,
+      "provision_hkd": 145688.0,
+      "ltv": 1.2,
+      "coverage_ratio": 0.83,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Tai Tam Supplies Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group North Point Marine Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Tai Tam Supplies Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 5 on 2025-04-30 to 5 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Tai Tam Supplies Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 39,960,000, 37,000,000, 34,780,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Tai Tam Supplies Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 740,000 in 53 days, sourced from the watchlist. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G025",
+      "legal_name": "White Egret Medical Distributors Limited",
+      "industry": "Medical distribution",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Morgan Wong",
+      "group_id": "GRP-ORCHID",
+      "group_name": "Orchid Channel Group",
+      "summary": "Fictional medical distribution customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 5250000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Receivables",
+      "collateral_hkd": 1837500.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        22680000.0,
+        21000000.0,
+        19740000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 60,
+      "next_due_hkd": 420000.0,
+      "next_due_source": "Credit proposal",
+      "refinancing": false,
+      "ecl_hkd": 35438.0,
+      "prior_ecl_hkd": 31894.0,
+      "provision_hkd": 35438.0,
+      "ltv": 2.86,
+      "coverage_ratio": 0.35,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 White Egret Medical Distributors Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Orchid Channel Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 White Egret Medical Distributors Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 White Egret Medical Distributors Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 22,680,000, 21,000,000, 19,740,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 White Egret Medical Distributors Limited",
+          "locator": "Credit proposal",
+          "passage": "Next obligation HKD 420,000 in 60 days, sourced from the credit proposal. Days past due: 0 (none)."
+        }
+      }
+    },
+    {
+      "customer_id": "CUS-G037",
+      "legal_name": "Willow Quay Holdings Limited",
+      "industry": "Investment holding",
+      "jurisdiction": "Hong Kong SAR",
+      "rm": "Casey Chan",
+      "group_id": "GRP-CLEAR",
+      "group_name": "Clearwater Group",
+      "summary": "Fictional investment holding customer used to populate the demonstration portfolio.",
+      "watchlist": "not_listed",
+      "drawn_hkd": 8250000.0,
+      "committed_hkd": 15000000.0,
+      "rating": 4,
+      "prior_rating": 4,
+      "prior_rating_date": "2025-04-30",
+      "stage": 1,
+      "prior_stage": 1,
+      "warnings": [],
+      "dpd": 0,
+      "dpd_component": "none",
+      "collateral_type": "Deposit",
+      "collateral_hkd": 3877500.0,
+      "guarantor": null,
+      "revenue_hkd": [
+        35640000.0,
+        33000000.0,
+        31020000.0
+      ],
+      "margin_pct": [
+        8.5,
+        8.0,
+        7.4
+      ],
+      "liquidity_ratio": [
+        1.5,
+        1.4,
+        1.3
+      ],
+      "leverage": [
+        1.6,
+        1.7,
+        1.8
+      ],
+      "interest_coverage": [
+        3.0,
+        2.8,
+        2.6
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 67,
+      "next_due_hkd": 660000.0,
+      "next_due_source": "Watchlist",
+      "refinancing": false,
+      "ecl_hkd": 55688.0,
+      "prior_ecl_hkd": 50119.0,
+      "provision_hkd": 55688.0,
+      "ltv": 2.13,
+      "coverage_ratio": 0.47,
+      "full_file": false,
+      "documents": {
+        "credit_paper": {
+          "title": "Credit paper \u2014 Willow Quay Holdings Limited",
+          "locator": "page 4",
+          "passage": "Approved interest-coverage covenant is at least 2.0 times. The credit assumption used at approval was 2.5 times. Group Clearwater Group."
+        },
+        "review": {
+          "title": "Credit review \u2014 Willow Quay Holdings Limited",
+          "locator": "30 Sep 2026, section 2",
+          "passage": "Internal rating moved from 4 on 2025-04-30 to 4 on 30 Sep 2026. The review records the latest financial extracts and repayment status."
+        },
+        "financials": {
+          "title": "Financial statements extract \u2014 Willow Quay Holdings Limited",
+          "locator": "income statement, three year-ends",
+          "passage": "Revenue HKD 35,640,000, 33,000,000, 31,020,000. Margin 8.5%, 8.0%, 7.4%. Interest coverage 3.0x, 2.8x, 2.6x."
+        },
+        "repayment": {
+          "title": "Repayment schedule \u2014 Willow Quay Holdings Limited",
+          "locator": "Watchlist",
+          "passage": "Next obligation HKD 660,000 in 67 days, sourced from the watchlist. Days past due: 0 (none)."
+        }
+      }
+    }
+  ],
+  "industries": [
+    {
+      "industry": "Wholesale trade",
+      "customers": 7,
+      "drawn_hkd": 168400000.0,
+      "stage2": 4,
+      "migrations": 1,
+      "open_warnings": 2,
+      "dpd_accounts": 1,
+      "collateral_hkd": 85488000.0
+    },
+    {
+      "industry": "Cross-border trading",
+      "customers": 2,
+      "drawn_hkd": 71600000.0,
+      "stage2": 0,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 2,
+      "collateral_hkd": 49060000.0
+    },
+    {
+      "industry": "Electronics manufacturing",
+      "customers": 2,
+      "drawn_hkd": 62500000.0,
+      "stage2": 0,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 1,
+      "collateral_hkd": 41675000.0
+    },
+    {
+      "industry": "Logistics",
+      "customers": 3,
+      "drawn_hkd": 58000000.0,
+      "stage2": 1,
+      "migrations": 0,
+      "open_warnings": 1,
+      "dpd_accounts": 2,
+      "collateral_hkd": 26510000.0
+    },
+    {
+      "industry": "Commercial services",
+      "customers": 5,
+      "drawn_hkd": 44900000.0,
+      "stage2": 1,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 3,
+      "collateral_hkd": 28063000.0
+    },
+    {
+      "industry": "Construction",
+      "customers": 1,
+      "drawn_hkd": 43200000.0,
+      "stage2": 1,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 1,
+      "collateral_hkd": 20304000.0
+    },
+    {
+      "industry": "Treasury",
+      "customers": 1,
+      "drawn_hkd": 23400000.0,
+      "stage2": 0,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 1,
+      "collateral_hkd": 10998000.0
+    },
+    {
+      "industry": "Food import",
+      "customers": 3,
+      "drawn_hkd": 22000000.0,
+      "stage2": 1,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 0,
+      "collateral_hkd": 9620000.0
+    },
+    {
+      "industry": "Commodities trading",
+      "customers": 1,
+      "drawn_hkd": 15000000.0,
+      "stage2": 1,
+      "migrations": 1,
+      "open_warnings": 0,
+      "dpd_accounts": 0,
+      "collateral_hkd": 10650000.0
+    },
+    {
+      "industry": "Renewable equipment",
+      "customers": 2,
+      "drawn_hkd": 14750000.0,
+      "stage2": 0,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 0,
+      "collateral_hkd": 7262500.0
+    },
+    {
+      "industry": "Engineering",
+      "customers": 1,
+      "drawn_hkd": 12000000.0,
+      "stage2": 0,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 1,
+      "collateral_hkd": 8520000.0
+    },
+    {
+      "industry": "Technology services",
+      "customers": 1,
+      "drawn_hkd": 12000000.0,
+      "stage2": 0,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 0,
+      "collateral_hkd": 7080000.0
+    },
+    {
+      "industry": "Marine supplies",
+      "customers": 1,
+      "drawn_hkd": 9500000.0,
+      "stage2": 0,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 0,
+      "collateral_hkd": 3325000.0
+    },
+    {
+      "industry": "Marine services",
+      "customers": 1,
+      "drawn_hkd": 9000000.0,
+      "stage2": 0,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 0,
+      "collateral_hkd": 7470000.0
+    },
+    {
+      "industry": "Light manufacturing",
+      "customers": 1,
+      "drawn_hkd": 9000000.0,
+      "stage2": 0,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 1,
+      "collateral_hkd": 3150000.0
+    },
+    {
+      "industry": "Textiles",
+      "customers": 2,
+      "drawn_hkd": 8500000.0,
+      "stage2": 1,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 1,
+      "collateral_hkd": 6035000.0
+    },
+    {
+      "industry": "Investment holding",
+      "customers": 1,
+      "drawn_hkd": 8250000.0,
+      "stage2": 0,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 0,
+      "collateral_hkd": 3877500.0
+    },
+    {
+      "industry": "Retail",
+      "customers": 1,
+      "drawn_hkd": 6500000.0,
+      "stage2": 0,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 1,
+      "collateral_hkd": 2275000.0
+    },
+    {
+      "industry": "Property holding",
+      "customers": 1,
+      "drawn_hkd": 6250000.0,
+      "stage2": 1,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 0,
+      "collateral_hkd": 2937500.0
+    },
+    {
+      "industry": "Aviation services",
+      "customers": 1,
+      "drawn_hkd": 5750000.0,
+      "stage2": 0,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 0,
+      "collateral_hkd": 2702500.0
+    },
+    {
+      "industry": "Construction materials",
+      "customers": 1,
+      "drawn_hkd": 5500000.0,
+      "stage2": 1,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 1,
+      "collateral_hkd": 4565000.0
+    },
+    {
+      "industry": "Medical distribution",
+      "customers": 1,
+      "drawn_hkd": 5250000.0,
+      "stage2": 0,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 0,
+      "collateral_hkd": 1837500.0
+    },
+    {
+      "industry": "Aquaculture",
+      "customers": 1,
+      "drawn_hkd": 3141593.0,
+      "stage2": 0,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 1,
+      "collateral_hkd": 2607522.0
+    },
+    {
+      "industry": "Money services",
+      "customers": 1,
+      "drawn_hkd": 1000000.0,
+      "stage2": 1,
+      "migrations": 0,
+      "open_warnings": 0,
+      "dpd_accounts": 0,
+      "collateral_hkd": 590000.0
+    }
+  ],
+  "news": [
+    {
+      "id": "NEWS-APEX-DIST",
+      "headline": "Mainland distributor receipts reported about six weeks slower",
+      "source": "Credit Risk Alert Portal (demonstration feed)",
+      "date": "18 Sep 2026",
+      "customer_id": "CUS-AHTL-0001",
+      "industry": "Wholesale trade",
+      "body": "A trade note says a named distributor is paying Apex Harbour Trading about six weeks late. The note does not state a loss amount.",
+      "factors": {
+        "exposure_hkd": 84800000.0,
+        "security_coverage": 0.42,
+        "guarantor_support": "none on file",
+        "financial_strength": "rating 6",
+        "warning_signals": 2,
+        "score": 90,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-WHOLESALE-TRADE",
+      "headline": "Trade friction is slowing orders across consumer-goods wholesalers",
+      "source": "Credit Risk Alert Portal (demonstration feed)",
+      "date": "2 Oct 2026",
+      "customer_id": null,
+      "industry": "Wholesale trade",
+      "body": "Sector reporting describes weaker order books for consumer-goods wholesalers. It does not name a default.",
+      "factors": {
+        "exposure_hkd": 168400000.0,
+        "security_coverage": "mixed across the industry book",
+        "guarantor_support": "not an industry-level fact",
+        "financial_strength": "two wholesale names are rating 6",
+        "warning_signals": "open rating and utilisation warnings at Apex Harbour Trading",
+        "score": 72,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-SMALL-MENTION",
+      "headline": "Unnamed blog mentions a small marine supplier",
+      "source": "Credit Risk Alert Portal (demonstration feed)",
+      "date": "5 Oct 2026",
+      "customer_id": "CUS-G042",
+      "industry": "Marine supplies",
+      "body": "The item does not name a payment default, a rating action, or a figure.",
+      "factors": {
+        "exposure_hkd": 9500000.0,
+        "security_coverage": 0.35,
+        "guarantor_support": "none on file",
+        "financial_strength": "rating 3",
+        "warning_signals": 0,
+        "score": 24,
+        "material": false
+      }
+    }
+  ],
+  "drafts": [
+    {
+      "id": "MAIL-NEWS-APEX",
+      "kind": "Adverse news",
+      "subject": "Adverse news \u2014 Apex Harbour Trading Limited",
+      "customer_id": "CUS-AHTL-0001",
+      "body": "To: yiyangyao2@gmail.com\nSubject: [Demonstration] Adverse news \u2014 Apex Harbour Trading Limited\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis is a demonstration alert generated from the synthetic book as at 30 Sep 2026. It is addressed to yiyangyao2@gmail.com so it can be sent on manually. It is not a credit decision.\n\nNews\n18 Sep 2026. Mainland distributor receipts reported about six weeks slower.\nSource: Credit Risk Alert Portal (demonstration feed).\nA trade note says a named distributor is paying Apex Harbour Trading about six weeks late. The note does not state a loss amount.\n\nMateriality\nThe item is treated as material because the score is 90.\nExposure: HKD 84,800,000.\nSecurity coverage: 0.42.\nGuarantor: none on file.\nFinancial strength: rating 6.\nOpen warning signals: 2.\n\nCredit implication\nThe onshore borrower remains the named customer in Wholesale trade. Slower receipts tighten cash available for the revolving facility. Drawn exposure is HKD 84,800,000. Collateral of type Receivables is HKD 36,000,000. Coverage does not eliminate the exposure.\n\nFollow-up for the relationship manager (Casey Chan)\nAsk for a monthly receivable ageing and identify whether the named distributor is the same debtor supporting the receivable charge. Bring the result to the next review. Do not treat this note as an instruction to downgrade, to call default, or to exit the relationship.\n\nRisk Intelligence Platform\n"
+    },
+    {
+      "id": "MAIL-IND-WHOLESALE",
+      "kind": "Industry stress",
+      "subject": "Industry review \u2014 Wholesale trade",
+      "customer_id": null,
+      "body": "To: yiyangyao2@gmail.com\nSubject: [Demonstration] Industry review \u2014 Wholesale trade\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis is a demonstration industry alert for the synthetic portfolio as at 30 Sep 2026.\n\nWhat is rising\nWholesale trade has 7 customers and drawn exposure of HKD 168,400,000.\nStage 2 names: 4.\nRating migrations this period: 1.\nOpen warning signals: 2.\nAccounts with days past due: 1.\nA sector note on 2 Oct 2026 describes slower orders. Apex Harbour Trading also has a named-distributor receipt delay dated 18 Sep 2026.\n\nEffect on the book\nThe industry is large enough, and two names are already rating 6, that the signals are material to the portfolio rather than a single keyword hit. Collateral recorded against the industry is HKD 85,488,000.\n\nRecommended review\nOpen a wholesale-trade portfolio review. Start with Apex Harbour Trading and Repulse Bay Furnishings. Confirm receivable performance, interest-coverage headroom, and any repayment above HKD 5,000,000 inside the next quarter.\n\nRisk Intelligence Platform\n"
+    },
+    {
+      "id": "MAIL-REPAY-LANTERN",
+      "kind": "Large repayment",
+      "subject": "Large repayment \u2014 Lantern Ferry Logistics Limited",
+      "customer_id": "CUS-LFLL-0003",
+      "body": "To: yiyangyao2@gmail.com\nSubject: [Demonstration] Large repayment \u2014 Lantern Ferry Logistics Limited\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis is a demonstration repayment alert as at 30 Sep 2026.\n\nObligation\nLantern Ferry Logistics Limited (CUS-LFLL-0003) has a repayment of HKD 8,000,000 due in 18 days.\nSource of the date and amount: Watchlist.\nThe monitoring threshold is HKD 5,000,000. This obligation is above that threshold and falls inside the next month.\nRelationship manager: Morgan Wong.\nDrawn exposure: HKD 45,000,000.\n\nFunding\nThe latest liquidity ratio on file is 1.05, against 1.20 in the early-warning description for this name. Cash and deposits have been falling in the synthetic history. The alert asks the relationship manager to contact the borrower and confirm where the repayment will be funded. It does not waive the instalment and it does not extend the maturity.\n\nRisk Intelligence Platform\n"
+    },
+    {
+      "id": "MAIL-DPD-LANTERN",
+      "kind": "Days past due",
+      "subject": "Ageing reminder \u2014 Lantern Ferry Logistics Limited",
+      "customer_id": "CUS-LFLL-0003",
+      "body": "To: yiyangyao2@gmail.com\nSubject: [Demonstration] Ageing reminder \u2014 Lantern Ferry Logistics Limited\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis is a demonstration ageing reminder as at 30 Sep 2026.\n\nPosition\nLantern Ferry Logistics Limited has 22 days past due on interest.\nThe next threshold in the reminder schedule is 30 days. The account has not reached 60, 90, or 180 days.\nDrawn exposure: HKD 45,000,000. Rating: 4.\n\nAction\nAsk the relationship manager (Morgan Wong) to confirm whether the interest arrears will clear before day 30, and to reassess the borrower grade if it does not. This reminder does not change the grade by itself.\n\nRisk Intelligence Platform\n"
+    },
+    {
+      "id": "MAIL-COV-APEX",
+      "kind": "Covenant scenario",
+      "subject": "Covenant headroom \u2014 Apex Harbour Trading Limited",
+      "customer_id": "CUS-AHTL-0001",
+      "body": "To: yiyangyao2@gmail.com\nSubject: [Demonstration] Covenant headroom \u2014 Apex Harbour Trading Limited\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis is a demonstration covenant alert as at 30 Sep 2026. The scenario is stated. It is not a forecast promise.\n\nCurrent test\nInterest coverage covenant: at least 2.0 times.\nCredit assumption at approval: 2.5 times.\nLatest extracted coverage: 2.2 times.\nStatus today: inside the covenant.\n\nScenario\nRevenue decline of 15 percent, using the trade-friction news as the reason to run the case, with margin and funding cost held at the latest extract.\nProjected interest coverage: 1.6 times.\nHeadroom against the 2.0 times threshold: -0.4 times.\nPrincipal driver: lower revenue through the coverage ratio. Collateral and the guarantee, if any, are not restated by this scenario.\n\nFollow-up\nAsk Casey Chan to review management accounts and the receivable ageing before the next test date. The monitoring plan is a recommendation. It is not a credit approval.\n\nRisk Intelligence Platform\n"
+    }
+  ],
+  "portfolio": {
+    "customers": 42,
+    "drawn_hkd": 625391593.0,
+    "ecl_hkd": 7664232.0,
+    "prior_ecl_hkd": 5154689.0,
+    "ecl_coverage": 0.0123,
+    "migrations": 2,
+    "stages": {
+      "1": {
+        "count": 29,
+        "drawn_hkd": 381741593.0
+      },
+      "2": {
+        "count": 13,
+        "drawn_hkd": 243650000.0
+      },
+      "3": {
+        "count": 0,
+        "drawn_hkd": 0
+      }
+    },
+    "dpd": {
+      "Current": {
+        "count": 25,
+        "drawn_hkd": 347950000.0
+      },
+      "1\u201329": {
+        "count": 8,
+        "drawn_hkd": 190500000.0
+      },
+      "30\u201359": {
+        "count": 3,
+        "drawn_hkd": 37400000.0
+      },
+      "60\u201389": {
+        "count": 3,
+        "drawn_hkd": 16641593.0
+      },
+      "90\u2013179": {
+        "count": 3,
+        "drawn_hkd": 32900000.0
+      },
+      "180+": {
+        "count": 0,
+        "drawn_hkd": 0
+      }
+    },
+    "collateral": {
+      "Receivables": 120987500.0,
+      "Deposit": 85957000.0,
+      "Commercial property": 41394022.0,
+      "Guarantee": 98264500.0
+    },
+    "maturity": {
+      "month": 9980000.0,
+      "quarter": 39336000.0,
+      "later": 16100000.0
+    },
+    "large_due": [
+      "CUS-AHTL-0001",
+      "CUS-LFLL-0003",
+      "CUS-RBFL-0013"
+    ],
+    "overdue_reviews": 3,
+    "open_warnings": 3
+  }
+}
