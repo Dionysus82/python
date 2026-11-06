@@ -1,0 +1,12 @@
+31/01/2026  contracts=40  rows= 248  bullet=24 equal=12 declining=4  off-bal excluded=20  validation=PASS
+28/02/2026  contracts=40  rows= 236  bullet=24 equal=12 declining=4  off-bal excluded=20  validation=PASS
+31/03/2026  contracts=40  rows= 223  bullet=24 equal=12 declining=4  off-bal excluded=20  validation=PASS
+30/04/2026  contracts=40  rows= 212  bullet=24 equal=12 declining=4  off-bal excluded=20  validation=PASS
+31/05/2026  contracts=40  rows= 206  bullet=24 equal=12 declining=4  off-bal excluded=20  validation=PASS
+30/06/2026  contracts=40  rows= 200  bullet=24 equal=12 declining=4  off-bal excluded=20  validation=PASS
+31/07/2026  contracts=40  rows= 192  bullet=24 equal=12 declining=4  off-bal excluded=20  validation=PASS
+31/08/2026  contracts=40  rows= 180  bullet=24 equal=12 declining=4  off-bal excluded=20  validation=PASS
+30/09/2026  contracts=40  rows= 167  bullet=24 equal=12 declining=4  off-bal excluded=20  validation=PASS
+31/10/2026  contracts=40  rows= 156  bullet=24 equal=12 declining=4  off-bal excluded=20  validation=PASS
+30/11/2026  contracts=40  rows= 150  bullet=24 equal=12 declining=4  off-bal excluded=20  validation=PASS
+31/12/2026  contracts=40  rows= 144  bullet=24 equal=12 declining=4  off-bal excluded=20  validation=PASS

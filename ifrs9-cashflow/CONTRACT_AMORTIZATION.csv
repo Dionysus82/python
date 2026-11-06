@@ -1,0 +1,41 @@
+﻿CONTRACT_REFERENCE,BORROWER_NAME,AMORTIZATION_METHOD,DISCOUNT_RATE
+CTR-0001-01,Metro Gov Authority A,BULLET,0.030000
+CTR-0001-02,Metro Gov Authority A,BULLET,0.030000
+CTR-0001-03,Metro Gov Authority A,EQUAL_AMORT,0.030000
+CTR-0001-04,Metro Gov Authority A,EQUAL_AMORT,0.030000
+CTR-0002-01,State Treasury Bureau B,BULLET,0.030000
+CTR-0002-02,State Treasury Bureau B,BULLET,0.030000
+CTR-0002-03,State Treasury Bureau B,EQUAL_AMORT,0.030000
+CTR-0002-04,State Treasury Bureau B,BULLET,0.030000
+CTR-0003-01,Apex Infrastructure Investment Corp.,BULLET,0.050000
+CTR-0003-02,Apex Infrastructure Investment Corp.,BULLET,0.050000
+CTR-0003-03,Apex Infrastructure Investment Corp.,EQUAL_AMORT,0.050000
+CTR-0003-04,Apex Infrastructure Investment Corp.,DECLINING_AMORT,0.050000
+CTR-0004-01,Public Float,BULLET,0.055000
+CTR-0004-02,Public Float,BULLET,0.055000
+CTR-0004-03,Public Float,EQUAL_AMORT,0.055000
+CTR-0004-04,Public Float,BULLET,0.055000
+CTR-0005-01,Provincial Capital Holdings,BULLET,0.060000
+CTR-0005-02,Provincial Capital Holdings,BULLET,0.060000
+CTR-0005-03,Provincial Capital Holdings,EQUAL_AMORT,0.060000
+CTR-0005-04,Provincial Capital Holdings,BULLET,0.060000
+CTR-0006-01,Industrial Development Investment Corp.,BULLET,0.060000
+CTR-0006-02,Industrial Development Investment Corp.,BULLET,0.060000
+CTR-0006-03,Industrial Development Investment Corp.,EQUAL_AMORT,0.060000
+CTR-0006-04,Industrial Development Investment Corp.,EQUAL_AMORT,0.060000
+CTR-0007-01,Global Property Investment Holdings Ltd.,BULLET,0.050000
+CTR-0007-02,Global Property Investment Holdings Ltd.,BULLET,0.050000
+CTR-0007-03,Global Property Investment Holdings Ltd.,EQUAL_AMORT,0.050000
+CTR-0007-04,Global Property Investment Holdings Ltd.,DECLINING_AMORT,0.050000
+CTR-0008-01,Municipal Asset Mgmt Holdings,BULLET,0.055000
+CTR-0008-02,Municipal Asset Mgmt Holdings,BULLET,0.055000
+CTR-0008-03,Municipal Asset Mgmt Holdings,EQUAL_AMORT,0.055000
+CTR-0008-04,Municipal Asset Mgmt Holdings,BULLET,0.055000
+CTR-0009-01,Apex Property Limited,BULLET,0.045000
+CTR-0009-02,Apex Property Limited,BULLET,0.045000
+CTR-0009-03,Apex Property Limited,EQUAL_AMORT,0.045000
+CTR-0009-04,Apex Property Limited,DECLINING_AMORT,0.045000
+CTR-0010-01,Apex Global Holdings Limited,BULLET,0.055000
+CTR-0010-02,Apex Global Holdings Limited,BULLET,0.055000
+CTR-0010-03,Apex Global Holdings Limited,EQUAL_AMORT,0.055000
+CTR-0010-04,Apex Global Holdings Limited,DECLINING_AMORT,0.055000
