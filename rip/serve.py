@@ -231,6 +231,24 @@ def date_bar() -> str:
     </form>"""
 
 
+def chart_month_menu() -> str:
+    labels = [datetime.strptime(item["date"], "%Y-%m-%d").strftime("%-d %b %Y") for item in BOOK["portfolio_history"]]
+    boxes = "".join(
+        f'<label><input type="checkbox" data-month="{index}" checked>{escape(label)}</label>'
+        for index, label in enumerate(labels)
+    )
+    return f"""
+    <div class="date-menu corner" id="trend-months">
+      <button type="button" class="date-toggle" aria-expanded="false" aria-controls="trend-month-panel">
+        <span class="label">Chart months</span>
+        <strong>All {len(labels)} months</strong>
+      </button>
+      <div class="date-panel" id="trend-month-panel">
+        {boxes}
+      </div>
+    </div>"""
+
+
 def trend_table(metrics: list[tuple[str, object]]) -> str:
     chosen = view()
     head = "".join(f"<th>{escape(chosen.label(iso))}</th>" for iso in chosen.dates)
@@ -263,10 +281,6 @@ def trend_chart() -> str:
         f'<label><input type="checkbox" data-series="{escape(item["id"])}" {"checked" if item["on"] else ""}>{escape(item["name"])}</label>'
         for item in payload["series"]
     )
-    month_boxes = "".join(
-        f'<label><input type="checkbox" data-month="{index}" checked>{escape(label)}</label>'
-        for index, label in enumerate(payload["full"])
-    )
     script = r"""
 <script>
 (function () {
@@ -289,7 +303,19 @@ def trend_chart() -> str:
     if (unit === "ratio") return Number(value).toFixed(2);
     return String(Math.round(value));
   }
+  function refreshMonthLabel() {
+    var host = document.getElementById("trend-months");
+    if (!host) return;
+    var boxes = host.querySelectorAll("[data-month]");
+    var on = Array.prototype.filter.call(boxes, function (box) { return box.checked; });
+    var strong = host.querySelector("strong");
+    if (!on.length) strong.textContent = "No months";
+    else if (on.length === boxes.length) strong.textContent = "All " + boxes.length + " months";
+    else if (on.length === 1) strong.textContent = on[0].parentNode.textContent.trim();
+    else strong.textContent = on.length + " months";
+  }
   function draw() {
+    refreshMonthLabel();
     var series = checked("[data-series]").map(function (box) {
       return data.series.filter(function (item) { return item.id === box.getAttribute("data-series"); })[0];
     });
@@ -357,6 +383,8 @@ def trend_chart() -> str:
       : "The axis is the actual amount. The legend is the figure at the last checked month.";
   }
   document.getElementById("trend-filter").addEventListener("change", draw);
+  var monthMenu = document.getElementById("trend-months");
+  if (monthMenu) monthMenu.addEventListener("change", draw);
   draw();
 })();
 </script>
@@ -367,8 +395,6 @@ def trend_chart() -> str:
       <div class="dates" id="trend-filter">
         <div class="label">Series</div>
         {series_boxes}
-        <div class="label">Months</div>
-        {month_boxes}
       </div>
       <svg id="trend-svg" viewBox="0 0 760 280" role="img" aria-label="Portfolio trend"></svg>
       <div class="legend" id="trend-legend"></div>
@@ -457,12 +483,15 @@ form.dates {{ display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; ba
 form.dates .label {{ width:100%; }}
 form.dates label {{ display:flex; gap:6px; align-items:center; font-size:.84rem; font-weight:600; }}
 form.dates input {{ width:auto; margin:0; }}
+.topbar {{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; }}
 .date-menu {{ position:relative; display:inline-block; max-width:100%; margin-bottom:16px; }}
+.date-menu.corner {{ margin-left:auto; margin-bottom:12px; }}
 .date-toggle {{ display:block; min-width:280px; max-width:100%; background:var(--card); color:var(--ink); border:1px solid var(--line); text-align:left; }}
 .date-toggle .label {{ display:block; }}
 .date-toggle strong {{ display:block; font-size:1rem; margin-top:2px; }}
 .date-panel {{ display:none; position:absolute; z-index:20; top:calc(100% + 6px); left:0; width:min(320px, 86vw); max-height:70vh; overflow:auto; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; box-shadow:0 12px 28px rgba(44,40,37,.14); }}
 .date-menu.open .date-panel {{ display:block; }}
+.date-menu.corner .date-panel {{ left:auto; right:0; }}
 .date-panel label {{ display:flex; gap:8px; align-items:center; padding:5px 0; font-weight:600; }}
 .date-panel input {{ width:auto; margin:0; }}
 .date-panel .hint {{ color:var(--muted); font-size:.82rem; }}
@@ -498,7 +527,10 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
   </nav>
   <div class="backdrop" id="backdrop"></div>
   <main>
-    <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="rail">Hide menu</button>
+    <div class="topbar">
+      <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="rail">Hide menu</button>
+      {chart_month_menu() if active == "dashboard" else ""}
+    </div>
     <div class="banner">{escape(BOOK["banner"])}</div>
     {"" if active == "dashboard" else date_bar()}
     {body}
@@ -590,7 +622,7 @@ def dashboard() -> str:
     )
     body = f"""
     <div class="label">Portfolio</div><h1>Management dashboard</h1>
-    <p class="lead">The number panels are the latest month-end, {escape(position)}. The chart can show any of the twelve months. Financial statements, covenants and the news headlines are still demonstration figures.</p>
+    <p class="lead">The number panels are the latest month-end, {escape(position)}. The months at the top right choose which points the chart draws. Financial statements, covenants and the news headlines are still demonstration figures.</p>
     {metrics([
         ("Customers", str(port["customers"]), False),
         ("Drawn exposure", money(port["drawn_hkd"]), False),
