@@ -49,26 +49,33 @@ class BookView:
     def label(self, iso: str | None = None) -> str:
         return datetime.strptime(iso or self.focus, "%Y-%m-%d").strftime("%-d %b %Y")
 
-    def point(self, raw: dict, iso: str) -> dict:
-        return next(item for item in raw["history"] if item["date"] == iso)
+    def point(self, raw: dict, iso: str) -> dict | None:
+        return next((item for item in raw["history"] if item["date"] == iso), None)
 
     def project(self, raw: dict) -> dict:
         row = dict(raw)
         point = self.point(raw, self.focus)
+        on_position = point is not None
+        if point is None:
+            earlier = [item for item in raw["history"] if item["date"] <= self.focus]
+            point = earlier[-1] if earlier else raw["history"][-1]
         for key in POINT_FIELDS:
             row[key] = point[key]
         row["nrv_hkd"] = point["nrv_hkd"]
         row["ead_hkd"] = point["ead_hkd"]
         row["nominal_hkd"] = point["nominal_hkd"]
-        row["series"] = [self.point(raw, date) for date in self.dates]
+        row["series"] = [self.point(raw, date) or blank_observation(date) for date in self.dates]
         row["facilities"] = point["facilities"]
+        row["on_position"] = on_position
+        row["observed"] = point["date"]
         row["dpd_component"] = "Portfolio extract" if point["dpd"] else "None"
-        row["position"] = self.focus
+        row["position"] = point["date"]
+        when = self.label(point["date"])
         extract = []
         if point["dpd"] > 0:
-            extract.append({"description": f"Portfolio extract at {self.label()}: {point['dpd']} days past due."})
+            extract.append({"description": f"Portfolio extract at {when}: {point['dpd']} days past due."})
         if point["stage"] >= 2:
-            extract.append({"description": f"Stage {point['stage']} on the portfolio extract at {self.label()}."})
+            extract.append({"description": f"Stage {point['stage']} on the portfolio extract at {when}."})
         demo = [
             item for item in raw["warnings"]
             if not item["description"].startswith("Portfolio extract") and not item["description"].startswith("Stage ")
@@ -96,9 +103,11 @@ def portfolio_at(iso: str) -> dict:
     return next(item for item in BOOK["portfolio_history"] if item["date"] == iso)
 
 
-def customer_at(cid: str, iso: str) -> dict:
+def customer_at(cid: str, iso: str) -> dict | None:
     raw = next(row for row in BOOK["customers"] if row["customer_id"] == cid)
-    point = next(item for item in raw["history"] if item["date"] == iso)
+    point = next((item for item in raw["history"] if item["date"] == iso), None)
+    if point is None:
+        return None
     row = dict(raw)
     for key in POINT_FIELDS:
         row[key] = point[key]
@@ -123,6 +132,33 @@ def dates_from_cookie(header: str | None) -> list[str]:
 def date_cookie(dates: list[str]) -> str:
     value = ",".join(dates)
     return f"rip-dates={value}; HttpOnly; SameSite=Lax; Path=/; Max-Age=31536000"
+
+
+def blank_observation(iso: str) -> dict:
+    return {
+        "date": iso,
+        "drawn_hkd": None,
+        "committed_hkd": None,
+        "ecl_hkd": None,
+        "prior_ecl_hkd": None,
+        "ead_hkd": None,
+        "nominal_hkd": None,
+        "stage": "—",
+        "prior_stage": "—",
+        "dpd": "—",
+        "rating": "—",
+        "collateral_hkd": None,
+        "nrv_hkd": None,
+        "ltv": "—",
+        "coverage_ratio": "—",
+        "next_due_days": "—",
+        "next_due_hkd": None,
+        "next_due_date": "—",
+        "next_contract": "—",
+        "next_method": "—",
+        "refinancing": False,
+        "facilities": [],
+    }
 
 
 def money(value: float | int | None) -> str:
@@ -195,6 +231,36 @@ def date_bar() -> str:
     </form>"""
 
 
+def chart_month_menu() -> str:
+    chosen = view()
+    history = BOOK["portfolio_history"]
+    boxes = []
+    for index, item in enumerate(history):
+        checked = "checked" if item["date"] in chosen.dates else ""
+        label = chosen.label(item["date"])
+        boxes.append(
+            f'<label><input type="checkbox" name="d" value="{item["date"]}" data-month="{index}" {checked}>{escape(label)}</label>'
+        )
+    count = len(chosen.dates)
+    if count == len(history):
+        summary = f"All {count} months"
+    elif count == 1:
+        summary = chosen.label()
+    else:
+        summary = f"{count} months"
+    return f"""
+    <form class="date-menu corner" id="trend-months" method="post" action="/dates">
+      <input type="hidden" name="next" value="/dashboard">
+      <button type="button" class="date-toggle" aria-expanded="false" aria-controls="trend-month-panel">
+        <span class="label">Chart months</span>
+        <strong>{escape(summary)}</strong>
+      </button>
+      <div class="date-panel" id="trend-month-panel">
+        {''.join(boxes)}
+      </div>
+    </form>"""
+
+
 def trend_table(metrics: list[tuple[str, object]]) -> str:
     chosen = view()
     head = "".join(f"<th>{escape(chosen.label(iso))}</th>" for iso in chosen.dates)
@@ -227,10 +293,6 @@ def trend_chart() -> str:
         f'<label><input type="checkbox" data-series="{escape(item["id"])}" {"checked" if item["on"] else ""}>{escape(item["name"])}</label>'
         for item in payload["series"]
     )
-    month_boxes = "".join(
-        f'<label><input type="checkbox" data-month="{index}" checked>{escape(label)}</label>'
-        for index, label in enumerate(payload["full"])
-    )
     script = r"""
 <script>
 (function () {
@@ -253,7 +315,19 @@ def trend_chart() -> str:
     if (unit === "ratio") return Number(value).toFixed(2);
     return String(Math.round(value));
   }
+  function refreshMonthLabel() {
+    var host = document.getElementById("trend-months");
+    if (!host) return;
+    var boxes = host.querySelectorAll("[data-month]");
+    var on = Array.prototype.filter.call(boxes, function (box) { return box.checked; });
+    var strong = host.querySelector("strong");
+    if (!on.length) strong.textContent = "No months";
+    else if (on.length === boxes.length) strong.textContent = "All " + boxes.length + " months";
+    else if (on.length === 1) strong.textContent = on[0].parentNode.textContent.trim();
+    else strong.textContent = on.length + " months";
+  }
   function draw() {
+    refreshMonthLabel();
     var series = checked("[data-series]").map(function (box) {
       return data.series.filter(function (item) { return item.id === box.getAttribute("data-series"); })[0];
     });
@@ -321,6 +395,11 @@ def trend_chart() -> str:
       : "The axis is the actual amount. The legend is the figure at the last checked month.";
   }
   document.getElementById("trend-filter").addEventListener("change", draw);
+  var monthMenu = document.getElementById("trend-months");
+  if (monthMenu) monthMenu.addEventListener("change", function () {
+    draw();
+    monthMenu.submit();
+  });
   draw();
 })();
 </script>
@@ -331,8 +410,6 @@ def trend_chart() -> str:
       <div class="dates" id="trend-filter">
         <div class="label">Series</div>
         {series_boxes}
-        <div class="label">Months</div>
-        {month_boxes}
       </div>
       <svg id="trend-svg" viewBox="0 0 760 280" role="img" aria-label="Portfolio trend"></svg>
       <div class="legend" id="trend-legend"></div>
@@ -421,12 +498,15 @@ form.dates {{ display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; ba
 form.dates .label {{ width:100%; }}
 form.dates label {{ display:flex; gap:6px; align-items:center; font-size:.84rem; font-weight:600; }}
 form.dates input {{ width:auto; margin:0; }}
+.topbar {{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; }}
 .date-menu {{ position:relative; display:inline-block; max-width:100%; margin-bottom:16px; }}
+.date-menu.corner {{ margin-left:auto; margin-bottom:12px; }}
 .date-toggle {{ display:block; min-width:280px; max-width:100%; background:var(--card); color:var(--ink); border:1px solid var(--line); text-align:left; }}
 .date-toggle .label {{ display:block; }}
 .date-toggle strong {{ display:block; font-size:1rem; margin-top:2px; }}
 .date-panel {{ display:none; position:absolute; z-index:20; top:calc(100% + 6px); left:0; width:min(320px, 86vw); max-height:70vh; overflow:auto; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; box-shadow:0 12px 28px rgba(44,40,37,.14); }}
 .date-menu.open .date-panel {{ display:block; }}
+.date-menu.corner .date-panel {{ left:auto; right:0; }}
 .date-panel label {{ display:flex; gap:8px; align-items:center; padding:5px 0; font-weight:600; }}
 .date-panel input {{ width:auto; margin:0; }}
 .date-panel .hint {{ color:var(--muted); font-size:.82rem; }}
@@ -456,13 +536,16 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
 <div class="shell" id="shell">
   <nav id="rail">
     <div class="mark">Risk Intelligence<br><span>Platform</span></div>
-    <p>Portfolio numbers are the latest month. Other pages keep the date choice in a menu.</p>
+    <p>Portfolio numbers follow the last checked month. Other pages keep the date choice in a menu.</p>
     {''.join(links)}
     <a class="logout" href="/logout">Sign out</a>
   </nav>
   <div class="backdrop" id="backdrop"></div>
   <main>
-    <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="rail">Hide menu</button>
+    <div class="topbar">
+      <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="rail">Hide menu</button>
+      {chart_month_menu() if active == "dashboard" else ""}
+    </div>
     <div class="banner">{escape(BOOK["banner"])}</div>
     {"" if active == "dashboard" else date_bar()}
     {body}
@@ -529,7 +612,7 @@ def bars(rows: list[tuple[str, float]], hot: bool = False) -> str:
 
 
 def dashboard() -> str:
-    iso = latest_iso()
+    iso = view().focus
     port = portfolio_at(iso)
     position = view().label(iso)
     stage_rows = [(f"Stage {key}", port["stages"][str(key)]["drawn_hkd"] if isinstance(port["stages"], dict) and str(key) in port["stages"] else port["stages"][key]["drawn_hkd"]) for key in (1, 2, 3)]
@@ -543,7 +626,8 @@ def dashboard() -> str:
     coll_rows = list(port["collateral"].items())
     mat = port["maturity"]
     industry_rows = [(row["industry"], row["drawn_hkd"]) for row in port["industries"][:6]]
-    top = sorted((customer_at(item["customer_id"], iso) for item in BOOK["customers"]), key=lambda row: row["drawn_hkd"], reverse=True)[:8]
+    present = [row for row in (customer_at(item["customer_id"], iso) for item in BOOK["customers"]) if row]
+    top = sorted(present, key=lambda row: row["drawn_hkd"], reverse=True)[:8]
     table = "".join(
         f'<tr class="click"><td><a href="/customer?id={escape(row["customer_id"])}">{escape(row["legal_name"])}</a><div style="color:var(--muted);font-size:.8rem">{escape(row["rm"])}</div></td>'
         f'<td>{escape(row["industry"])}</td><td>Stage {row["stage"]}</td>'
@@ -553,7 +637,7 @@ def dashboard() -> str:
     )
     body = f"""
     <div class="label">Portfolio</div><h1>Management dashboard</h1>
-    <p class="lead">The number panels are the latest month-end, {escape(position)}. The chart can show any of the twelve months. Financial statements, covenants and the news headlines are still demonstration figures.</p>
+    <p class="lead">The number panels are {escape(position)}, the last checked month. The chart draws every checked month, and its legend is that same month. Financial statements, covenants and the news headlines are still demonstration figures.</p>
     {metrics([
         ("Customers", str(port["customers"]), False),
         ("Drawn exposure", money(port["drawn_hkd"]), False),
@@ -645,13 +729,27 @@ def news_position(item: dict) -> str:
 
 def industry_on(iso: str, name: str) -> dict:
     point = next(item for item in view().portfolio_series() if item["date"] == iso)
-    return next(item for item in point["industries"] if item["industry"] == name)
+    found = next((item for item in point["industries"] if item["industry"] == name), None)
+    if found:
+        return found
+    return {
+        "industry": name,
+        "drawn_hkd": 0,
+        "ecl_hkd": 0,
+        "stage2": 0,
+        "migrations": 0,
+        "dpd_accounts": 0,
+        "collateral_hkd": 0,
+    }
 
 
 def industry_page(name: str) -> str:
     port = view().portfolio()
     row = next((item for item in port["industries"] if item["industry"] == name), port["industries"][0])
-    members = [customer(item["customer_id"]) for item in BOOK["customers"] if item["industry"] == row["industry"]]
+    members = [
+        person for person in (customer(item["customer_id"]) for item in BOOK["customers"] if item["industry"] == row["industry"])
+        if person and person.get("on_position", True)
+    ]
     members.sort(key=lambda item: item["drawn_hkd"], reverse=True)
     open_warnings = sum(len(item["warnings"]) for item in members)
     body_rows = "".join(
@@ -693,7 +791,7 @@ def industry_page(name: str) -> str:
 
 
 def repayment_page(window: int) -> str:
-    people = [customer(item["customer_id"]) for item in BOOK["customers"]]
+    people = [person for person in (customer(item["customer_id"]) for item in BOOK["customers"]) if person and person.get("on_position", True)]
     rows = []
     for item in people:
         if item["next_due_hkd"] < THRESHOLD or item["next_due_days"] > window:
@@ -953,7 +1051,7 @@ def drafts_page() -> str:
 
 def live_letter(draft: dict) -> str:
     port = view().portfolio()
-    people = [customer(item["customer_id"]) for item in BOOK["customers"]]
+    people = [person for person in (customer(item["customer_id"]) for item in BOOK["customers"]) if person and person.get("on_position", True)]
     checked = ", ".join(view().label(date) for date in view().dates)
     late = [item for item in people if item["dpd"] > 0]
     late_line = "; ".join(
@@ -1018,7 +1116,9 @@ def customer_page(cid: str) -> str:
     def facility_metric(field: str, contract: str, money_field: bool = False):
         def getter(iso: str, contract: str = contract) -> str:
             point = customer(row["customer_id"])["series"][view().dates.index(iso)]
-            found = next(item for item in point["facilities"] if item["contract"] == contract)
+            found = next((item for item in point["facilities"] if item["contract"] == contract), None)
+            if found is None:
+                return "—"
             return money(found[field]) if money_field else str(found[field])
         return getter
 
@@ -1038,7 +1138,7 @@ def customer_page(cid: str) -> str:
     )
     return f"""
     <div class="label">Customer</div><h1>{escape(row["legal_name"])}</h1>
-    <p class="lead">Position {escape(view().label())}. {escape(row["legal_name"])} has drawn {money(row["drawn_hkd"])}, ECL {money(row["ecl_hkd"])}, stage {row["stage"]} and {row["dpd"]} days past due. Original grade {row["prior_rating"]}, current grade {row["rating"]}. Next principal {money(row["next_due_hkd"])} on {escape(row["next_due_date"])}.</p>
+    <p class="lead">Position {escape(view().label(row.get("observed") or view().focus))}. {escape(row["legal_name"])} has drawn {money(row["drawn_hkd"])}, ECL {money(row["ecl_hkd"])}, stage {row["stage"]} and {row["dpd"]} days past due. Original grade {row["prior_rating"]}, current grade {row["rating"]}. Next principal {money(row["next_due_hkd"])} on {escape(row["next_due_date"])}.</p>
     {metrics([
         ("Drawn", money(row["drawn_hkd"]), False),
         ("ECL", money(row["ecl_hkd"]), True),
