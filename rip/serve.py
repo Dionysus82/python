@@ -17,6 +17,7 @@ from urllib.parse import parse_qs, urlparse
 ROOT = Path(__file__).resolve().parent
 BOOK = json.loads((ROOT / "book.json").read_text(encoding="utf-8"))
 REPORT_FILES = ROOT / "report_files"
+OBLIGORS = json.loads((REPORT_FILES / "obligors.json").read_text(encoding="utf-8"))
 UPLOADS = REPORT_FILES / "uploads"
 UPLOAD_INDEX = UPLOADS / "index.json"
 HK = timezone(timedelta(hours=8))
@@ -459,7 +460,7 @@ def page(title: str, active: str, body: str) -> bytes:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{escape(shown)} · Risk Intelligence Platform</title>
+<title>{escape(shown)} · BEA - Risk Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,560&display=swap" rel="stylesheet">
 <style>
@@ -525,6 +526,11 @@ form.dates input {{ width:auto; margin:0; }}
 .date-panel {{ display:none; position:absolute; z-index:20; top:calc(100% + 6px); left:0; width:min(320px, 86vw); max-height:70vh; overflow:auto; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; box-shadow:0 12px 28px rgba(44,40,37,.14); }}
 .date-menu.open .date-panel {{ display:block; }}
 .date-menu.corner .date-panel {{ left:auto; right:0; }}
+.suggest {{ position:relative; max-width:560px; }}
+.suggest input {{ width:100%; font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; margin-top:6px; }}
+.suggest-list {{ position:absolute; z-index:30; left:0; right:0; top:calc(100% + 4px); background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 12px 28px rgba(44,40,37,.14); max-height:320px; overflow:auto; }}
+.suggest-item {{ display:block; width:100%; text-align:left; background:#fff; color:var(--ink); border:0; border-bottom:1px solid var(--line); border-radius:0; padding:8px 12px; font-weight:600; }}
+.suggest-item small {{ display:block; color:var(--muted); font-weight:400; }}
 .date-panel label {{ display:flex; gap:8px; align-items:center; padding:5px 0; font-weight:600; }}
 .date-panel input {{ width:auto; margin:0; }}
 .date-panel .hint {{ color:var(--muted); font-size:.82rem; }}
@@ -553,7 +559,7 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
 <body>
 <div class="shell" id="shell">
   <nav id="rail">
-    <div class="mark">Risk Intelligence<br><span>Platform</span></div>
+    <div class="mark">BEA -<br><span>Risk Intelligence</span></div>
     <p>Portfolio numbers follow the last checked month. Other pages keep the date choice in a menu.</p>
     {''.join(links)}
     <a class="logout" href="/logout">Sign out</a>
@@ -1013,55 +1019,109 @@ def reports_page(kind: str, detail: str, cid: str, generated: str = "") -> str:
         f'<option value="{escape(item["customer_id"])}" {"selected" if item["customer_id"]==row["customer_id"] else ""}>{escape(item["legal_name"])}</option>'
         for item in BOOK["customers"] if item["full_file"]
     )
-    proposal_rows = []
-    for item in proposal_records():
-        generate = (
-            f'<a class="btn" href="/reports?generated={escape(item["id"])}">Generate full report</a>'
-            if item.get("output_file")
-            else "Stored"
-        )
-        proposal_rows.append(
-            f'<tr><td>{escape(item["title"])}</td><td>{escape(item["rm"])}</td><td>{escape(item["stored"])}</td>'
-            f'<td><a href="/proposal-file?id={escape(item["id"])}">{escape(item["filename"])}</a></td>'
-            f'<td>{generate}</td></tr>'
-        )
-    chosen_proposal = proposal_by_id(generated) if generated else None
-    if chosen_proposal and chosen_proposal.get("output_file"):
-        generated_card = f"""
-        <div class="card" style="margin-top:12px">
-          <div class="label">Full report</div>
-          <h2>{escape(chosen_proposal["output_title"])}</h2>
-          <p>Input is the stored proposal, {escape(chosen_proposal["filename"])}. Output is the credit monitoring report. A person still reviews it. It is not an approval.</p>
-          <p><a class="btn" href="/report-file?id={escape(chosen_proposal["id"])}">Download the full report</a>
-             <a class="btn ghost" href="/proposal-file?id={escape(chosen_proposal["id"])}">Download the proposal</a></p>
-          <div class="label">A5 collateral</div>
-          <table><thead><tr><th>Security</th><th>Address</th><th>Latest valuation</th></tr></thead><tbody>
-            <tr><td>Grade-A office building, Central</td><td>Apex Central Tower, Central, Hong Kong</td><td>HK$620.0 million</td></tr>
-            <tr><td>Retail shops, Tsim Sha Tsui</td><td>Harbour Retail Plaza, Tsim Sha Tsui, Kowloon, Hong Kong</td><td>HK$200.0 million</td></tr>
-            <tr><td>Total collateral value</td><td></td><td>HK$820.0 million</td></tr>
-          </tbody></table>
-        </div>"""
-    elif generated:
-        generated_card = '<div class="card" style="margin-top:12px"><p>This stored proposal is kept on file. This first version generates the full report for the Apex annual review.</p></div>'
-    else:
-        generated_card = ""
+    catalog = json.dumps([
+        {
+            "id": item["id"],
+            "name": item["name"],
+            "aliases": item.get("aliases") or [],
+            "industry": item["industry"],
+            "rm": item["rm"],
+            "asof": item["asof"],
+            "drawn": item["drawn"],
+            "ecl": item["ecl"],
+            "stage": item["stage"],
+            "dpd": item["dpd"],
+            "rating": item["rating"],
+        }
+        for item in OBLIGORS
+    ])
     return f"""
     <div class="label">Reports</div><h1>Reports</h1>
-    <p class="lead">Relationship managers store a proposal here. Generate full report reads that proposal and prepares the credit monitoring report.</p>
+    <p class="lead">Search for a borrower. The closest names appear as you type. Choose one, generate the paper, then download the proposal or the monitoring report.</p>
     <div class="card">
-      <div class="label">Proposals on file</div>
-      <div class="scroll"><table><thead><tr><th>Proposal</th><th>RM</th><th>Stored</th><th>File</th><th></th></tr></thead>
-      <tbody>{''.join(proposal_rows)}</tbody></table></div>
+      <div class="label">Borrower</div>
+      <div class="suggest">
+        <label>Search<br><input id="borrower-q" placeholder="Name, industry or borrower id" autocomplete="off"></label>
+        <div class="suggest-list" id="borrower-list" hidden></div>
+      </div>
+      <div id="borrower-actions" hidden style="margin-top:12px">
+        <p id="sel-line"></p>
+        <button type="button" id="generate-btn">Generate</button>
+      </div>
+      <div id="borrower-result" hidden style="margin-top:12px">
+        <h2 id="res-name"></h2>
+        <p id="res-line"></p>
+        <p><a class="btn" id="res-proposal">Download proposal</a> <a class="btn ghost" id="res-report">Download report</a></p>
+      </div>
     </div>
-    <div class="card" style="margin-top:12px">
-      <div class="label">Upload a proposal</div>
-      <form class="inline" method="post" action="/proposals" enctype="multipart/form-data">
-        <label>Relationship manager<br><input name="rm" required></label>
-        <label>Proposal file<br><input name="proposal" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required></label>
-        <button type="submit">Save proposal</button>
-      </form>
-    </div>
-    {generated_card}
+    <script>
+    (function () {{
+      var borrowers = {catalog};
+      var input = document.getElementById("borrower-q");
+      var list = document.getElementById("borrower-list");
+      var actions = document.getElementById("borrower-actions");
+      var result = document.getElementById("borrower-result");
+      var current = null;
+      function esc(value) {{
+        return String(value).replace(/[&<>\"']/g, function (ch) {{
+          return {{"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","'":"&#39;"}}[ch];
+        }});
+      }}
+      function score(item, query) {{
+        var name = item.name.toLowerCase();
+        var industry = item.industry.toLowerCase();
+        var id = item.id.toLowerCase();
+        var aliases = (item.aliases || []).join(" ").toLowerCase();
+        if (name === query) return 100;
+        if (name.indexOf(query) === 0) return 80;
+        if (name.split(/\\s+/).some(function (word) {{ return word.indexOf(query) === 0; }})) return 70;
+        if (aliases.indexOf(query) >= 0) return 65;
+        if (name.indexOf(query) >= 0) return 50;
+        if (industry.indexOf(query) >= 0) return 30;
+        if (id.indexOf(query) >= 0) return 20;
+        return 0;
+      }}
+      function render() {{
+        var query = input.value.trim().toLowerCase();
+        if (!query) {{ list.hidden = true; list.innerHTML = ""; return; }}
+        var hits = borrowers.map(function (item) {{ return {{ item: item, rank: score(item, query) }}; }})
+          .filter(function (row) {{ return row.rank > 0; }})
+          .sort(function (a, b) {{ return b.rank - a.rank || a.item.name.localeCompare(b.item.name); }})
+          .slice(0, 8);
+        list.hidden = false;
+        list.innerHTML = hits.length ? hits.map(function (row) {{
+          return '<button type="button" class="suggest-item" data-id="' + esc(row.item.id) + '">' + esc(row.item.name) + '<small>' + esc(row.item.industry) + " · " + esc(row.item.id) + "</small></button>";
+        }}).join("") : '<p style="margin:8px 12px;color:#6F6862">No borrower matches.</p>';
+      }}
+      function select(id) {{
+        current = borrowers.filter(function (item) {{ return item.id === id; }})[0];
+        if (!current) return;
+        input.value = current.name;
+        list.hidden = true;
+        actions.hidden = false;
+        result.hidden = true;
+        document.getElementById("sel-line").textContent = current.industry + " · " + current.asof + " · RM " + current.rm;
+      }}
+      input.addEventListener("input", render);
+      list.addEventListener("mousedown", function (event) {{
+        var button = event.target.closest("button");
+        if (!button) return;
+        event.preventDefault();
+        select(button.getAttribute("data-id"));
+      }});
+      document.getElementById("generate-btn").addEventListener("click", function () {{
+        if (!current) return;
+        result.hidden = false;
+        document.getElementById("res-name").textContent = current.name;
+        document.getElementById("res-line").textContent = "Position " + current.asof + ". Drawn " + current.drawn + ". ECL " + current.ecl + ". Stage " + current.stage + ", PD grade " + current.rating + ", " + current.dpd + " days past due. The proposal is the input and the monitoring report is the output.";
+        document.getElementById("res-proposal").href = "/proposal-file?id=" + encodeURIComponent(current.id);
+        document.getElementById("res-report").href = "/report-file?id=" + encodeURIComponent(current.id);
+      }});
+      document.addEventListener("click", function (event) {{
+        if (!input.parentElement.parentElement.contains(event.target)) list.hidden = true;
+      }});
+    }})();
+    </script>
     <div class="label" style="margin-top:18px">Portfolio extract</div><h2>{escape(title)}</h2>
     <p class="lead">Draft for discussion. A person still reviews it. The draft is not an approval.</p>
     <form class="inline" method="get" action="/reports">
@@ -1319,7 +1379,7 @@ def login_page(message: str = "") -> bytes:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sign in · Risk Intelligence Platform</title>
+<title>Sign in · BEA - Risk Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,560&display=swap" rel="stylesheet">
 <style>
 body {{ margin:0; min-height:100vh; display:grid; place-items:center; background:#F3EFEA; font-family:"Source Sans 3",sans-serif; color:#2C2825; }}
@@ -1335,7 +1395,7 @@ code {{ color:#2C2825; }}
 </head>
 <body>
 <form method="post" action="/login">
-  <div style="font-family:'Source Serif 4',serif;font-size:1.45rem;line-height:1.2">Risk Intelligence<br><span style="color:#E36F1E">Platform</span></div>
+  <div style="font-family:'Source Serif 4',serif;font-size:1.45rem;line-height:1.2">BEA -<br><span style="color:#E36F1E">Risk Intelligence</span></div>
   <h1>Sign in</h1>
   <p>Property portfolio from 31 Dec 2025 to 30 Nov 2026. After sign-in, check the reporting dates. Demonstration account <code>cro.shum</code>, password <code>Harbour-Demo-2026</code>.</p>
   {note}
@@ -1392,19 +1452,26 @@ class Handler(BaseHTTPRequestHandler):
         requested = query.get("d") or dates_from_cookie(self.headers.get("Cookie"))
         bind_view(requested, parsed.path + (("?" + parsed.query) if parsed.query else ""))
         if key in {"proposal-file", "report-file"}:
-            item = proposal_by_id((query.get("id") or [""])[0])
-            if item is None:
-                self.send_error(404)
-                return
-            if key == "report-file":
-                if not item.get("output_file"):
+            requested_id = (query.get("id") or [""])[0]
+            obligor = next((row for row in OBLIGORS if row["id"] == requested_id), None)
+            if obligor is not None:
+                kind = "proposal" if key == "proposal-file" else "report"
+                path = REPORT_FILES / "obligors" / obligor["id"] / f"{kind}.docx"
+                download_name = f"{obligor['name']} {'Proposal' if kind == 'proposal' else 'Report'}.docx".replace('"', "")
+            else:
+                item = proposal_by_id(requested_id)
+                if item is None:
                     self.send_error(404)
                     return
-                path = REPORT_FILES / item["output_file"]
-                download_name = item["output_name"]
-            else:
-                path = proposal_path(item)
-                download_name = item["filename"]
+                if key == "report-file":
+                    if not item.get("output_file"):
+                        self.send_error(404)
+                        return
+                    path = REPORT_FILES / item["output_file"]
+                    download_name = item["output_name"]
+                else:
+                    path = proposal_path(item)
+                    download_name = item["filename"]
             if not path.is_file():
                 self.send_error(404)
                 return
