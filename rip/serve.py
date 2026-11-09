@@ -232,21 +232,33 @@ def date_bar() -> str:
 
 
 def chart_month_menu() -> str:
-    labels = [datetime.strptime(item["date"], "%Y-%m-%d").strftime("%-d %b %Y") for item in BOOK["portfolio_history"]]
-    boxes = "".join(
-        f'<label><input type="checkbox" data-month="{index}" checked>{escape(label)}</label>'
-        for index, label in enumerate(labels)
-    )
+    chosen = view()
+    history = BOOK["portfolio_history"]
+    boxes = []
+    for index, item in enumerate(history):
+        checked = "checked" if item["date"] in chosen.dates else ""
+        label = chosen.label(item["date"])
+        boxes.append(
+            f'<label><input type="checkbox" name="d" value="{item["date"]}" data-month="{index}" {checked}>{escape(label)}</label>'
+        )
+    count = len(chosen.dates)
+    if count == len(history):
+        summary = f"All {count} months"
+    elif count == 1:
+        summary = chosen.label()
+    else:
+        summary = f"{count} months"
     return f"""
-    <div class="date-menu corner" id="trend-months">
+    <form class="date-menu corner" id="trend-months" method="post" action="/dates">
+      <input type="hidden" name="next" value="/dashboard">
       <button type="button" class="date-toggle" aria-expanded="false" aria-controls="trend-month-panel">
         <span class="label">Chart months</span>
-        <strong>All {len(labels)} months</strong>
+        <strong>{escape(summary)}</strong>
       </button>
       <div class="date-panel" id="trend-month-panel">
-        {boxes}
+        {''.join(boxes)}
       </div>
-    </div>"""
+    </form>"""
 
 
 def trend_table(metrics: list[tuple[str, object]]) -> str:
@@ -384,7 +396,10 @@ def trend_chart() -> str:
   }
   document.getElementById("trend-filter").addEventListener("change", draw);
   var monthMenu = document.getElementById("trend-months");
-  if (monthMenu) monthMenu.addEventListener("change", draw);
+  if (monthMenu) monthMenu.addEventListener("change", function () {
+    draw();
+    monthMenu.submit();
+  });
   draw();
 })();
 </script>
@@ -521,7 +536,7 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
 <div class="shell" id="shell">
   <nav id="rail">
     <div class="mark">Risk Intelligence<br><span>Platform</span></div>
-    <p>Portfolio numbers are the latest month. Other pages keep the date choice in a menu.</p>
+    <p>Portfolio numbers follow the last checked month. Other pages keep the date choice in a menu.</p>
     {''.join(links)}
     <a class="logout" href="/logout">Sign out</a>
   </nav>
@@ -597,7 +612,7 @@ def bars(rows: list[tuple[str, float]], hot: bool = False) -> str:
 
 
 def dashboard() -> str:
-    iso = latest_iso()
+    iso = view().focus
     port = portfolio_at(iso)
     position = view().label(iso)
     stage_rows = [(f"Stage {key}", port["stages"][str(key)]["drawn_hkd"] if isinstance(port["stages"], dict) and str(key) in port["stages"] else port["stages"][key]["drawn_hkd"]) for key in (1, 2, 3)]
@@ -622,7 +637,7 @@ def dashboard() -> str:
     )
     body = f"""
     <div class="label">Portfolio</div><h1>Management dashboard</h1>
-    <p class="lead">The number panels are the latest month-end, {escape(position)}. The months at the top right choose which points the chart draws. Financial statements, covenants and the news headlines are still demonstration figures.</p>
+    <p class="lead">The number panels are {escape(position)}, the last checked month. The chart draws every checked month, and its legend is that same month. Financial statements, covenants and the news headlines are still demonstration figures.</p>
     {metrics([
         ("Customers", str(port["customers"]), False),
         ("Drawn exposure", money(port["drawn_hkd"]), False),
