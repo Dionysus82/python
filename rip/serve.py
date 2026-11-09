@@ -235,7 +235,7 @@ def dashboard() -> str:
     )
     body = f"""
     <div class="label">Portfolio</div><h1>Management dashboard</h1>
-    <p class="lead">Position 30 Sep 2026. Drawn balances, collateral and the next cash-flow dates come from the property extract. ECL, stage, days past due, financial statements and the news feed are demonstration figures until those files arrive.</p>
+    <p class="lead">Position 30 Sep 2026. Drawn balances, collateral, LTV, cash-flow dates, PD grades, stage, ECL and days past due come from the property portfolio. Financial statements, covenants and the news headlines are still demonstration figures.</p>
     {metrics([
         ("Customers", str(port["customers"]), False),
         ("Drawn exposure", money(port["drawn_hkd"]), False),
@@ -249,7 +249,7 @@ def dashboard() -> str:
       <div class="card"><div class="label">Collateral by type</div>{bars(coll_rows)}</div>
       <div class="card"><div class="label">Largest industries</div>{bars(industry_rows, hot=True)}<p><a href="/industry?name={escape(default_industry())}">Open the {escape(default_industry())} review</a></p></div>
       <div class="card"><div class="label">ECL and LTV</div>
-        <p>ECL coverage of drawn exposure is {port["ecl_coverage"]:.2%}. Provision movement versus the prior rating base is {money(port["ecl_hkd"] - port["prior_ecl_hkd"])}.</p>
+        <p>ECL coverage of drawn exposure is {port["ecl_coverage"]:.2%}. ECL movement versus 31 Aug 2026 is {money(port["ecl_hkd"] - port["prior_ecl_hkd"])}.</p>
         <p>Portfolio LTV is exposure divided by recorded collateral. Open a customer to see the ratio used in news materiality.</p>
       </div>
     </div>
@@ -370,7 +370,7 @@ def repayment_page(window: int) -> str:
     )
     return f"""
     <div class="label">Repayment</div><h1>Obligations above HKD 5,000,000</h1>
-    <p class="lead">Due dates and amounts are the next principal on the cash flow schedule. The window is {window} days. Days past due in the table below are demonstration ageing, because the extract shows every facility current.</p>
+    <p class="lead">Due dates and amounts are the next principal on the cash flow schedule. The window is {window} days. Days past due in the table below are the portfolio extract at 30 Sep 2026.</p>
     <form class="inline" method="get" action="/repayment">
       <label>Window (days)<br><input type="number" name="window" min="7" max="365" value="{window}"></label>
       <button type="submit">Apply</button>
@@ -522,8 +522,9 @@ def answer_for(row: dict, question: str) -> tuple[str, list[dict]]:
     docs = row["documents"]
     if any(word in text for word in ("rating", "downgrade", "notch", "why")):
         return (
-            f"The internal rating is {row['rating']}. It was {row['prior_rating']} on {row['prior_rating_date']} and is unchanged at 30 Sep 2026. "
-            f"Stage is now {row['stage']}, from {row['prior_stage']}.",
+            f"The current PD grade is {row['rating']}. The original grade on the portfolio file is {row['prior_rating']}. "
+            f"The current grade did not change across the month-ends from December 2025 to November 2026. "
+            f"Stage is {row['stage']}, and it was {row['prior_stage']} on 31 Aug 2026.",
             [docs["review"], docs["credit_paper"]],
         )
     if any(word in text for word in ("repay", "due", "maturity", "instal")):
@@ -534,9 +535,11 @@ def answer_for(row: dict, question: str) -> tuple[str, list[dict]]:
         )
     if any(word in text for word in ("since", "develop", "change", "latest", "review")):
         return (
-            f"Since 31 Aug 2026, drawn exposure is {money(row['drawn_hkd'])}. "
-            f"Interest cover is {measure(row['interest_coverage'][-1], '{:.1f} times')} and the covenant threshold is {measure(row['coverage_threshold'], '{:.1f} times')}. "
-            f"Revenue in the latest year is {money(row['revenue_hkd'][-1])}.",
+            f"From 31 Aug 2026 to 30 Sep 2026, drawn exposure is {money(row['drawn_hkd'])}. "
+            f"ECL moved from {money(row['prior_ecl_hkd'])} to {money(row['ecl_hkd'])}. Days past due are {row['dpd']}. "
+            f"Interest cover on the demonstration statements is {measure(row['interest_coverage'][-1], '{:.1f} times')} "
+            f"and the demonstration covenant is {measure(row['coverage_threshold'], '{:.1f} times')}. "
+            f"Demonstration revenue in the latest year is {money(row['revenue_hkd'][-1])}.",
             [docs["review"], docs["financials"]],
         )
     if any(word in text for word in ("risk", "key", "concern", "group")):

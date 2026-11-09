@@ -11,11 +11,13 @@ from pathlib import Path
 ASOF = "30/09/2026"
 PRIOR = "31/08/2026"
 THRESHOLD = 5_000_000
-COLL = Path("/workspace/rip/property_data/COLLATERAL_ALL_2026.csv")
-FLOW = Path("/workspace/rip/property_data/CASH_FLOW_ALL_2026.csv")
+ROOT = Path("/workspace/rip/property_data")
+COLL = ROOT / "COLLATERAL_ALL_2026.csv"
+FLOW = ROOT / "CASH_FLOW_ALL_2026.csv"
+PORTFOLIO = ROOT / "source" / "IFRS9_Property_Portfolio_2026-09.csv"
+PORTFOLIO_PRIOR = ROOT / "source" / "IFRS9_Property_Portfolio_2026-08.csv"
 OUT = Path(__file__).resolve().parent / "book.json"
 
-GOVERNMENT = {"Metro Gov Authority A", "State Treasury Bureau B"}
 
 
 def parse_date(text: str):
@@ -31,20 +33,37 @@ def money_words(value: float) -> str:
     return f"HKD {value:,.0f}"
 
 
-def industry_name(borrower: str) -> str:
-    if borrower in GOVERNMENT:
-        return "Government"
-    return "Property investment"
+def borrower_facts(rows: list[dict]) -> dict[str, dict]:
+    grouped = defaultdict(list)
+    for row in rows:
+        grouped[row["BORROWER1"]].append(row)
+    facts = {}
+    for name, items in grouped.items():
+        on_balance = [row for row in items if row["INSTRUMENT"] != "Off-Bal"]
+        facts[name] = {
+            "drawn": round(sum(float(row["BAL_OUTSTD"]) for row in on_balance), 2),
+            "committed": round(sum(float(row["FACILITY_LIMIT"]) for row in items), 2),
+            "ecl": round(sum(float(row["ECL_HKD"]) for row in items), 2),
+            "stage": max(int(row["STAGE"]) for row in items),
+            "dpd": max(int(row["PAST_DUE_DAY"]) for row in items),
+            "industry": items[0]["INDUSTRY_SECTOR"],
+            "grade": int(items[0]["CURRENT_PD_GRADE"]),
+            "original": int(items[0]["ORIGINAL_PD_GRADE"]),
+            "bond": round(sum(float(row["BAL_OUTSTD"]) for row in items if row["INSTRUMENT"] == "Bond"), 2),
+        }
+    return facts
 
 
 def main() -> None:
     collateral = load(COLL)
     flows = load(FLOW)
+    facts = borrower_facts(load(PORTFOLIO))
+    prior_facts = borrower_facts(load(PORTFOLIO_PRIOR))
     current = [row for row in collateral if row["REPORTING_DATE"] == ASOF]
     prior_rows = [row for row in collateral if row["REPORTING_DATE"] == PRIOR]
     prior_bal = defaultdict(float)
     for row in prior_rows:
-        if row["INSTRUMENT"] == "Customer Loan":
+        if row["INSTRUMENT"] != "Off-Bal":
             prior_bal[row["BORROWER_NAME"]] += float(row["BAL_OUTSTD_HKD"])
 
     terms = {}
@@ -73,13 +92,19 @@ def main() -> None:
     customers = []
     reporting = parse_date(ASOF)
     for borrower, rows in grouped.items():
-        loans = [row for row in rows if row["INSTRUMENT"] == "Customer Loan"]
-        off = [row for row in rows if row["INSTRUMENT"] != "Customer Loan"]
-        drawn = sum(float(row["BAL_OUTSTD_HKD"]) for row in loans)
+        loans = [row for row in rows if row["INSTRUMENT"] != "Off-Bal"]
+        off = [row for row in rows if row["INSTRUMENT"] == "Off-Bal"]
+        drawn = round(sum(float(row["BAL_OUTSTD_HKD"]) for row in loans), 2)
         market = sum(float(row["MARKET_VALUE_HKD"]) for row in loans)
         net = sum(float(row["NET_REALIZABLE_VALUE_HKD"]) for row in loans)
         off_market = sum(float(row["MARKET_VALUE_HKD"]) for row in off)
-        grade = int(terms[loans[0]["CONTRACT_REFERENCE"]]["CURRENT_PD_GRADE"])
+        profile = facts[borrower]
+        if abs(profile["drawn"] - drawn) > 1:
+            raise RuntimeError(f"{borrower} collateral balance {drawn} != portfolio {profile['drawn']}")
+        grade = profile["grade"]
+        if int(terms[loans[0]["CONTRACT_REFERENCE"]]["CURRENT_PD_GRADE"]) != grade:
+            raise RuntimeError(f"{borrower} cash-flow grade differs from the portfolio")
+        earlier = prior_facts[borrower]
         next_principal = None
         for loan in loans:
             ref = loan["CONTRACT_REFERENCE"]
@@ -119,25 +144,25 @@ def main() -> None:
                 "group_id": slug,
                 "group_name": borrower,
                 "rm": f"{len(loans)} on-balance facilities",
-                "industry": industry_name(borrower),
+                "industry": profile["industry"],
                 "jurisdiction": "Hong Kong",
                 "rating": grade,
-                "prior_rating": grade,
-                "prior_rating_date": "31/01/2026",
-                "stage": 1,
-                "prior_stage": 1,
+                "prior_rating": profile["original"],
+                "prior_rating_date": "original grade on the portfolio file",
+                "stage": profile["stage"],
+                "prior_stage": earlier["stage"],
                 "drawn_hkd": round(drawn, 2),
-                "committed_hkd": round(drawn, 2),
+                "committed_hkd": profile["committed"],
                 "collateral_hkd": round(market, 2),
                 "collateral_type": "Residential and commercial property",
                 "coverage_ratio": coverage,
                 "ltv": ltv,
                 "guarantor": "None on the extract",
-                "dpd": 0,
-                "dpd_component": "None",
-                "ecl_hkd": 0,
-                "prior_ecl_hkd": 0,
-                "provision_hkd": 0,
+                "dpd": profile["dpd"],
+                "dpd_component": "Portfolio extract" if profile["dpd"] else "None",
+                "ecl_hkd": profile["ecl"],
+                "prior_ecl_hkd": earlier["ecl"],
+                "provision_hkd": profile["ecl"],
                 "revenue_hkd": [None, None, None],
                 "margin_pct": [None, None, None],
                 "liquidity_ratio": [None, None, None],
@@ -156,13 +181,19 @@ def main() -> None:
                 "warnings": [],
                 "full_file": True,
                 "summary": (
-                    f"{borrower} has {len(loans)} on-balance facilities totalling {money_words(drawn)} "
-                    f"and {len(off)} off-balance facilities with property market value {money_words(off_market)}. "
+                    f"{borrower} has {len(loans)} on-balance facilities totalling {money_words(drawn)}"
+                    + (f", including a bond of {money_words(profile['bond'])}," if profile["bond"] else "")
+                    + f" and {len(off)} off-balance facilities with property market value {money_words(off_market)}. "
                     f"On-balance market value is {money_words(market)} and net realizable value is {money_words(net)}. "
-                    f"LTV is {ltv:.2f}. Grade {grade} is unchanged since 31 Jan 2026. "
-                    f"Outstanding on 31 Aug 2026 was {money_words(prior)}."
+                    f"LTV is {ltv:.2f}. Current grade is {grade} and the original grade is {profile['original']}. "
+                    f"Stage {profile['stage']}, days past due {profile['dpd']}, ECL {money_words(profile['ecl'])}. "
+                    f"Outstanding on 31 Aug 2026 was {money_words(prior)} and ECL was {money_words(earlier['ecl'])}."
                 ),
-                "documents": documents(borrower, grade, drawn, market, net, ltv, addresses, next_principal, prior),
+                "documents": documents(
+                    borrower, grade, profile["original"], drawn, market, net, ltv, addresses,
+                    next_principal, prior, profile["stage"], earlier["stage"], profile["dpd"],
+                    profile["ecl"], earlier["ecl"],
+                ),
                 "repay_draft_id": "",
             }
         )
@@ -196,7 +227,7 @@ def main() -> None:
     drawn = sum(item["drawn_hkd"] for item in customers)
     collateral_split = defaultdict(float)
     for row in current:
-        if row["INSTRUMENT"] == "Customer Loan":
+        if row["INSTRUMENT"] != "Off-Bal":
             collateral_split[row["COLLATERAL_TYPE"]] += float(row["MARKET_VALUE_HKD"])
     maturity = {"month": 0.0, "quarter": 0.0, "later": 0.0}
     for item in customers:
@@ -233,7 +264,7 @@ def main() -> None:
         }
     portfolio = {
         "customers": len(customers),
-        "facilities_on_balance": sum(1 for row in current if row["INSTRUMENT"] == "Customer Loan"),
+        "facilities_on_balance": sum(1 for row in current if row["INSTRUMENT"] != "Off-Bal"),
         "drawn_hkd": round(drawn, 2),
         "ecl_hkd": ecl,
         "prior_ecl_hkd": prior_ecl,
@@ -290,8 +321,8 @@ VIRTUAL = {
         "coverage_assumption": 2.5,
         "coverage_threshold": 2.0,
         "warnings": [
-            "Demonstration interest cover is 1.7 times, below the 2.0 times covenant.",
-            "Office leasing on the Kowloon towers is behind the budget used at approval.",
+            "Demonstration statements: interest cover is 1.7 times, below the 2.0 times covenant. Statements are not in the portfolio file.",
+            "Placeholder news: office leasing on the Kowloon towers is behind the budget used at approval.",
         ],
     },
     "BOR-APL": {
@@ -361,8 +392,7 @@ VIRTUAL = {
         "coverage_assumption": 2.0,
         "coverage_threshold": 1.8,
         "warnings": [
-            "Demonstration ageing shows 36 days past due on one instalment.",
-            "A contractor payment claim is open. The amount is not in the property extract.",
+            "Placeholder news: a contractor payment claim is open. The amount is not in the property extract.",
         ],
     },
     "BOR-PCH": {
@@ -380,7 +410,7 @@ VIRTUAL = {
         "interest_coverage": [1.8, 1.7, 1.6],
         "coverage_assumption": 1.8,
         "coverage_threshold": 1.5,
-        "warnings": ["Twelve days past due on a demonstration ageing item. Still inside 30 days."],
+        "warnings": [],
     },
     "BOR-PF": {
         "rm": "David Ho",
@@ -454,19 +484,10 @@ VIRTUAL = {
 
 
 def apply_virtual(customers: list[dict]) -> None:
-    """Fill screens the property extract does not cover. Balances, collateral and grades stay as provided."""
+    """Fill screens the portfolio file does not cover. Balances, collateral, grades, stage, ECL and days past due stay as provided."""
     for customer in customers:
         profile = VIRTUAL[customer["customer_id"]]
-        drawn = customer["drawn_hkd"]
-        ecl = round(drawn * profile["ecl_rate"], 2)
         customer["rm"] = profile["rm"]
-        customer["stage"] = profile["stage"]
-        customer["prior_stage"] = profile["prior_stage"]
-        customer["dpd"] = profile["dpd"]
-        customer["dpd_component"] = "Demonstration instalment" if profile["dpd"] else "None"
-        customer["ecl_hkd"] = ecl
-        customer["prior_ecl_hkd"] = round(ecl * profile["prior_factor"], 2)
-        customer["provision_hkd"] = ecl
         customer["guarantor"] = profile["guarantor"]
         customer["revenue_hkd"] = profile["revenue_hkd"]
         customer["margin_pct"] = profile["margin_pct"]
@@ -475,13 +496,18 @@ def apply_virtual(customers: list[dict]) -> None:
         customer["interest_coverage"] = profile["interest_coverage"]
         customer["coverage_assumption"] = profile["coverage_assumption"]
         customer["coverage_threshold"] = profile["coverage_threshold"]
-        customer["warnings"] = [{"description": text} for text in profile["warnings"]]
-        customer["watchlist"] = profile["stage"] >= 2 or profile["dpd"] > 0
+        extract_warnings = []
+        if customer["dpd"] > 0:
+            extract_warnings.append(f"Portfolio extract at 30 Sep 2026: {customer['dpd']} days past due.")
+        if customer["stage"] >= 2:
+            extract_warnings.append(f"Stage {customer['stage']} on the portfolio extract at 30 Sep 2026.")
+        customer["warnings"] = [{"description": text} for text in extract_warnings + profile["warnings"]]
+        customer["watchlist"] = customer["stage"] >= 2 or customer["dpd"] > 0
         cover = profile["interest_coverage"][-1]
         customer["summary"] += (
-            f" Demonstration figures, not on the property extract: relationship manager {profile['rm']}, "
-            f"stage {profile['prior_stage']} to {profile['stage']}, days past due {profile['dpd']}, "
-            f"ECL {money_words(ecl)}, interest cover {cover:.1f} times against a {profile['coverage_threshold']:.1f} times covenant."
+            f" Relationship manager {profile['rm']} is a demonstration name. "
+            f"Demonstration statements, not on the portfolio file: interest cover {cover:.1f} times "
+            f"against a {profile['coverage_threshold']:.1f} times covenant."
         )
         customer["documents"]["financials"] = {
             "title": f"Demonstration statements — {customer['legal_name']}",
@@ -496,8 +522,7 @@ def apply_virtual(customers: list[dict]) -> None:
             ),
         }
         customer["documents"]["review"]["passage"] += (
-            f" Demonstration overlay: stage {profile['prior_stage']} to {profile['stage']}, "
-            f"days past due {profile['dpd']}, ECL {money_words(ecl)}."
+            " Relationship manager, financial statements and the covenant threshold are demonstration fields."
         )
 
 
@@ -535,7 +560,10 @@ def news_items(customers: list[dict]) -> list[dict]:
     apex = by_id["BOR-AGHL"]
     idic = by_id["BOR-IDIC"]
     metro = by_id["BOR-MGAA"]
-    property_drawn = sum(item["drawn_hkd"] for item in customers if item["industry"] == "Property investment")
+    property_names = [item for item in customers if item["industry"] == "Property Investment"]
+    property_drawn = sum(item["drawn_hkd"] for item in property_names)
+    property_market = sum(item["collateral_hkd"] for item in property_names)
+    property_grades = [item["rating"] for item in property_names]
     return [
         {
             "id": "NEWS-AGHL-LEASE",
@@ -560,7 +588,7 @@ def news_items(customers: list[dict]) -> list[dict]:
             "industry": idic["industry"],
             "body": (
                 "A placeholder court-list note names a contractor claim. The claim amount is not in the property extract. "
-                "The demonstration file also shows 36 days past due on one instalment."
+                f"The portfolio extract itself shows {idic['dpd']} days past due and stage {idic['stage']} at 30 Sep 2026."
             ),
             "factors": materiality(idic, direct_hit=True),
         },
@@ -570,16 +598,16 @@ def news_items(customers: list[dict]) -> list[dict]:
             "source": "Credit Risk Alert Portal (placeholder feed)",
             "date": "28 Sep 2026",
             "customer_id": None,
-            "industry": "Property investment",
+            "industry": "Property Investment",
             "body": (
                 "A sector placeholder says grade-A and fringe office vacancy did not improve in the quarter. "
                 "It does not name a default. It is here so the industry step has a headline until a live feed arrives."
             ),
             "factors": {
                 "exposure_hkd": property_drawn,
-                "security_coverage": "about 1.58 times market value over drawn, from the collateral extract",
+                "security_coverage": f"{property_market / property_drawn:.2f} times market value over drawn, from the collateral extract",
                 "guarantor_support": "not an industry-level fact",
-                "financial_strength": "property names carry grades 7 to 11 on the cash flow file",
+                "financial_strength": f"property investment names carry grades {min(property_grades)} to {max(property_grades)} on the portfolio file",
                 "warning_signals": "leasing, vacancy and one contractor claim on the placeholder feed",
                 "score": 74,
                 "material": True,
@@ -601,25 +629,28 @@ def news_items(customers: list[dict]) -> list[dict]:
     ]
 
 
-def documents(borrower, grade, drawn, market, net, ltv, addresses, nxt, prior):
+def documents(borrower, grade, original, drawn, market, net, ltv, addresses, nxt, prior, stage, prior_stage, dpd, ecl, prior_ecl):
     address_text = "; ".join(addresses)
     return {
         "credit_paper": {
             "title": f"Credit extract — {borrower}",
             "locator": "Property portfolio collateral extract, 30 Sep 2026",
             "passage": (
-                f"Grade {grade}. On-balance drawn {money_words(drawn)}. "
+                f"Current grade {grade}. Original grade {original}. On-balance drawn {money_words(drawn)}. "
                 f"Property market value {money_words(market)}. Net realizable value {money_words(net)}. "
-                f"LTV {ltv:.2f}. First charge. Properties: {address_text}."
+                f"LTV {ltv:.2f}. Stage {stage}. Days past due {dpd}. ECL {money_words(ecl)}. "
+                f"First charge. Properties: {address_text}."
             ),
         },
         "review": {
             "title": f"Position comparison — {borrower}",
-            "locator": "Collateral extract 31 Aug 2026 and 30 Sep 2026",
+            "locator": "Portfolio extract 31 Aug 2026 and 30 Sep 2026",
             "passage": (
-                f"Grade stayed at {grade} from 31 Jan 2026 through 30 Sep 2026. "
+                f"Current PD grade {grade} is the grade on every month-end from 31 Dec 2025 through 30 Nov 2026. "
+                f"The original grade on the portfolio file is {original}. "
                 f"On-balance outstanding moved from {money_words(prior)} on 31 Aug 2026 to {money_words(drawn)} on 30 Sep 2026. "
-                "No stage migration and no days-past-due balance is on the extract."
+                f"Stage was {prior_stage} on 31 Aug 2026 and is {stage} on 30 Sep 2026. "
+                f"Days past due on 30 Sep 2026 are {dpd}. ECL moved from {money_words(prior_ecl)} to {money_words(ecl)}."
             ),
         },
         "financials": {
@@ -670,11 +701,18 @@ def letter(subject, kind, customer_id, paragraphs: list[str]) -> dict:
 
 
 def letters(customers, focus, industries, drawn, collateral_split, news_feed):
-    property_book = next(item for item in industries if item["industry"] == "Property investment")
+    property_book = next(item for item in industries if item["industry"] == "Property Investment")
+    development = next(item for item in industries if item["industry"] == "Property Development")
     government = next(item for item in industries if item["industry"] == "Government")
     collateral_line = ", ".join(f"{name} {money_words(value)}" for name, value in collateral_split.items())
+    portfolio_ltv = drawn / sum(collateral_split.values())
+    late = [item for item in customers if item["dpd"] > 0]
+    late.sort(key=lambda item: item["legal_name"])
+    late_line = "; ".join(
+        f"{item['legal_name']} at {item['dpd']} days, drawn {money_words(item['drawn_hkd'])}, ECL {money_words(item['ecl_hkd'])}"
+        for item in late
+    )
     apex = next(item for item in customers if item["customer_id"] == "BOR-AGHL")
-    idic = next(item for item in customers if item["customer_id"] == "BOR-IDIC")
     apex_news = next(item for item in news_feed if item["id"] == "NEWS-AGHL-LEASE")
     vacancy = next(item for item in news_feed if item["id"] == "NEWS-PROP-VACANCY")
     news = letter(
@@ -690,14 +728,14 @@ def letters(customers, focus, industries, drawn, collateral_split, news_feed):
         ],
     )
     industry = letter(
-        "Industry review — Property investment",
+        "Industry review — Property Investment",
         ("MAIL-IND-WHOLESALE", "Industry stress"),
         "",
         [
             f"{vacancy['date']}. {vacancy['headline']}. {vacancy['body']}",
-            f"Property investment drawn is {money_words(property_book['drawn_hkd'])} across {property_book['customers']} groups. Stage 2 names: {property_book['stage2']}. Migrations: {property_book['migrations']}. Open warnings: {property_book['open_warnings']}.",
-            f"Government drawn is {money_words(government['drawn_hkd'])} across {government['customers']} groups.",
-            f"On-balance collateral market value is {collateral_line}. Portfolio LTV on the extract is about 0.63. Grades on the cash flow file did not change between January and September 2026.",
+            f"Property Investment drawn is {money_words(property_book['drawn_hkd'])} across {property_book['customers']} groups. Stage 2 names: {property_book['stage2']}. Migrations since 31 Aug 2026: {property_book['migrations']}. Open warnings: {property_book['open_warnings']}.",
+            f"Property Development drawn is {money_words(development['drawn_hkd'])} across {development['customers']} groups. Government drawn is {money_words(government['drawn_hkd'])} across {government['customers']} groups.",
+            f"On-balance collateral market value is {collateral_line}. Portfolio LTV on the on-balance collateral is {portfolio_ltv:.2f}. Current PD grades did not change between the December 2025 and November 2026 month-ends.",
         ],
     )
     repayment = letter(
@@ -712,14 +750,13 @@ def letters(customers, focus, industries, drawn, collateral_split, news_feed):
         ],
     )
     ageing = letter(
-        f"Days past due — {idic['legal_name']}",
+        "Days past due — portfolio extract",
         ("MAIL-DPD-LANTERN", "Days past due"),
-        idic["customer_id"],
+        "",
         [
-            f"The property extract itself shows every facility current. The demonstration ageing, used until a collections file arrives, places {idic['legal_name']} at {idic['dpd']} days past due.",
-            f"Drawn {money_words(idic['drawn_hkd'])}. Relationship manager {idic['rm']}. One warning records a contractor claim that is also a placeholder.",
-            "Provincial Capital Holdings is 12 days past due on the same demonstration file, still inside 30 days.",
-            "The cash-flow dates above HKD 5,000,000 remain future obligations. This draft does not treat those future dates as past due.",
+            f"The portfolio extract at 30 Sep 2026 records days past due on three names: {late_line}.",
+            "Stage on each of these names is 2, the same stage as 31 Aug 2026. The days-past-due figure is PAST_DUE_DAY on the portfolio file.",
+            "The cash-flow dates above HKD 5,000,000 are future principal dates. This draft does not treat those future dates as past due.",
         ],
     )
     projected = round(apex["interest_coverage"][-1] - 0.6, 1)

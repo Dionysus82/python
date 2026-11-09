@@ -3,579 +3,35 @@
   "as_of_label": "30 Sep 2026",
   "threshold_hkd": 5000000,
   "notify_to": "yiyangyao2@gmail.com",
-  "default_customer_id": "BOR-AGHL",
-  "default_industry": "Property investment",
+  "default_customer_id": "BOR-PF",
+  "default_industry": "Property Investment",
   "banner": "SYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING",
   "customers": [
-    {
-      "customer_id": "BOR-AGHL",
-      "legal_name": "Apex Global Holdings Limited",
-      "group_id": "BOR-AGHL",
-      "group_name": "Apex Global Holdings Limited",
-      "rm": "Chris Leung",
-      "industry": "Property investment",
-      "jurisdiction": "Hong Kong",
-      "rating": 10,
-      "prior_rating": 10,
-      "prior_rating_date": "31/01/2026",
-      "stage": 2,
-      "prior_stage": 1,
-      "drawn_hkd": 2856268000.0,
-      "committed_hkd": 2856268000.0,
-      "collateral_hkd": 4509895000.0,
-      "collateral_type": "Residential and commercial property",
-      "coverage_ratio": 1.58,
-      "ltv": 0.63,
-      "guarantor": "Apex Group parent comfort letter, unsecured",
-      "dpd": 0,
-      "dpd_component": "None",
-      "ecl_hkd": 99969380.0,
-      "prior_ecl_hkd": 71977953.6,
-      "provision_hkd": 99969380.0,
-      "revenue_hkd": [
-        4820000000,
-        4260000000,
-        3640000000
-      ],
-      "margin_pct": [
-        21.4,
-        18.6,
-        15.2
-      ],
-      "liquidity_ratio": [
-        1.38,
-        1.22,
-        1.08
-      ],
-      "leverage": [
-        4.6,
-        5.3,
-        6.2
-      ],
-      "interest_coverage": [
-        2.6,
-        2.1,
-        1.7
-      ],
-      "coverage_assumption": 2.5,
-      "coverage_threshold": 2.0,
-      "next_due_days": 123,
-      "next_due_hkd": 358457000.0,
-      "next_due_date": "31/01/2027",
-      "next_due_source": "Cash flow schedule",
-      "next_contract": "CTR-0010-04",
-      "next_method": "DECLINING_AMORT",
-      "refinancing": false,
-      "watchlist": true,
-      "warnings": [
-        {
-          "description": "Demonstration interest cover is 1.7 times, below the 2.0 times covenant."
-        },
-        {
-          "description": "Office leasing on the Kowloon towers is behind the budget used at approval."
-        }
-      ],
-      "full_file": true,
-      "summary": "Apex Global Holdings Limited has 4 on-balance facilities totalling HKD 2,856,268,000 and 2 off-balance facilities with property market value HKD 2,258,710,000. On-balance market value is HKD 4,509,895,000 and net realizable value is HKD 3,307,258,000. LTV is 0.63. Grade 10 is unchanged since 31 Jan 2026. Outstanding on 31 Aug 2026 was HKD 2,846,465,000. Demonstration figures, not on the property extract: relationship manager Chris Leung, stage 1 to 2, days past due 0, ECL HKD 99,969,380, interest cover 1.7 times against a 2.0 times covenant.",
-      "documents": {
-        "credit_paper": {
-          "title": "Credit extract \u2014 Apex Global Holdings Limited",
-          "locator": "Property portfolio collateral extract, 30 Sep 2026",
-          "passage": "Grade 10. On-balance drawn HKD 2,856,268,000. Property market value HKD 4,509,895,000. Net realizable value HKD 3,307,258,000. LTV 0.63. First charge. Properties: COL010001 Flat A, 8/F, Apex Tower, 11 Apex Gate, Quarry Bay (Commercial Property, market HKD 1,125,508,000); COL010002 Flat B, 12/F, Apex Court, 11 Apex Gate, Quarry Bay (Residential Property, market HKD 1,127,378,000); COL010003 Flat C, 15/F, Apex Tower, 11 Apex Gate, Quarry Bay (Commercial Property, market HKD 1,125,040,000); COL010004 Flat D, 18/F, Apex Court, 11 Apex Gate, Quarry Bay (Residential Property, market HKD 1,131,969,000)."
-        },
-        "review": {
-          "title": "Position comparison \u2014 Apex Global Holdings Limited",
-          "locator": "Collateral extract 31 Aug 2026 and 30 Sep 2026",
-          "passage": "Grade stayed at 10 from 31 Jan 2026 through 30 Sep 2026. On-balance outstanding moved from HKD 2,846,465,000 on 31 Aug 2026 to HKD 2,856,268,000 on 30 Sep 2026. No stage migration and no days-past-due balance is on the extract. Demonstration overlay: stage 1 to 2, days past due 0, ECL HKD 99,969,380."
-        },
-        "financials": {
-          "title": "Demonstration statements \u2014 Apex Global Holdings Limited",
-          "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
-          "passage": "2024 to 2026 revenue HKD 4,820,000,000, HKD 4,260,000,000, HKD 3,640,000,000. Interest cover 2.6 times, 2.1 times, 1.7 times. Covenant 2.0 times. Replace these figures when statements are provided."
-        },
-        "repayment": {
-          "title": "Cash flow schedule \u2014 CTR-0010-04",
-          "locator": "CASH_FLOW as at 30 Sep 2026, 31/01/2027",
-          "passage": "Next principal is HKD 358,457,000 on 31/01/2027 (123 days), contract CTR-0010-04, method Declining Amort, coupon 5.5 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
-        }
-      },
-      "repay_draft_id": ""
-    },
-    {
-      "customer_id": "BOR-APL",
-      "legal_name": "Apex Property Limited",
-      "group_id": "BOR-APL",
-      "group_name": "Apex Property Limited",
-      "rm": "May Chan",
-      "industry": "Property investment",
-      "jurisdiction": "Hong Kong",
-      "rating": 7,
-      "prior_rating": 7,
-      "prior_rating_date": "31/01/2026",
-      "stage": 1,
-      "prior_stage": 1,
-      "drawn_hkd": 2756700000.0,
-      "committed_hkd": 2756700000.0,
-      "collateral_hkd": 4352685000.0,
-      "collateral_type": "Residential and commercial property",
-      "coverage_ratio": 1.58,
-      "ltv": 0.63,
-      "guarantor": "None on the extract",
-      "dpd": 0,
-      "dpd_component": "None",
-      "ecl_hkd": 22053600.0,
-      "prior_ecl_hkd": 20730384.0,
-      "provision_hkd": 22053600.0,
-      "revenue_hkd": [
-        1940000000,
-        2050000000,
-        2110000000
-      ],
-      "margin_pct": [
-        28.0,
-        27.4,
-        26.8
-      ],
-      "liquidity_ratio": [
-        1.55,
-        1.52,
-        1.49
-      ],
-      "leverage": [
-        3.4,
-        3.3,
-        3.2
-      ],
-      "interest_coverage": [
-        3.4,
-        3.3,
-        3.2
-      ],
-      "coverage_assumption": 3.0,
-      "coverage_threshold": 2.0,
-      "next_due_days": 31,
-      "next_due_hkd": 231610666.67,
-      "next_due_date": "31/10/2026",
-      "next_due_source": "Cash flow schedule",
-      "next_contract": "CTR-0009-03",
-      "next_method": "EQUAL_AMORT",
-      "refinancing": false,
-      "watchlist": false,
-      "warnings": [],
-      "full_file": true,
-      "summary": "Apex Property Limited has 4 on-balance facilities totalling HKD 2,756,700,000 and 2 off-balance facilities with property market value HKD 2,171,019,000. On-balance market value is HKD 4,352,685,000 and net realizable value is HKD 3,191,969,000. LTV is 0.63. Grade 7 is unchanged since 31 Jan 2026. Outstanding on 31 Aug 2026 was HKD 2,757,134,000. Demonstration figures, not on the property extract: relationship manager May Chan, stage 1 to 1, days past due 0, ECL HKD 22,053,600, interest cover 3.2 times against a 2.0 times covenant.",
-      "documents": {
-        "credit_paper": {
-          "title": "Credit extract \u2014 Apex Property Limited",
-          "locator": "Property portfolio collateral extract, 30 Sep 2026",
-          "passage": "Grade 7. On-balance drawn HKD 2,756,700,000. Property market value HKD 4,352,685,000. Net realizable value HKD 3,191,969,000. LTV 0.63. First charge. Properties: COL009001 Flat A, 8/F, Lantern Court, 4 Property Crescent, Causeway Bay (Residential Property, market HKD 1,078,988,000); COL009002 Flat B, 12/F, Lantern Tower, 4 Property Crescent, Causeway Bay (Commercial Property, market HKD 1,093,668,000); COL009003 Flat C, 15/F, Lantern Court, 4 Property Crescent, Causeway Bay (Residential Property, market HKD 1,097,103,000); COL009004 Flat D, 18/F, Lantern Tower, 4 Property Crescent, Causeway Bay (Commercial Property, market HKD 1,082,926,000)."
-        },
-        "review": {
-          "title": "Position comparison \u2014 Apex Property Limited",
-          "locator": "Collateral extract 31 Aug 2026 and 30 Sep 2026",
-          "passage": "Grade stayed at 7 from 31 Jan 2026 through 30 Sep 2026. On-balance outstanding moved from HKD 2,757,134,000 on 31 Aug 2026 to HKD 2,756,700,000 on 30 Sep 2026. No stage migration and no days-past-due balance is on the extract. Demonstration overlay: stage 1 to 1, days past due 0, ECL HKD 22,053,600."
-        },
-        "financials": {
-          "title": "Demonstration statements \u2014 Apex Property Limited",
-          "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
-          "passage": "2024 to 2026 revenue HKD 1,940,000,000, HKD 2,050,000,000, HKD 2,110,000,000. Interest cover 3.4 times, 3.3 times, 3.2 times. Covenant 2.0 times. Replace these figures when statements are provided."
-        },
-        "repayment": {
-          "title": "Cash flow schedule \u2014 CTR-0009-03",
-          "locator": "CASH_FLOW as at 30 Sep 2026, 31/10/2026",
-          "passage": "Next principal is HKD 231,610,667 on 31/10/2026 (31 days), contract CTR-0009-03, method Equal Amort, coupon 4.5 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
-        }
-      },
-      "repay_draft_id": ""
-    },
-    {
-      "customer_id": "BOR-MAMH",
-      "legal_name": "Municipal Asset Mgmt Holdings",
-      "group_id": "BOR-MAMH",
-      "group_name": "Municipal Asset Mgmt Holdings",
-      "rm": "Peter Ng",
-      "industry": "Property investment",
-      "jurisdiction": "Hong Kong",
-      "rating": 10,
-      "prior_rating": 10,
-      "prior_rating_date": "31/01/2026",
-      "stage": 1,
-      "prior_stage": 1,
-      "drawn_hkd": 2663434000.0,
-      "committed_hkd": 2663434000.0,
-      "collateral_hkd": 4205424000.0,
-      "collateral_type": "Residential and commercial property",
-      "coverage_ratio": 1.58,
-      "ltv": 0.63,
-      "guarantor": "Municipal holding-company guarantee, limited to drawn balance",
-      "dpd": 0,
-      "dpd_component": "None",
-      "ecl_hkd": 42614944.0,
-      "prior_ecl_hkd": 40484196.8,
-      "provision_hkd": 42614944.0,
-      "revenue_hkd": [
-        3100000000,
-        3040000000,
-        2980000000
-      ],
-      "margin_pct": [
-        18.2,
-        17.6,
-        17.1
-      ],
-      "liquidity_ratio": [
-        1.46,
-        1.41,
-        1.36
-      ],
-      "leverage": [
-        4.1,
-        4.3,
-        4.4
-      ],
-      "interest_coverage": [
-        2.8,
-        2.6,
-        2.5
-      ],
-      "coverage_assumption": 2.5,
-      "coverage_threshold": 1.8,
-      "next_due_days": 151,
-      "next_due_hkd": 334551000.0,
-      "next_due_date": "28/02/2027",
-      "next_due_source": "Cash flow schedule",
-      "next_contract": "CTR-0008-03",
-      "next_method": "EQUAL_AMORT",
-      "refinancing": false,
-      "watchlist": false,
-      "warnings": [],
-      "full_file": true,
-      "summary": "Municipal Asset Mgmt Holdings has 4 on-balance facilities totalling HKD 2,663,434,000 and 2 off-balance facilities with property market value HKD 2,084,658,000. On-balance market value is HKD 4,205,424,000 and net realizable value is HKD 3,083,978,000. LTV is 0.63. Grade 10 is unchanged since 31 Jan 2026. Outstanding on 31 Aug 2026 was HKD 2,665,025,000. Demonstration figures, not on the property extract: relationship manager Peter Ng, stage 1 to 1, days past due 0, ECL HKD 42,614,944, interest cover 2.5 times against a 1.8 times covenant.",
-      "documents": {
-        "credit_paper": {
-          "title": "Credit extract \u2014 Municipal Asset Mgmt Holdings",
-          "locator": "Property portfolio collateral extract, 30 Sep 2026",
-          "passage": "Grade 10. On-balance drawn HKD 2,663,434,000. Property market value HKD 4,205,424,000. Net realizable value HKD 3,083,978,000. LTV 0.63. First charge. Properties: COL008001 Flat A, 8/F, Civic Tower, 27 Municipal Street, Tsuen Wan (Commercial Property, market HKD 1,049,866,000); COL008002 Flat B, 12/F, Civic Court, 27 Municipal Street, Tsuen Wan (Residential Property, market HKD 1,044,056,000); COL008003 Flat C, 15/F, Civic Tower, 27 Municipal Street, Tsuen Wan (Commercial Property, market HKD 1,056,477,000); COL008004 Flat D, 18/F, Civic Court, 27 Municipal Street, Tsuen Wan (Residential Property, market HKD 1,055,025,000)."
-        },
-        "review": {
-          "title": "Position comparison \u2014 Municipal Asset Mgmt Holdings",
-          "locator": "Collateral extract 31 Aug 2026 and 30 Sep 2026",
-          "passage": "Grade stayed at 10 from 31 Jan 2026 through 30 Sep 2026. On-balance outstanding moved from HKD 2,665,025,000 on 31 Aug 2026 to HKD 2,663,434,000 on 30 Sep 2026. No stage migration and no days-past-due balance is on the extract. Demonstration overlay: stage 1 to 1, days past due 0, ECL HKD 42,614,944."
-        },
-        "financials": {
-          "title": "Demonstration statements \u2014 Municipal Asset Mgmt Holdings",
-          "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
-          "passage": "2024 to 2026 revenue HKD 3,100,000,000, HKD 3,040,000,000, HKD 2,980,000,000. Interest cover 2.8 times, 2.6 times, 2.5 times. Covenant 1.8 times. Replace these figures when statements are provided."
-        },
-        "repayment": {
-          "title": "Cash flow schedule \u2014 CTR-0008-03",
-          "locator": "CASH_FLOW as at 30 Sep 2026, 28/02/2027",
-          "passage": "Next principal is HKD 334,551,000 on 28/02/2027 (151 days), contract CTR-0008-03, method Equal Amort, coupon 5.5 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
-        }
-      },
-      "repay_draft_id": ""
-    },
-    {
-      "customer_id": "BOR-GPIHL",
-      "legal_name": "Global Property Investment Holdings Ltd.",
-      "group_id": "BOR-GPIHL",
-      "group_name": "Global Property Investment Holdings Ltd.",
-      "rm": "Irene Cheung",
-      "industry": "Property investment",
-      "jurisdiction": "Hong Kong",
-      "rating": 9,
-      "prior_rating": 9,
-      "prior_rating_date": "31/01/2026",
-      "stage": 1,
-      "prior_stage": 1,
-      "drawn_hkd": 2574209000.0,
-      "committed_hkd": 2574209000.0,
-      "collateral_hkd": 4064540000.0,
-      "collateral_type": "Residential and commercial property",
-      "coverage_ratio": 1.58,
-      "ltv": 0.63,
-      "guarantor": "None on the extract",
-      "dpd": 0,
-      "dpd_component": "None",
-      "ecl_hkd": 36038926.0,
-      "prior_ecl_hkd": 34597368.96,
-      "provision_hkd": 36038926.0,
-      "revenue_hkd": [
-        2240000000,
-        2180000000,
-        2090000000
-      ],
-      "margin_pct": [
-        24.1,
-        23.0,
-        21.6
-      ],
-      "liquidity_ratio": [
-        1.33,
-        1.29,
-        1.24
-      ],
-      "leverage": [
-        4.8,
-        5.0,
-        5.2
-      ],
-      "interest_coverage": [
-        2.4,
-        2.2,
-        2.1
-      ],
-      "coverage_assumption": 2.2,
-      "coverage_threshold": 1.75,
-      "next_due_days": 61,
-      "next_due_hkd": 321549000.0,
-      "next_due_date": "30/11/2026",
-      "next_due_source": "Cash flow schedule",
-      "next_contract": "CTR-0007-04",
-      "next_method": "DECLINING_AMORT",
-      "refinancing": false,
-      "watchlist": false,
-      "warnings": [
-        {
-          "description": "Vacancy on two commercial floors is above the case used at the last review."
-        }
-      ],
-      "full_file": true,
-      "summary": "Global Property Investment Holdings Ltd. has 4 on-balance facilities totalling HKD 2,574,209,000 and 2 off-balance facilities with property market value HKD 2,018,462,000. On-balance market value is HKD 4,064,540,000 and net realizable value is HKD 2,980,662,000. LTV is 0.63. Grade 9 is unchanged since 31 Jan 2026. Outstanding on 31 Aug 2026 was HKD 2,580,887,000. Demonstration figures, not on the property extract: relationship manager Irene Cheung, stage 1 to 1, days past due 0, ECL HKD 36,038,926, interest cover 2.1 times against a 1.8 times covenant.",
-      "documents": {
-        "credit_paper": {
-          "title": "Credit extract \u2014 Global Property Investment Holdings Ltd.",
-          "locator": "Property portfolio collateral extract, 30 Sep 2026",
-          "passage": "Grade 9. On-balance drawn HKD 2,574,209,000. Property market value HKD 4,064,540,000. Net realizable value HKD 2,980,662,000. LTV 0.63. First charge. Properties: COL007001 Flat A, 8/F, Harbour Court, 15 Harbour Path, Sha Tin (Residential Property, market HKD 1,020,333,000); COL007002 Flat B, 12/F, Harbour Tower, 15 Harbour Path, Sha Tin (Commercial Property, market HKD 1,011,066,000); COL007003 Flat C, 15/F, Harbour Court, 15 Harbour Path, Sha Tin (Residential Property, market HKD 1,017,723,000); COL007004 Flat D, 18/F, Harbour Tower, 15 Harbour Path, Sha Tin (Commercial Property, market HKD 1,015,418,000)."
-        },
-        "review": {
-          "title": "Position comparison \u2014 Global Property Investment Holdings Ltd.",
-          "locator": "Collateral extract 31 Aug 2026 and 30 Sep 2026",
-          "passage": "Grade stayed at 9 from 31 Jan 2026 through 30 Sep 2026. On-balance outstanding moved from HKD 2,580,887,000 on 31 Aug 2026 to HKD 2,574,209,000 on 30 Sep 2026. No stage migration and no days-past-due balance is on the extract. Demonstration overlay: stage 1 to 1, days past due 0, ECL HKD 36,038,926."
-        },
-        "financials": {
-          "title": "Demonstration statements \u2014 Global Property Investment Holdings Ltd.",
-          "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
-          "passage": "2024 to 2026 revenue HKD 2,240,000,000, HKD 2,180,000,000, HKD 2,090,000,000. Interest cover 2.4 times, 2.2 times, 2.1 times. Covenant 1.8 times. Replace these figures when statements are provided."
-        },
-        "repayment": {
-          "title": "Cash flow schedule \u2014 CTR-0007-04",
-          "locator": "CASH_FLOW as at 30 Sep 2026, 30/11/2026",
-          "passage": "Next principal is HKD 321,549,000 on 30/11/2026 (61 days), contract CTR-0007-04, method Declining Amort, coupon 5.0 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
-        }
-      },
-      "repay_draft_id": "MAIL-REPAY-LANTERN"
-    },
-    {
-      "customer_id": "BOR-IDIC",
-      "legal_name": "Industrial Development Investment Corp.",
-      "group_id": "BOR-IDIC",
-      "group_name": "Industrial Development Investment Corp.",
-      "rm": "Alan Siu",
-      "industry": "Property investment",
-      "jurisdiction": "Hong Kong",
-      "rating": 11,
-      "prior_rating": 11,
-      "prior_rating_date": "31/01/2026",
-      "stage": 2,
-      "prior_stage": 1,
-      "drawn_hkd": 2472061000.0,
-      "committed_hkd": 2472061000.0,
-      "collateral_hkd": 3903255000.0,
-      "collateral_type": "Residential and commercial property",
-      "coverage_ratio": 1.58,
-      "ltv": 0.63,
-      "guarantor": "Sponsor completion guarantee on one development site",
-      "dpd": 36,
-      "dpd_component": "Demonstration instalment",
-      "ecl_hkd": 111242745.0,
-      "prior_ecl_hkd": 77869921.5,
-      "provision_hkd": 111242745.0,
-      "revenue_hkd": [
-        1760000000,
-        1520000000,
-        1280000000
-      ],
-      "margin_pct": [
-        16.4,
-        12.8,
-        9.1
-      ],
-      "liquidity_ratio": [
-        1.21,
-        1.08,
-        0.96
-      ],
-      "leverage": [
-        5.5,
-        6.4,
-        7.3
-      ],
-      "interest_coverage": [
-        1.9,
-        1.6,
-        1.4
-      ],
-      "coverage_assumption": 2.0,
-      "coverage_threshold": 1.8,
-      "next_due_days": 31,
-      "next_due_hkd": 207024666.67,
-      "next_due_date": "31/10/2026",
-      "next_due_source": "Cash flow schedule",
-      "next_contract": "CTR-0006-03",
-      "next_method": "EQUAL_AMORT",
-      "refinancing": false,
-      "watchlist": true,
-      "warnings": [
-        {
-          "description": "Demonstration ageing shows 36 days past due on one instalment."
-        },
-        {
-          "description": "A contractor payment claim is open. The amount is not in the property extract."
-        }
-      ],
-      "full_file": true,
-      "summary": "Industrial Development Investment Corp. has 4 on-balance facilities totalling HKD 2,472,061,000 and 2 off-balance facilities with property market value HKD 1,962,924,000. On-balance market value is HKD 3,903,255,000 and net realizable value is HKD 2,862,387,000. LTV is 0.63. Grade 11 is unchanged since 31 Jan 2026. Outstanding on 31 Aug 2026 was HKD 2,467,131,000. Demonstration figures, not on the property extract: relationship manager Alan Siu, stage 1 to 2, days past due 36, ECL HKD 111,242,745, interest cover 1.4 times against a 1.8 times covenant.",
-      "documents": {
-        "credit_paper": {
-          "title": "Credit extract \u2014 Industrial Development Investment Corp.",
-          "locator": "Property portfolio collateral extract, 30 Sep 2026",
-          "passage": "Grade 11. On-balance drawn HKD 2,472,061,000. Property market value HKD 3,903,255,000. Net realizable value HKD 2,862,387,000. LTV 0.63. First charge. Properties: COL006001 Flat A, 8/F, Workshop Tower, 33 Development Road, Kwun Tong (Commercial Property, market HKD 972,978,000); COL006002 Flat B, 12/F, Workshop Court, 33 Development Road, Kwun Tong (Residential Property, market HKD 970,418,000); COL006003 Flat C, 15/F, Workshop Tower, 33 Development Road, Kwun Tong (Commercial Property, market HKD 980,643,000); COL006004 Flat D, 18/F, Workshop Court, 33 Development Road, Kwun Tong (Residential Property, market HKD 979,216,000)."
-        },
-        "review": {
-          "title": "Position comparison \u2014 Industrial Development Investment Corp.",
-          "locator": "Collateral extract 31 Aug 2026 and 30 Sep 2026",
-          "passage": "Grade stayed at 11 from 31 Jan 2026 through 30 Sep 2026. On-balance outstanding moved from HKD 2,467,131,000 on 31 Aug 2026 to HKD 2,472,061,000 on 30 Sep 2026. No stage migration and no days-past-due balance is on the extract. Demonstration overlay: stage 1 to 2, days past due 36, ECL HKD 111,242,745."
-        },
-        "financials": {
-          "title": "Demonstration statements \u2014 Industrial Development Investment Corp.",
-          "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
-          "passage": "2024 to 2026 revenue HKD 1,760,000,000, HKD 1,520,000,000, HKD 1,280,000,000. Interest cover 1.9 times, 1.6 times, 1.4 times. Covenant 1.8 times. Replace these figures when statements are provided."
-        },
-        "repayment": {
-          "title": "Cash flow schedule \u2014 CTR-0006-03",
-          "locator": "CASH_FLOW as at 30 Sep 2026, 31/10/2026",
-          "passage": "Next principal is HKD 207,024,667 on 31/10/2026 (31 days), contract CTR-0006-03, method Equal Amort, coupon 6.0 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
-        }
-      },
-      "repay_draft_id": ""
-    },
-    {
-      "customer_id": "BOR-PCH",
-      "legal_name": "Provincial Capital Holdings",
-      "group_id": "BOR-PCH",
-      "group_name": "Provincial Capital Holdings",
-      "rm": "Joanna Lam",
-      "industry": "Property investment",
-      "jurisdiction": "Hong Kong",
-      "rating": 11,
-      "prior_rating": 11,
-      "prior_rating_date": "31/01/2026",
-      "stage": 2,
-      "prior_stage": 2,
-      "drawn_hkd": 2375636000.0,
-      "committed_hkd": 2375636000.0,
-      "collateral_hkd": 3751004000.0,
-      "collateral_type": "Residential and commercial property",
-      "coverage_ratio": 1.58,
-      "ltv": 0.63,
-      "guarantor": "Provincial finance bureau letter of support",
-      "dpd": 12,
-      "dpd_component": "Demonstration instalment",
-      "ecl_hkd": 66517808.0,
-      "prior_ecl_hkd": 59866027.2,
-      "provision_hkd": 66517808.0,
-      "revenue_hkd": [
-        980000000,
-        940000000,
-        910000000
-      ],
-      "margin_pct": [
-        14.2,
-        13.5,
-        12.8
-      ],
-      "liquidity_ratio": [
-        1.18,
-        1.12,
-        1.05
-      ],
-      "leverage": [
-        5.8,
-        6.0,
-        6.3
-      ],
-      "interest_coverage": [
-        1.8,
-        1.7,
-        1.6
-      ],
-      "coverage_assumption": 1.8,
-      "coverage_threshold": 1.5,
-      "next_due_days": 92,
-      "next_due_hkd": 198387333.33,
-      "next_due_date": "31/12/2026",
-      "next_due_source": "Cash flow schedule",
-      "next_contract": "CTR-0005-03",
-      "next_method": "EQUAL_AMORT",
-      "refinancing": false,
-      "watchlist": true,
-      "warnings": [
-        {
-          "description": "Twelve days past due on a demonstration ageing item. Still inside 30 days."
-        }
-      ],
-      "full_file": true,
-      "summary": "Provincial Capital Holdings has 4 on-balance facilities totalling HKD 2,375,636,000 and 2 off-balance facilities with property market value HKD 1,874,829,000. On-balance market value is HKD 3,751,004,000 and net realizable value is HKD 2,750,736,000. LTV is 0.63. Grade 11 is unchanged since 31 Jan 2026. Outstanding on 31 Aug 2026 was HKD 2,380,458,000. Demonstration figures, not on the property extract: relationship manager Joanna Lam, stage 2 to 2, days past due 12, ECL HKD 66,517,808, interest cover 1.6 times against a 1.5 times covenant.",
-      "documents": {
-        "credit_paper": {
-          "title": "Credit extract \u2014 Provincial Capital Holdings",
-          "locator": "Property portfolio collateral extract, 30 Sep 2026",
-          "passage": "Grade 11. On-balance drawn HKD 2,375,636,000. Property market value HKD 3,751,004,000. Net realizable value HKD 2,750,736,000. LTV 0.63. First charge. Properties: COL005001 Flat A, 8/F, Capital Court, 9 Capital Avenue, Tsim Sha Tsui (Residential Property, market HKD 939,786,000); COL005002 Flat B, 12/F, Capital Tower, 9 Capital Avenue, Tsim Sha Tsui (Commercial Property, market HKD 931,316,000); COL005003 Flat C, 15/F, Capital Court, 9 Capital Avenue, Tsim Sha Tsui (Residential Property, market HKD 939,729,000); COL005004 Flat D, 18/F, Capital Tower, 9 Capital Avenue, Tsim Sha Tsui (Commercial Property, market HKD 940,173,000)."
-        },
-        "review": {
-          "title": "Position comparison \u2014 Provincial Capital Holdings",
-          "locator": "Collateral extract 31 Aug 2026 and 30 Sep 2026",
-          "passage": "Grade stayed at 11 from 31 Jan 2026 through 30 Sep 2026. On-balance outstanding moved from HKD 2,380,458,000 on 31 Aug 2026 to HKD 2,375,636,000 on 30 Sep 2026. No stage migration and no days-past-due balance is on the extract. Demonstration overlay: stage 2 to 2, days past due 12, ECL HKD 66,517,808."
-        },
-        "financials": {
-          "title": "Demonstration statements \u2014 Provincial Capital Holdings",
-          "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
-          "passage": "2024 to 2026 revenue HKD 980,000,000, HKD 940,000,000, HKD 910,000,000. Interest cover 1.8 times, 1.7 times, 1.6 times. Covenant 1.5 times. Replace these figures when statements are provided."
-        },
-        "repayment": {
-          "title": "Cash flow schedule \u2014 CTR-0005-03",
-          "locator": "CASH_FLOW as at 30 Sep 2026, 31/12/2026",
-          "passage": "Next principal is HKD 198,387,333 on 31/12/2026 (92 days), contract CTR-0005-03, method Equal Amort, coupon 6.0 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
-        }
-      },
-      "repay_draft_id": ""
-    },
     {
       "customer_id": "BOR-PF",
       "legal_name": "Public Float",
       "group_id": "BOR-PF",
       "group_name": "Public Float",
       "rm": "David Ho",
-      "industry": "Property investment",
+      "industry": "Property Investment",
       "jurisdiction": "Hong Kong",
       "rating": 10,
       "prior_rating": 10,
-      "prior_rating_date": "31/01/2026",
+      "prior_rating_date": "original grade on the portfolio file",
       "stage": 1,
       "prior_stage": 1,
-      "drawn_hkd": 2281454000.0,
-      "committed_hkd": 2281454000.0,
-      "collateral_hkd": 3602294000.0,
+      "drawn_hkd": 579509000.0,
+      "committed_hkd": 1062613000.0,
+      "collateral_hkd": 787904000.0,
       "collateral_type": "Residential and commercial property",
-      "coverage_ratio": 1.58,
-      "ltv": 0.63,
+      "coverage_ratio": 1.36,
+      "ltv": 0.74,
       "guarantor": "None on the extract",
       "dpd": 0,
       "dpd_component": "None",
-      "ecl_hkd": 34221810.0,
-      "prior_ecl_hkd": 33195155.7,
-      "provision_hkd": 34221810.0,
+      "ecl_hkd": 2150000.0,
+      "prior_ecl_hkd": 1731000.0,
+      "provision_hkd": 2150000.0,
       "revenue_hkd": [
         1420000000,
         1460000000,
@@ -603,9 +59,9 @@
       ],
       "coverage_assumption": 2.4,
       "coverage_threshold": 1.8,
-      "next_due_days": 151,
-      "next_due_hkd": 285729000.0,
-      "next_due_date": "28/02/2027",
+      "next_due_days": 28,
+      "next_due_hkd": 147248000.0,
+      "next_due_date": "28/10/2026",
       "next_due_source": "Cash flow schedule",
       "next_contract": "CTR-0004-03",
       "next_method": "EQUAL_AMORT",
@@ -613,17 +69,17 @@
       "watchlist": false,
       "warnings": [],
       "full_file": true,
-      "summary": "Public Float has 4 on-balance facilities totalling HKD 2,281,454,000 and 2 off-balance facilities with property market value HKD 1,793,662,000. On-balance market value is HKD 3,602,294,000 and net realizable value is HKD 2,641,683,000. LTV is 0.63. Grade 10 is unchanged since 31 Jan 2026. Outstanding on 31 Aug 2026 was HKD 2,284,039,000. Demonstration figures, not on the property extract: relationship manager David Ho, stage 1 to 1, days past due 0, ECL HKD 34,221,810, interest cover 2.9 times against a 1.8 times covenant.",
+      "summary": "Public Float has 4 on-balance facilities totalling HKD 579,509,000 and 2 off-balance facilities with property market value HKD 258,296,000. On-balance market value is HKD 787,904,000 and net realizable value is HKD 594,291,000. LTV is 0.74. Current grade is 10 and the original grade is 10. Stage 1, days past due 0, ECL HKD 2,150,000. Outstanding on 31 Aug 2026 was HKD 579,509,000 and ECL was HKD 1,731,000. Relationship manager David Ho is a demonstration name. Demonstration statements, not on the portfolio file: interest cover 2.9 times against a 1.8 times covenant.",
       "documents": {
         "credit_paper": {
           "title": "Credit extract \u2014 Public Float",
           "locator": "Property portfolio collateral extract, 30 Sep 2026",
-          "passage": "Grade 10. On-balance drawn HKD 2,281,454,000. Property market value HKD 3,602,294,000. Net realizable value HKD 2,641,683,000. LTV 0.63. First charge. Properties: COL004001 Flat A, 8/F, Float Tower, 41 Float Street, Wan Chai (Commercial Property, market HKD 897,255,000); COL004002 Flat B, 12/F, Float Court, 41 Float Street, Wan Chai (Residential Property, market HKD 898,587,000); COL004003 Flat C, 15/F, Float Tower, 41 Float Street, Wan Chai (Commercial Property, market HKD 902,302,000); COL004004 Flat D, 18/F, Float Court, 41 Float Street, Wan Chai (Residential Property, market HKD 904,150,000)."
+          "passage": "Current grade 10. Original grade 10. On-balance drawn HKD 579,509,000. Property market value HKD 787,904,000. Net realizable value HKD 594,291,000. LTV 0.74. Stage 1. Days past due 0. ECL HKD 2,150,000. First charge. Properties: COL000019 Flat B, 12/F, Java Court, 26 Java Road, North Point (Residential Property, market HKD 164,766,000); COL000020 Unit 110, 12/F, Cheung Sha Centre, 26 Cheung Sha Wan Road, Cheung Sha Wan (Commercial Property, market HKD 234,989,000); COL000021 Flat C, 13/F, King's Residences, 28 King's Road, Quarry Bay (Residential Property, market HKD 210,360,000); COL000022 Unit 111, 13/F, Westlands Annex, 28 Westlands Road, Quarry Bay (Commercial Property, market HKD 177,789,000)."
         },
         "review": {
           "title": "Position comparison \u2014 Public Float",
-          "locator": "Collateral extract 31 Aug 2026 and 30 Sep 2026",
-          "passage": "Grade stayed at 10 from 31 Jan 2026 through 30 Sep 2026. On-balance outstanding moved from HKD 2,284,039,000 on 31 Aug 2026 to HKD 2,281,454,000 on 30 Sep 2026. No stage migration and no days-past-due balance is on the extract. Demonstration overlay: stage 1 to 1, days past due 0, ECL HKD 34,221,810."
+          "locator": "Portfolio extract 31 Aug 2026 and 30 Sep 2026",
+          "passage": "Current PD grade 10 is the grade on every month-end from 31 Dec 2025 through 30 Nov 2026. The original grade on the portfolio file is 10. On-balance outstanding moved from HKD 579,509,000 on 31 Aug 2026 to HKD 579,509,000 on 30 Sep 2026. Stage was 1 on 31 Aug 2026 and is 1 on 30 Sep 2026. Days past due on 30 Sep 2026 are 0. ECL moved from HKD 1,731,000 to HKD 2,150,000. Relationship manager, financial statements and the covenant threshold are demonstration fields."
         },
         "financials": {
           "title": "Demonstration statements \u2014 Public Float",
@@ -632,185 +88,302 @@
         },
         "repayment": {
           "title": "Cash flow schedule \u2014 CTR-0004-03",
-          "locator": "CASH_FLOW as at 30 Sep 2026, 28/02/2027",
-          "passage": "Next principal is HKD 285,729,000 on 28/02/2027 (151 days), contract CTR-0004-03, method Equal Amort, coupon 5.5 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
+          "locator": "CASH_FLOW as at 30 Sep 2026, 28/10/2026",
+          "passage": "Next principal is HKD 147,248,000 on 28/10/2026 (28 days), contract CTR-0004-03, method Equal Amort, coupon 5.5 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
         }
       },
       "repay_draft_id": ""
     },
     {
-      "customer_id": "BOR-AIIC",
-      "legal_name": "Apex Infrastructure Investment Corp.",
-      "group_id": "BOR-AIIC",
-      "group_name": "Apex Infrastructure Investment Corp.",
-      "rm": "Sophie Yip",
-      "industry": "Property investment",
+      "customer_id": "BOR-PCH",
+      "legal_name": "Provincial Capital Holdings",
+      "group_id": "BOR-PCH",
+      "group_name": "Provincial Capital Holdings",
+      "rm": "Joanna Lam",
+      "industry": "Property Development",
       "jurisdiction": "Hong Kong",
-      "rating": 9,
-      "prior_rating": 9,
-      "prior_rating_date": "31/01/2026",
-      "stage": 1,
-      "prior_stage": 1,
-      "drawn_hkd": 2186179000.0,
-      "committed_hkd": 2186179000.0,
-      "collateral_hkd": 3451862000.0,
+      "rating": 11,
+      "prior_rating": 8,
+      "prior_rating_date": "original grade on the portfolio file",
+      "stage": 2,
+      "prior_stage": 2,
+      "drawn_hkd": 571119000.0,
+      "committed_hkd": 848658000.0,
+      "collateral_hkd": 859441000.0,
       "collateral_type": "Residential and commercial property",
-      "coverage_ratio": 1.58,
-      "ltv": 0.63,
-      "guarantor": "Apex Group cross-guarantee, capped",
-      "dpd": 0,
-      "dpd_component": "None",
-      "ecl_hkd": 28420327.0,
-      "prior_ecl_hkd": 27283513.92,
-      "provision_hkd": 28420327.0,
+      "coverage_ratio": 1.5,
+      "ltv": 0.66,
+      "guarantor": "Provincial finance bureau letter of support",
+      "dpd": 65,
+      "dpd_component": "Portfolio extract",
+      "ecl_hkd": 3604000.0,
+      "prior_ecl_hkd": 4106000.0,
+      "provision_hkd": 3604000.0,
       "revenue_hkd": [
-        1680000000,
-        1720000000,
-        1750000000
+        980000000,
+        940000000,
+        910000000
       ],
       "margin_pct": [
-        22.0,
-        21.5,
-        21.1
+        14.2,
+        13.5,
+        12.8
       ],
       "liquidity_ratio": [
-        1.36,
-        1.34,
-        1.31
+        1.18,
+        1.12,
+        1.05
       ],
       "leverage": [
-        4.2,
-        4.2,
-        4.3
+        5.8,
+        6.0,
+        6.3
       ],
       "interest_coverage": [
-        2.5,
-        2.4,
-        2.3
+        1.8,
+        1.7,
+        1.6
       ],
-      "coverage_assumption": 2.3,
-      "coverage_threshold": 1.8,
-      "next_due_days": 31,
-      "next_due_hkd": 183758666.67,
-      "next_due_date": "31/10/2026",
+      "coverage_assumption": 1.8,
+      "coverage_threshold": 1.5,
+      "next_due_days": 28,
+      "next_due_hkd": 60025500.0,
+      "next_due_date": "28/10/2026",
       "next_due_source": "Cash flow schedule",
-      "next_contract": "CTR-0003-03",
+      "next_contract": "CTR-0005-03",
       "next_method": "EQUAL_AMORT",
       "refinancing": false,
-      "watchlist": false,
-      "warnings": [],
+      "watchlist": true,
+      "warnings": [
+        {
+          "description": "Portfolio extract at 30 Sep 2026: 65 days past due."
+        },
+        {
+          "description": "Stage 2 on the portfolio extract at 30 Sep 2026."
+        }
+      ],
       "full_file": true,
-      "summary": "Apex Infrastructure Investment Corp. has 4 on-balance facilities totalling HKD 2,186,179,000 and 2 off-balance facilities with property market value HKD 1,729,680,000. On-balance market value is HKD 3,451,862,000 and net realizable value is HKD 2,531,366,000. LTV is 0.63. Grade 9 is unchanged since 31 Jan 2026. Outstanding on 31 Aug 2026 was HKD 2,177,027,000. Demonstration figures, not on the property extract: relationship manager Sophie Yip, stage 1 to 1, days past due 0, ECL HKD 28,420,327, interest cover 2.3 times against a 1.8 times covenant.",
+      "summary": "Provincial Capital Holdings has 4 on-balance facilities totalling HKD 571,119,000 and 2 off-balance facilities with property market value HKD 144,586,000. On-balance market value is HKD 859,441,000 and net realizable value is HKD 668,145,000. LTV is 0.66. Current grade is 11 and the original grade is 8. Stage 2, days past due 65, ECL HKD 3,604,000. Outstanding on 31 Aug 2026 was HKD 571,119,000 and ECL was HKD 4,106,000. Relationship manager Joanna Lam is a demonstration name. Demonstration statements, not on the portfolio file: interest cover 1.6 times against a 1.5 times covenant.",
       "documents": {
         "credit_paper": {
-          "title": "Credit extract \u2014 Apex Infrastructure Investment Corp.",
+          "title": "Credit extract \u2014 Provincial Capital Holdings",
           "locator": "Property portfolio collateral extract, 30 Sep 2026",
-          "passage": "Grade 9. On-balance drawn HKD 2,186,179,000. Property market value HKD 3,451,862,000. Net realizable value HKD 2,531,366,000. LTV 0.63. First charge. Properties: COL003001 Flat A, 8/F, Pier Court, 22 Infrastructure Road, Kowloon Bay (Residential Property, market HKD 862,365,000); COL003002 Flat B, 12/F, Pier Tower, 22 Infrastructure Road, Kowloon Bay (Commercial Property, market HKD 857,979,000); COL003003 Flat C, 15/F, Pier Court, 22 Infrastructure Road, Kowloon Bay (Residential Property, market HKD 870,436,000); COL003004 Flat D, 18/F, Pier Tower, 22 Infrastructure Road, Kowloon Bay (Commercial Property, market HKD 861,082,000)."
+          "passage": "Current grade 11. Original grade 8. On-balance drawn HKD 571,119,000. Property market value HKD 859,441,000. Net realizable value HKD 668,145,000. LTV 0.66. Stage 2. Days past due 65. ECL HKD 3,604,000. First charge. Properties: COL000025 Flat E, 15/F, Kimberley Court, 32 Kimberley Road, Tsim Sha Tsui (Residential Property, market HKD 208,733,000); COL000026 Unit 113, 15/F, Bonham Tower, 32 Bonham Strand, Sheung Wan (Commercial Property, market HKD 270,850,000); COL000027 Flat F, 16/F, Argyle Residences, 34 Argyle Street, Mong Kok (Residential Property, market HKD 186,134,000); COL000028 Unit 114, 16/F, Austin Centre, 34 Austin Road, Jordan (Commercial Property, market HKD 193,724,000)."
         },
         "review": {
-          "title": "Position comparison \u2014 Apex Infrastructure Investment Corp.",
-          "locator": "Collateral extract 31 Aug 2026 and 30 Sep 2026",
-          "passage": "Grade stayed at 9 from 31 Jan 2026 through 30 Sep 2026. On-balance outstanding moved from HKD 2,177,027,000 on 31 Aug 2026 to HKD 2,186,179,000 on 30 Sep 2026. No stage migration and no days-past-due balance is on the extract. Demonstration overlay: stage 1 to 1, days past due 0, ECL HKD 28,420,327."
+          "title": "Position comparison \u2014 Provincial Capital Holdings",
+          "locator": "Portfolio extract 31 Aug 2026 and 30 Sep 2026",
+          "passage": "Current PD grade 11 is the grade on every month-end from 31 Dec 2025 through 30 Nov 2026. The original grade on the portfolio file is 8. On-balance outstanding moved from HKD 571,119,000 on 31 Aug 2026 to HKD 571,119,000 on 30 Sep 2026. Stage was 2 on 31 Aug 2026 and is 2 on 30 Sep 2026. Days past due on 30 Sep 2026 are 65. ECL moved from HKD 4,106,000 to HKD 3,604,000. Relationship manager, financial statements and the covenant threshold are demonstration fields."
         },
         "financials": {
-          "title": "Demonstration statements \u2014 Apex Infrastructure Investment Corp.",
+          "title": "Demonstration statements \u2014 Provincial Capital Holdings",
           "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
-          "passage": "2024 to 2026 revenue HKD 1,680,000,000, HKD 1,720,000,000, HKD 1,750,000,000. Interest cover 2.5 times, 2.4 times, 2.3 times. Covenant 1.8 times. Replace these figures when statements are provided."
+          "passage": "2024 to 2026 revenue HKD 980,000,000, HKD 940,000,000, HKD 910,000,000. Interest cover 1.8 times, 1.7 times, 1.6 times. Covenant 1.5 times. Replace these figures when statements are provided."
         },
         "repayment": {
-          "title": "Cash flow schedule \u2014 CTR-0003-03",
-          "locator": "CASH_FLOW as at 30 Sep 2026, 31/10/2026",
-          "passage": "Next principal is HKD 183,758,667 on 31/10/2026 (31 days), contract CTR-0003-03, method Equal Amort, coupon 5.0 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
+          "title": "Cash flow schedule \u2014 CTR-0005-03",
+          "locator": "CASH_FLOW as at 30 Sep 2026, 28/10/2026",
+          "passage": "Next principal is HKD 60,025,500 on 28/10/2026 (28 days), contract CTR-0005-03, method Equal Amort, coupon 6.0 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
         }
       },
       "repay_draft_id": ""
     },
     {
-      "customer_id": "BOR-STBB",
-      "legal_name": "State Treasury Bureau B",
-      "group_id": "BOR-STBB",
-      "group_name": "State Treasury Bureau B",
-      "rm": "Raymond Au",
-      "industry": "Government",
+      "customer_id": "BOR-AGHL",
+      "legal_name": "Apex Global Holdings Limited",
+      "group_id": "BOR-AGHL",
+      "group_name": "Apex Global Holdings Limited",
+      "rm": "Chris Leung",
+      "industry": "Property Development",
       "jurisdiction": "Hong Kong",
-      "rating": 3,
-      "prior_rating": 3,
-      "prior_rating_date": "31/01/2026",
-      "stage": 1,
-      "prior_stage": 1,
-      "drawn_hkd": 2102149000.0,
-      "committed_hkd": 2102149000.0,
-      "collateral_hkd": 3319182000.0,
+      "rating": 14,
+      "prior_rating": 11,
+      "prior_rating_date": "original grade on the portfolio file",
+      "stage": 2,
+      "prior_stage": 2,
+      "drawn_hkd": 517465000.0,
+      "committed_hkd": 732314000.0,
+      "collateral_hkd": 788670000.0,
       "collateral_type": "Residential and commercial property",
-      "coverage_ratio": 1.58,
-      "ltv": 0.63,
-      "guarantor": "Sovereign appropriation, as described in the demonstration file",
-      "dpd": 0,
-      "dpd_component": "None",
-      "ecl_hkd": 4204298.0,
-      "prior_ecl_hkd": 4204298.0,
-      "provision_hkd": 4204298.0,
+      "coverage_ratio": 1.52,
+      "ltv": 0.66,
+      "guarantor": "Apex Group parent comfort letter, unsecured",
+      "dpd": 65,
+      "dpd_component": "Portfolio extract",
+      "ecl_hkd": 10731000.0,
+      "prior_ecl_hkd": 8503000.0,
+      "provision_hkd": 10731000.0,
       "revenue_hkd": [
-        8400000000,
-        8550000000,
-        8620000000
+        4820000000,
+        4260000000,
+        3640000000
       ],
       "margin_pct": [
-        11.0,
-        11.2,
-        11.1
+        21.4,
+        18.6,
+        15.2
       ],
       "liquidity_ratio": [
-        1.85,
-        1.88,
-        1.9
+        1.38,
+        1.22,
+        1.08
       ],
       "leverage": [
+        4.6,
+        5.3,
+        6.2
+      ],
+      "interest_coverage": [
+        2.6,
         2.1,
-        2.0,
-        2.0
+        1.7
       ],
-      "interest_coverage": [
-        4.8,
-        4.7,
-        4.6
-      ],
-      "coverage_assumption": 4.0,
-      "coverage_threshold": 2.5,
-      "next_due_days": 31,
-      "next_due_hkd": 175485000.0,
-      "next_due_date": "31/10/2026",
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 2.0,
+      "next_due_days": 28,
+      "next_due_hkd": 110893000.0,
+      "next_due_date": "28/10/2026",
       "next_due_source": "Cash flow schedule",
-      "next_contract": "CTR-0002-03",
+      "next_contract": "CTR-0010-03",
       "next_method": "EQUAL_AMORT",
       "refinancing": false,
-      "watchlist": false,
-      "warnings": [],
+      "watchlist": true,
+      "warnings": [
+        {
+          "description": "Portfolio extract at 30 Sep 2026: 65 days past due."
+        },
+        {
+          "description": "Stage 2 on the portfolio extract at 30 Sep 2026."
+        },
+        {
+          "description": "Demonstration statements: interest cover is 1.7 times, below the 2.0 times covenant. Statements are not in the portfolio file."
+        },
+        {
+          "description": "Placeholder news: office leasing on the Kowloon towers is behind the budget used at approval."
+        }
+      ],
       "full_file": true,
-      "summary": "State Treasury Bureau B has 4 on-balance facilities totalling HKD 2,102,149,000 and 2 off-balance facilities with property market value HKD 1,646,366,000. On-balance market value is HKD 3,319,182,000 and net realizable value is HKD 2,434,067,000. LTV is 0.63. Grade 3 is unchanged since 31 Jan 2026. Outstanding on 31 Aug 2026 was HKD 2,094,662,000. Demonstration figures, not on the property extract: relationship manager Raymond Au, stage 1 to 1, days past due 0, ECL HKD 4,204,298, interest cover 4.6 times against a 2.5 times covenant.",
+      "summary": "Apex Global Holdings Limited has 5 on-balance facilities totalling HKD 517,465,000, including a bond of HKD 68,963,000, and 1 off-balance facilities with property market value HKD 91,676,000. On-balance market value is HKD 788,670,000 and net realizable value is HKD 591,679,000. LTV is 0.66. Current grade is 14 and the original grade is 11. Stage 2, days past due 65, ECL HKD 10,731,000. Outstanding on 31 Aug 2026 was HKD 517,465,000 and ECL was HKD 8,503,000. Relationship manager Chris Leung is a demonstration name. Demonstration statements, not on the portfolio file: interest cover 1.7 times against a 2.0 times covenant.",
       "documents": {
         "credit_paper": {
-          "title": "Credit extract \u2014 State Treasury Bureau B",
+          "title": "Credit extract \u2014 Apex Global Holdings Limited",
           "locator": "Property portfolio collateral extract, 30 Sep 2026",
-          "passage": "Grade 3. On-balance drawn HKD 2,102,149,000. Property market value HKD 3,319,182,000. Net realizable value HKD 2,434,067,000. LTV 0.63. First charge. Properties: COL002001 Flat A, 8/F, Treasury Tower, 6 Treasury Square, Admiralty (Commercial Property, market HKD 831,826,000); COL002002 Flat B, 12/F, Treasury Court, 6 Treasury Square, Admiralty (Residential Property, market HKD 832,994,000); COL002003 Flat C, 15/F, Treasury Tower, 6 Treasury Square, Admiralty (Commercial Property, market HKD 831,244,000); COL002004 Flat D, 18/F, Treasury Court, 6 Treasury Square, Admiralty (Residential Property, market HKD 823,118,000)."
+          "passage": "Current grade 14. Original grade 11. On-balance drawn HKD 517,465,000. Property market value HKD 788,670,000. Net realizable value HKD 591,679,000. LTV 0.66. Stage 2. Days past due 65. ECL HKD 10,731,000. First charge. Properties: COL000055 Flat D, 30/F, Percival Place, 62 Percival Street, Causeway Bay (Residential Property, market HKD 224,914,000); COL000056 Unit 128, 30/F, Bonham Tower, 62 Bonham Strand, Sheung Wan (Commercial Property, market HKD 215,307,000); COL000057 Flat E, 31/F, Blue Pool House, 64 Blue Pool Road, Happy Valley (Residential Property, market HKD 187,402,000); COL000058 Unit 129, 31/F, Austin Centre, 64 Austin Road, Jordan (Commercial Property, market HKD 73,513,000); COL000060 Unit 130, 32/F, Tseuk Luk Place, 66 Tseuk Luk Street, San Po Kong (Commercial Property, market HKD 87,534,000)."
         },
         "review": {
-          "title": "Position comparison \u2014 State Treasury Bureau B",
-          "locator": "Collateral extract 31 Aug 2026 and 30 Sep 2026",
-          "passage": "Grade stayed at 3 from 31 Jan 2026 through 30 Sep 2026. On-balance outstanding moved from HKD 2,094,662,000 on 31 Aug 2026 to HKD 2,102,149,000 on 30 Sep 2026. No stage migration and no days-past-due balance is on the extract. Demonstration overlay: stage 1 to 1, days past due 0, ECL HKD 4,204,298."
+          "title": "Position comparison \u2014 Apex Global Holdings Limited",
+          "locator": "Portfolio extract 31 Aug 2026 and 30 Sep 2026",
+          "passage": "Current PD grade 14 is the grade on every month-end from 31 Dec 2025 through 30 Nov 2026. The original grade on the portfolio file is 11. On-balance outstanding moved from HKD 517,465,000 on 31 Aug 2026 to HKD 517,465,000 on 30 Sep 2026. Stage was 2 on 31 Aug 2026 and is 2 on 30 Sep 2026. Days past due on 30 Sep 2026 are 65. ECL moved from HKD 8,503,000 to HKD 10,731,000. Relationship manager, financial statements and the covenant threshold are demonstration fields."
         },
         "financials": {
-          "title": "Demonstration statements \u2014 State Treasury Bureau B",
+          "title": "Demonstration statements \u2014 Apex Global Holdings Limited",
           "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
-          "passage": "2024 to 2026 revenue HKD 8,400,000,000, HKD 8,550,000,000, HKD 8,620,000,000. Interest cover 4.8 times, 4.7 times, 4.6 times. Covenant 2.5 times. Replace these figures when statements are provided."
+          "passage": "2024 to 2026 revenue HKD 4,820,000,000, HKD 4,260,000,000, HKD 3,640,000,000. Interest cover 2.6 times, 2.1 times, 1.7 times. Covenant 2.0 times. Replace these figures when statements are provided."
         },
         "repayment": {
-          "title": "Cash flow schedule \u2014 CTR-0002-03",
-          "locator": "CASH_FLOW as at 30 Sep 2026, 31/10/2026",
-          "passage": "Next principal is HKD 175,485,000 on 31/10/2026 (31 days), contract CTR-0002-03, method Equal Amort, coupon 3.0 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
+          "title": "Cash flow schedule \u2014 CTR-0010-03",
+          "locator": "CASH_FLOW as at 30 Sep 2026, 28/10/2026",
+          "passage": "Next principal is HKD 110,893,000 on 28/10/2026 (28 days), contract CTR-0010-03, method Equal Amort, coupon 5.5 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
         }
       },
       "repay_draft_id": ""
+    },
+    {
+      "customer_id": "BOR-IDIC",
+      "legal_name": "Industrial Development Investment Corp.",
+      "group_id": "BOR-IDIC",
+      "group_name": "Industrial Development Investment Corp.",
+      "rm": "Alan Siu",
+      "industry": "Property Investment",
+      "jurisdiction": "Hong Kong",
+      "rating": 11,
+      "prior_rating": 8,
+      "prior_rating_date": "original grade on the portfolio file",
+      "stage": 2,
+      "prior_stage": 2,
+      "drawn_hkd": 512405000.0,
+      "committed_hkd": 826544000.0,
+      "collateral_hkd": 785431000.0,
+      "collateral_type": "Residential and commercial property",
+      "coverage_ratio": 1.53,
+      "ltv": 0.65,
+      "guarantor": "Sponsor completion guarantee on one development site",
+      "dpd": 65,
+      "dpd_component": "Portfolio extract",
+      "ecl_hkd": 3295000.0,
+      "prior_ecl_hkd": 2784000.0,
+      "provision_hkd": 3295000.0,
+      "revenue_hkd": [
+        1760000000,
+        1520000000,
+        1280000000
+      ],
+      "margin_pct": [
+        16.4,
+        12.8,
+        9.1
+      ],
+      "liquidity_ratio": [
+        1.21,
+        1.08,
+        0.96
+      ],
+      "leverage": [
+        5.5,
+        6.4,
+        7.3
+      ],
+      "interest_coverage": [
+        1.9,
+        1.6,
+        1.4
+      ],
+      "coverage_assumption": 2.0,
+      "coverage_threshold": 1.8,
+      "next_due_days": 28,
+      "next_due_hkd": 163443000.0,
+      "next_due_date": "28/10/2026",
+      "next_due_source": "Cash flow schedule",
+      "next_contract": "CTR-0006-03",
+      "next_method": "EQUAL_AMORT",
+      "refinancing": false,
+      "watchlist": true,
+      "warnings": [
+        {
+          "description": "Portfolio extract at 30 Sep 2026: 65 days past due."
+        },
+        {
+          "description": "Stage 2 on the portfolio extract at 30 Sep 2026."
+        },
+        {
+          "description": "Placeholder news: a contractor payment claim is open. The amount is not in the property extract."
+        }
+      ],
+      "full_file": true,
+      "summary": "Industrial Development Investment Corp. has 4 on-balance facilities totalling HKD 512,405,000 and 2 off-balance facilities with property market value HKD 165,253,000. On-balance market value is HKD 785,431,000 and net realizable value is HKD 572,134,000. LTV is 0.65. Current grade is 11 and the original grade is 8. Stage 2, days past due 65, ECL HKD 3,295,000. Outstanding on 31 Aug 2026 was HKD 512,405,000 and ECL was HKD 2,784,000. Relationship manager Alan Siu is a demonstration name. Demonstration statements, not on the portfolio file: interest cover 1.4 times against a 1.8 times covenant.",
+      "documents": {
+        "credit_paper": {
+          "title": "Credit extract \u2014 Industrial Development Investment Corp.",
+          "locator": "Property portfolio collateral extract, 30 Sep 2026",
+          "passage": "Current grade 11. Original grade 8. On-balance drawn HKD 512,405,000. Property market value HKD 785,431,000. Net realizable value HKD 572,134,000. LTV 0.65. Stage 2. Days past due 65. ECL HKD 3,295,000. First charge. Properties: COL000031 Flat H, 18/F, Princess Court, 38 Princess Margaret Road, Ho Man Tin (Residential Property, market HKD 310,172,000); COL000032 Unit 116, 18/F, Exchange Tower, 38 Connaught Road Central, Central (Commercial Property, market HKD 158,107,000); COL000033 Flat A, 19/F, Sha Tin Heights, 40 Tai Po Road, Sha Tin (Residential Property, market HKD 239,173,000); COL000034 Unit 117, 19/F, Pedder Place, 40 Pedder Street, Central (Commercial Property, market HKD 77,979,000)."
+        },
+        "review": {
+          "title": "Position comparison \u2014 Industrial Development Investment Corp.",
+          "locator": "Portfolio extract 31 Aug 2026 and 30 Sep 2026",
+          "passage": "Current PD grade 11 is the grade on every month-end from 31 Dec 2025 through 30 Nov 2026. The original grade on the portfolio file is 8. On-balance outstanding moved from HKD 512,405,000 on 31 Aug 2026 to HKD 512,405,000 on 30 Sep 2026. Stage was 2 on 31 Aug 2026 and is 2 on 30 Sep 2026. Days past due on 30 Sep 2026 are 65. ECL moved from HKD 2,784,000 to HKD 3,295,000. Relationship manager, financial statements and the covenant threshold are demonstration fields."
+        },
+        "financials": {
+          "title": "Demonstration statements \u2014 Industrial Development Investment Corp.",
+          "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
+          "passage": "2024 to 2026 revenue HKD 1,760,000,000, HKD 1,520,000,000, HKD 1,280,000,000. Interest cover 1.9 times, 1.6 times, 1.4 times. Covenant 1.8 times. Replace these figures when statements are provided."
+        },
+        "repayment": {
+          "title": "Cash flow schedule \u2014 CTR-0006-03",
+          "locator": "CASH_FLOW as at 30 Sep 2026, 28/10/2026",
+          "passage": "Next principal is HKD 163,443,000 on 28/10/2026 (28 days), contract CTR-0006-03, method Equal Amort, coupon 6.0 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
+        }
+      },
+      "repay_draft_id": "MAIL-REPAY-LANTERN"
     },
     {
       "customer_id": "BOR-MGAA",
@@ -822,21 +395,21 @@
       "jurisdiction": "Hong Kong",
       "rating": 3,
       "prior_rating": 3,
-      "prior_rating_date": "31/01/2026",
+      "prior_rating_date": "original grade on the portfolio file",
       "stage": 1,
       "prior_stage": 1,
-      "drawn_hkd": 1991289000.0,
-      "committed_hkd": 1991289000.0,
-      "collateral_hkd": 3144139000.0,
+      "drawn_hkd": 449133000.0,
+      "committed_hkd": 1138741000.0,
+      "collateral_hkd": 721611000.0,
       "collateral_type": "Residential and commercial property",
-      "coverage_ratio": 1.58,
-      "ltv": 0.63,
+      "coverage_ratio": 1.61,
+      "ltv": 0.62,
       "guarantor": "Municipal revenue assignment",
       "dpd": 0,
       "dpd_component": "None",
-      "ecl_hkd": 3982578.0,
-      "prior_ecl_hkd": 3982578.0,
-      "provision_hkd": 3982578.0,
+      "ecl_hkd": 274000.0,
+      "prior_ecl_hkd": 307000.0,
+      "provision_hkd": 274000.0,
       "revenue_hkd": [
         6200000000,
         6350000000,
@@ -864,9 +437,9 @@
       ],
       "coverage_assumption": 3.5,
       "coverage_threshold": 2.5,
-      "next_due_days": 61,
-      "next_due_hkd": 165040000.0,
-      "next_due_date": "30/11/2026",
+      "next_due_days": 28,
+      "next_due_hkd": 84776000.0,
+      "next_due_date": "28/10/2026",
       "next_due_source": "Cash flow schedule",
       "next_contract": "CTR-0001-03",
       "next_method": "EQUAL_AMORT",
@@ -874,17 +447,17 @@
       "watchlist": false,
       "warnings": [],
       "full_file": true,
-      "summary": "Metro Gov Authority A has 4 on-balance facilities totalling HKD 1,991,289,000 and 2 off-balance facilities with property market value HKD 1,576,542,000. On-balance market value is HKD 3,144,139,000 and net realizable value is HKD 2,305,703,000. LTV is 0.63. Grade 3 is unchanged since 31 Jan 2026. Outstanding on 31 Aug 2026 was HKD 1,990,662,000. Demonstration figures, not on the property extract: relationship manager Helen Kwok, stage 1 to 1, days past due 0, ECL HKD 3,982,578, interest cover 4.1 times against a 2.5 times covenant.",
+      "summary": "Metro Gov Authority A has 4 on-balance facilities totalling HKD 449,133,000 and 2 off-balance facilities with property market value HKD 464,735,000. On-balance market value is HKD 721,611,000 and net realizable value is HKD 545,383,000. LTV is 0.62. Current grade is 3 and the original grade is 3. Stage 1, days past due 0, ECL HKD 274,000. Outstanding on 31 Aug 2026 was HKD 449,133,000 and ECL was HKD 307,000. Relationship manager Helen Kwok is a demonstration name. Demonstration statements, not on the portfolio file: interest cover 4.1 times against a 2.5 times covenant.",
       "documents": {
         "credit_paper": {
           "title": "Credit extract \u2014 Metro Gov Authority A",
           "locator": "Property portfolio collateral extract, 30 Sep 2026",
-          "passage": "Grade 3. On-balance drawn HKD 1,991,289,000. Property market value HKD 3,144,139,000. Net realizable value HKD 2,305,703,000. LTV 0.63. First charge. Properties: COL001001 Flat A, 8/F, Meridian Court, 18 Meridian Lane, Central (Residential Property, market HKD 781,413,000); COL001002 Flat B, 12/F, Meridian Tower, 18 Meridian Lane, Central (Commercial Property, market HKD 790,539,000); COL001003 Flat C, 15/F, Meridian Court, 18 Meridian Lane, Central (Residential Property, market HKD 781,768,000); COL001004 Flat D, 18/F, Meridian Tower, 18 Meridian Lane, Central (Commercial Property, market HKD 790,419,000)."
+          "passage": "Current grade 3. Original grade 3. On-balance drawn HKD 449,133,000. Property market value HKD 721,611,000. Net realizable value HKD 545,383,000. LTV 0.62. Stage 1. Days past due 0. ECL HKD 274,000. First charge. Properties: COL000001 Flat A, 3/F, Meridian Court, 8 Meridian Lane, Central (Residential Property, market HKD 43,627,000); COL000002 Unit 101, 3/F, Exchange Tower, 8 Connaught Road Central, Central (Commercial Property, market HKD 262,532,000); COL000003 Flat B, 4/F, Harbourlight House, 10 Ice House Street, Central (Residential Property, market HKD 268,963,000); COL000004 Unit 102, 4/F, Pedder Place, 10 Pedder Street, Central (Commercial Property, market HKD 146,489,000)."
         },
         "review": {
           "title": "Position comparison \u2014 Metro Gov Authority A",
-          "locator": "Collateral extract 31 Aug 2026 and 30 Sep 2026",
-          "passage": "Grade stayed at 3 from 31 Jan 2026 through 30 Sep 2026. On-balance outstanding moved from HKD 1,990,662,000 on 31 Aug 2026 to HKD 1,991,289,000 on 30 Sep 2026. No stage migration and no days-past-due balance is on the extract. Demonstration overlay: stage 1 to 1, days past due 0, ECL HKD 3,982,578."
+          "locator": "Portfolio extract 31 Aug 2026 and 30 Sep 2026",
+          "passage": "Current PD grade 3 is the grade on every month-end from 31 Dec 2025 through 30 Nov 2026. The original grade on the portfolio file is 3. On-balance outstanding moved from HKD 449,133,000 on 31 Aug 2026 to HKD 449,133,000 on 30 Sep 2026. Stage was 1 on 31 Aug 2026 and is 1 on 30 Sep 2026. Days past due on 30 Sep 2026 are 0. ECL moved from HKD 307,000 to HKD 274,000. Relationship manager, financial statements and the covenant threshold are demonstration fields."
         },
         "financials": {
           "title": "Demonstration statements \u2014 Metro Gov Authority A",
@@ -893,8 +466,447 @@
         },
         "repayment": {
           "title": "Cash flow schedule \u2014 CTR-0001-03",
-          "locator": "CASH_FLOW as at 30 Sep 2026, 30/11/2026",
-          "passage": "Next principal is HKD 165,040,000 on 30/11/2026 (61 days), contract CTR-0001-03, method Equal Amort, coupon 3.0 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
+          "locator": "CASH_FLOW as at 30 Sep 2026, 28/10/2026",
+          "passage": "Next principal is HKD 84,776,000 on 28/10/2026 (28 days), contract CTR-0001-03, method Equal Amort, coupon 3.0 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
+        }
+      },
+      "repay_draft_id": ""
+    },
+    {
+      "customer_id": "BOR-MAMH",
+      "legal_name": "Municipal Asset Mgmt Holdings",
+      "group_id": "BOR-MAMH",
+      "group_name": "Municipal Asset Mgmt Holdings",
+      "rm": "Peter Ng",
+      "industry": "Property Investment",
+      "jurisdiction": "Hong Kong",
+      "rating": 10,
+      "prior_rating": 10,
+      "prior_rating_date": "original grade on the portfolio file",
+      "stage": 1,
+      "prior_stage": 1,
+      "drawn_hkd": 331259000.0,
+      "committed_hkd": 738098000.0,
+      "collateral_hkd": 526117000.0,
+      "collateral_type": "Residential and commercial property",
+      "coverage_ratio": 1.59,
+      "ltv": 0.63,
+      "guarantor": "Municipal holding-company guarantee, limited to drawn balance",
+      "dpd": 0,
+      "dpd_component": "None",
+      "ecl_hkd": 1830000.0,
+      "prior_ecl_hkd": 968000.0,
+      "provision_hkd": 1830000.0,
+      "revenue_hkd": [
+        3100000000,
+        3040000000,
+        2980000000
+      ],
+      "margin_pct": [
+        18.2,
+        17.6,
+        17.1
+      ],
+      "liquidity_ratio": [
+        1.46,
+        1.41,
+        1.36
+      ],
+      "leverage": [
+        4.1,
+        4.3,
+        4.4
+      ],
+      "interest_coverage": [
+        2.8,
+        2.6,
+        2.5
+      ],
+      "coverage_assumption": 2.5,
+      "coverage_threshold": 1.8,
+      "next_due_days": 28,
+      "next_due_hkd": 63296000.0,
+      "next_due_date": "28/10/2026",
+      "next_due_source": "Cash flow schedule",
+      "next_contract": "CTR-0008-03",
+      "next_method": "EQUAL_AMORT",
+      "refinancing": false,
+      "watchlist": false,
+      "warnings": [],
+      "full_file": true,
+      "summary": "Municipal Asset Mgmt Holdings has 4 on-balance facilities totalling HKD 331,259,000 and 2 off-balance facilities with property market value HKD 355,177,000. On-balance market value is HKD 526,117,000 and net realizable value is HKD 389,280,000. LTV is 0.63. Current grade is 10 and the original grade is 10. Stage 1, days past due 0, ECL HKD 1,830,000. Outstanding on 31 Aug 2026 was HKD 331,259,000 and ECL was HKD 968,000. Relationship manager Peter Ng is a demonstration name. Demonstration statements, not on the portfolio file: interest cover 2.5 times against a 1.8 times covenant.",
+      "documents": {
+        "credit_paper": {
+          "title": "Credit extract \u2014 Municipal Asset Mgmt Holdings",
+          "locator": "Property portfolio collateral extract, 30 Sep 2026",
+          "passage": "Current grade 10. Original grade 10. On-balance drawn HKD 331,259,000. Property market value HKD 526,117,000. Net realizable value HKD 389,280,000. LTV 0.63. Stage 1. Days past due 0. ECL HKD 1,830,000. First charge. Properties: COL000043 Flat F, 24/F, Harbourlight House, 50 Ice House Street, Central (Residential Property, market HKD 18,698,000); COL000044 Unit 122, 24/F, Portland Centre, 50 Portland Street, Mong Kok (Commercial Property, market HKD 324,240,000); COL000045 Flat G, 25/F, Caine Residences, 52 Caine Road, Mid-Levels (Residential Property, market HKD 94,972,000); COL000046 Unit 123, 25/F, Wang Kwong Centre, 52 Wang Kwong Road, Kowloon Bay (Commercial Property, market HKD 88,207,000)."
+        },
+        "review": {
+          "title": "Position comparison \u2014 Municipal Asset Mgmt Holdings",
+          "locator": "Portfolio extract 31 Aug 2026 and 30 Sep 2026",
+          "passage": "Current PD grade 10 is the grade on every month-end from 31 Dec 2025 through 30 Nov 2026. The original grade on the portfolio file is 10. On-balance outstanding moved from HKD 331,259,000 on 31 Aug 2026 to HKD 331,259,000 on 30 Sep 2026. Stage was 1 on 31 Aug 2026 and is 1 on 30 Sep 2026. Days past due on 30 Sep 2026 are 0. ECL moved from HKD 968,000 to HKD 1,830,000. Relationship manager, financial statements and the covenant threshold are demonstration fields."
+        },
+        "financials": {
+          "title": "Demonstration statements \u2014 Municipal Asset Mgmt Holdings",
+          "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
+          "passage": "2024 to 2026 revenue HKD 3,100,000,000, HKD 3,040,000,000, HKD 2,980,000,000. Interest cover 2.8 times, 2.6 times, 2.5 times. Covenant 1.8 times. Replace these figures when statements are provided."
+        },
+        "repayment": {
+          "title": "Cash flow schedule \u2014 CTR-0008-03",
+          "locator": "CASH_FLOW as at 30 Sep 2026, 28/10/2026",
+          "passage": "Next principal is HKD 63,296,000 on 28/10/2026 (28 days), contract CTR-0008-03, method Equal Amort, coupon 5.5 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
+        }
+      },
+      "repay_draft_id": ""
+    },
+    {
+      "customer_id": "BOR-GPIHL",
+      "legal_name": "Global Property Investment Holdings Ltd.",
+      "group_id": "BOR-GPIHL",
+      "group_name": "Global Property Investment Holdings Ltd.",
+      "rm": "Irene Cheung",
+      "industry": "Property Investment",
+      "jurisdiction": "Hong Kong",
+      "rating": 9,
+      "prior_rating": 9,
+      "prior_rating_date": "original grade on the portfolio file",
+      "stage": 1,
+      "prior_stage": 1,
+      "drawn_hkd": 312718000.0,
+      "committed_hkd": 758607000.0,
+      "collateral_hkd": 436833000.0,
+      "collateral_type": "Residential and commercial property",
+      "coverage_ratio": 1.4,
+      "ltv": 0.72,
+      "guarantor": "None on the extract",
+      "dpd": 0,
+      "dpd_component": "None",
+      "ecl_hkd": 1285000.0,
+      "prior_ecl_hkd": 1459000.0,
+      "provision_hkd": 1285000.0,
+      "revenue_hkd": [
+        2240000000,
+        2180000000,
+        2090000000
+      ],
+      "margin_pct": [
+        24.1,
+        23.0,
+        21.6
+      ],
+      "liquidity_ratio": [
+        1.33,
+        1.29,
+        1.24
+      ],
+      "leverage": [
+        4.8,
+        5.0,
+        5.2
+      ],
+      "interest_coverage": [
+        2.4,
+        2.2,
+        2.1
+      ],
+      "coverage_assumption": 2.2,
+      "coverage_threshold": 1.75,
+      "next_due_days": 28,
+      "next_due_hkd": 91025500.0,
+      "next_due_date": "28/10/2026",
+      "next_due_source": "Cash flow schedule",
+      "next_contract": "CTR-0007-03",
+      "next_method": "EQUAL_AMORT",
+      "refinancing": false,
+      "watchlist": false,
+      "warnings": [
+        {
+          "description": "Vacancy on two commercial floors is above the case used at the last review."
+        }
+      ],
+      "full_file": true,
+      "summary": "Global Property Investment Holdings Ltd. has 4 on-balance facilities totalling HKD 312,718,000 and 2 off-balance facilities with property market value HKD 383,480,000. On-balance market value is HKD 436,833,000 and net realizable value is HKD 346,403,000. LTV is 0.72. Current grade is 9 and the original grade is 9. Stage 1, days past due 0, ECL HKD 1,285,000. Outstanding on 31 Aug 2026 was HKD 312,718,000 and ECL was HKD 1,459,000. Relationship manager Irene Cheung is a demonstration name. Demonstration statements, not on the portfolio file: interest cover 2.1 times against a 1.8 times covenant.",
+      "documents": {
+        "credit_paper": {
+          "title": "Credit extract \u2014 Global Property Investment Holdings Ltd.",
+          "locator": "Property portfolio collateral extract, 30 Sep 2026",
+          "passage": "Current grade 9. Original grade 9. On-balance drawn HKD 312,718,000. Property market value HKD 436,833,000. Net realizable value HKD 346,403,000. LTV 0.72. Stage 1. Days past due 0. ECL HKD 1,285,000. First charge. Properties: COL000037 Flat C, 21/F, Castle Peak Lodge, 44 Castle Peak Road, Tsuen Wan (Residential Property, market HKD 93,257,000); COL000038 Unit 119, 21/F, Gloucester House, 44 Gloucester Road, Wan Chai (Commercial Property, market HKD 23,515,000); COL000039 Flat D, 22/F, Tuen Mun Court, 46 Tuen Mun Heung Sze Wui Road, Tuen Mun (Residential Property, market HKD 223,366,000); COL000040 Unit 120, 22/F, Russell Centre, 46 Russell Street, Causeway Bay (Commercial Property, market HKD 96,695,000)."
+        },
+        "review": {
+          "title": "Position comparison \u2014 Global Property Investment Holdings Ltd.",
+          "locator": "Portfolio extract 31 Aug 2026 and 30 Sep 2026",
+          "passage": "Current PD grade 9 is the grade on every month-end from 31 Dec 2025 through 30 Nov 2026. The original grade on the portfolio file is 9. On-balance outstanding moved from HKD 312,718,000 on 31 Aug 2026 to HKD 312,718,000 on 30 Sep 2026. Stage was 1 on 31 Aug 2026 and is 1 on 30 Sep 2026. Days past due on 30 Sep 2026 are 0. ECL moved from HKD 1,459,000 to HKD 1,285,000. Relationship manager, financial statements and the covenant threshold are demonstration fields."
+        },
+        "financials": {
+          "title": "Demonstration statements \u2014 Global Property Investment Holdings Ltd.",
+          "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
+          "passage": "2024 to 2026 revenue HKD 2,240,000,000, HKD 2,180,000,000, HKD 2,090,000,000. Interest cover 2.4 times, 2.2 times, 2.1 times. Covenant 1.8 times. Replace these figures when statements are provided."
+        },
+        "repayment": {
+          "title": "Cash flow schedule \u2014 CTR-0007-03",
+          "locator": "CASH_FLOW as at 30 Sep 2026, 28/10/2026",
+          "passage": "Next principal is HKD 91,025,500 on 28/10/2026 (28 days), contract CTR-0007-03, method Equal Amort, coupon 5.0 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
+        }
+      },
+      "repay_draft_id": ""
+    },
+    {
+      "customer_id": "BOR-AIIC",
+      "legal_name": "Apex Infrastructure Investment Corp.",
+      "group_id": "BOR-AIIC",
+      "group_name": "Apex Infrastructure Investment Corp.",
+      "rm": "Sophie Yip",
+      "industry": "Property Investment",
+      "jurisdiction": "Hong Kong",
+      "rating": 9,
+      "prior_rating": 9,
+      "prior_rating_date": "original grade on the portfolio file",
+      "stage": 1,
+      "prior_stage": 1,
+      "drawn_hkd": 260922000.0,
+      "committed_hkd": 495168000.0,
+      "collateral_hkd": 389871000.0,
+      "collateral_type": "Residential and commercial property",
+      "coverage_ratio": 1.49,
+      "ltv": 0.67,
+      "guarantor": "Apex Group cross-guarantee, capped",
+      "dpd": 0,
+      "dpd_component": "None",
+      "ecl_hkd": 900000.0,
+      "prior_ecl_hkd": 1009000.0,
+      "provision_hkd": 900000.0,
+      "revenue_hkd": [
+        1680000000,
+        1720000000,
+        1750000000
+      ],
+      "margin_pct": [
+        22.0,
+        21.5,
+        21.1
+      ],
+      "liquidity_ratio": [
+        1.36,
+        1.34,
+        1.31
+      ],
+      "leverage": [
+        4.2,
+        4.2,
+        4.3
+      ],
+      "interest_coverage": [
+        2.5,
+        2.4,
+        2.3
+      ],
+      "coverage_assumption": 2.3,
+      "coverage_threshold": 1.8,
+      "next_due_days": 28,
+      "next_due_hkd": 15880000.0,
+      "next_due_date": "28/10/2026",
+      "next_due_source": "Cash flow schedule",
+      "next_contract": "CTR-0003-03",
+      "next_method": "EQUAL_AMORT",
+      "refinancing": false,
+      "watchlist": false,
+      "warnings": [],
+      "full_file": true,
+      "summary": "Apex Infrastructure Investment Corp. has 4 on-balance facilities totalling HKD 260,922,000 and 2 off-balance facilities with property market value HKD 169,603,000. On-balance market value is HKD 389,871,000 and net realizable value is HKD 309,725,000. LTV is 0.67. Current grade is 9 and the original grade is 9. Stage 1, days past due 0, ECL HKD 900,000. Outstanding on 31 Aug 2026 was HKD 260,922,000 and ECL was HKD 1,009,000. Relationship manager Sophie Yip is a demonstration name. Demonstration statements, not on the portfolio file: interest cover 2.3 times against a 1.8 times covenant.",
+      "documents": {
+        "credit_paper": {
+          "title": "Credit extract \u2014 Apex Infrastructure Investment Corp.",
+          "locator": "Property portfolio collateral extract, 30 Sep 2026",
+          "passage": "Current grade 9. Original grade 9. On-balance drawn HKD 260,922,000. Property market value HKD 389,871,000. Net realizable value HKD 309,725,000. LTV 0.67. Stage 1. Days past due 0. ECL HKD 900,000. First charge. Properties: COL000013 Flat G, 9/F, Hennessy Court, 20 Hennessy Road, Wan Chai (Residential Property, market HKD 73,952,000); COL000014 Unit 107, 9/F, Portland Centre, 20 Portland Street, Mong Kok (Commercial Property, market HKD 87,178,000); COL000015 Flat H, 10/F, Percival Place, 22 Percival Street, Causeway Bay (Residential Property, market HKD 48,768,000); COL000016 Unit 108, 10/F, Wang Kwong Centre, 22 Wang Kwong Road, Kowloon Bay (Commercial Property, market HKD 179,973,000)."
+        },
+        "review": {
+          "title": "Position comparison \u2014 Apex Infrastructure Investment Corp.",
+          "locator": "Portfolio extract 31 Aug 2026 and 30 Sep 2026",
+          "passage": "Current PD grade 9 is the grade on every month-end from 31 Dec 2025 through 30 Nov 2026. The original grade on the portfolio file is 9. On-balance outstanding moved from HKD 260,922,000 on 31 Aug 2026 to HKD 260,922,000 on 30 Sep 2026. Stage was 1 on 31 Aug 2026 and is 1 on 30 Sep 2026. Days past due on 30 Sep 2026 are 0. ECL moved from HKD 1,009,000 to HKD 900,000. Relationship manager, financial statements and the covenant threshold are demonstration fields."
+        },
+        "financials": {
+          "title": "Demonstration statements \u2014 Apex Infrastructure Investment Corp.",
+          "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
+          "passage": "2024 to 2026 revenue HKD 1,680,000,000, HKD 1,720,000,000, HKD 1,750,000,000. Interest cover 2.5 times, 2.4 times, 2.3 times. Covenant 1.8 times. Replace these figures when statements are provided."
+        },
+        "repayment": {
+          "title": "Cash flow schedule \u2014 CTR-0003-03",
+          "locator": "CASH_FLOW as at 30 Sep 2026, 28/10/2026",
+          "passage": "Next principal is HKD 15,880,000 on 28/10/2026 (28 days), contract CTR-0003-03, method Equal Amort, coupon 5.0 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
+        }
+      },
+      "repay_draft_id": ""
+    },
+    {
+      "customer_id": "BOR-APL",
+      "legal_name": "Apex Property Limited",
+      "group_id": "BOR-APL",
+      "group_name": "Apex Property Limited",
+      "rm": "May Chan",
+      "industry": "Property Development",
+      "jurisdiction": "Hong Kong",
+      "rating": 7,
+      "prior_rating": 7,
+      "prior_rating_date": "original grade on the portfolio file",
+      "stage": 1,
+      "prior_stage": 1,
+      "drawn_hkd": 245505000.0,
+      "committed_hkd": 820657000.0,
+      "collateral_hkd": 328980000.0,
+      "collateral_type": "Residential and commercial property",
+      "coverage_ratio": 1.34,
+      "ltv": 0.75,
+      "guarantor": "None on the extract",
+      "dpd": 0,
+      "dpd_component": "None",
+      "ecl_hkd": 723000.0,
+      "prior_ecl_hkd": 815000.0,
+      "provision_hkd": 723000.0,
+      "revenue_hkd": [
+        1940000000,
+        2050000000,
+        2110000000
+      ],
+      "margin_pct": [
+        28.0,
+        27.4,
+        26.8
+      ],
+      "liquidity_ratio": [
+        1.55,
+        1.52,
+        1.49
+      ],
+      "leverage": [
+        3.4,
+        3.3,
+        3.2
+      ],
+      "interest_coverage": [
+        3.4,
+        3.3,
+        3.2
+      ],
+      "coverage_assumption": 3.0,
+      "coverage_threshold": 2.0,
+      "next_due_days": 28,
+      "next_due_hkd": 52420500.0,
+      "next_due_date": "28/10/2026",
+      "next_due_source": "Cash flow schedule",
+      "next_contract": "CTR-0009-03",
+      "next_method": "EQUAL_AMORT",
+      "refinancing": false,
+      "watchlist": false,
+      "warnings": [],
+      "full_file": true,
+      "summary": "Apex Property Limited has 4 on-balance facilities totalling HKD 245,505,000 and 2 off-balance facilities with property market value HKD 400,066,000. On-balance market value is HKD 328,980,000 and net realizable value is HKD 252,011,000. LTV is 0.75. Current grade is 7 and the original grade is 7. Stage 1, days past due 0, ECL HKD 723,000. Outstanding on 31 Aug 2026 was HKD 245,505,000 and ECL was HKD 815,000. Relationship manager May Chan is a demonstration name. Demonstration statements, not on the portfolio file: interest cover 3.2 times against a 2.0 times covenant.",
+      "documents": {
+        "credit_paper": {
+          "title": "Credit extract \u2014 Apex Property Limited",
+          "locator": "Property portfolio collateral extract, 30 Sep 2026",
+          "passage": "Current grade 7. Original grade 7. On-balance drawn HKD 245,505,000. Property market value HKD 328,980,000. Net realizable value HKD 252,011,000. LTV 0.75. Stage 1. Days past due 0. ECL HKD 723,000. First charge. Properties: COL000049 Flat A, 27/F, Queensway Lodge, 56 Queensway, Admiralty (Residential Property, market HKD 127,603,000); COL000050 Unit 125, 27/F, Cheung Sha Centre, 56 Cheung Sha Wan Road, Cheung Sha Wan (Commercial Property, market HKD 45,975,000); COL000051 Flat B, 28/F, Lockhart House, 58 Lockhart Road, Wan Chai (Residential Property, market HKD 132,470,000); COL000052 Unit 126, 28/F, Westlands Annex, 58 Westlands Road, Quarry Bay (Commercial Property, market HKD 22,932,000)."
+        },
+        "review": {
+          "title": "Position comparison \u2014 Apex Property Limited",
+          "locator": "Portfolio extract 31 Aug 2026 and 30 Sep 2026",
+          "passage": "Current PD grade 7 is the grade on every month-end from 31 Dec 2025 through 30 Nov 2026. The original grade on the portfolio file is 7. On-balance outstanding moved from HKD 245,505,000 on 31 Aug 2026 to HKD 245,505,000 on 30 Sep 2026. Stage was 1 on 31 Aug 2026 and is 1 on 30 Sep 2026. Days past due on 30 Sep 2026 are 0. ECL moved from HKD 815,000 to HKD 723,000. Relationship manager, financial statements and the covenant threshold are demonstration fields."
+        },
+        "financials": {
+          "title": "Demonstration statements \u2014 Apex Property Limited",
+          "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
+          "passage": "2024 to 2026 revenue HKD 1,940,000,000, HKD 2,050,000,000, HKD 2,110,000,000. Interest cover 3.4 times, 3.3 times, 3.2 times. Covenant 2.0 times. Replace these figures when statements are provided."
+        },
+        "repayment": {
+          "title": "Cash flow schedule \u2014 CTR-0009-03",
+          "locator": "CASH_FLOW as at 30 Sep 2026, 28/10/2026",
+          "passage": "Next principal is HKD 52,420,500 on 28/10/2026 (28 days), contract CTR-0009-03, method Equal Amort, coupon 4.5 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
+        }
+      },
+      "repay_draft_id": ""
+    },
+    {
+      "customer_id": "BOR-STBB",
+      "legal_name": "State Treasury Bureau B",
+      "group_id": "BOR-STBB",
+      "group_name": "State Treasury Bureau B",
+      "rm": "Raymond Au",
+      "industry": "Government",
+      "jurisdiction": "Hong Kong",
+      "rating": 3,
+      "prior_rating": 3,
+      "prior_rating_date": "original grade on the portfolio file",
+      "stage": 1,
+      "prior_stage": 1,
+      "drawn_hkd": 198117000.0,
+      "committed_hkd": 681583000.0,
+      "collateral_hkd": 323811000.0,
+      "collateral_type": "Residential and commercial property",
+      "coverage_ratio": 1.63,
+      "ltv": 0.61,
+      "guarantor": "Sovereign appropriation, as described in the demonstration file",
+      "dpd": 0,
+      "dpd_component": "None",
+      "ecl_hkd": 115000.0,
+      "prior_ecl_hkd": 129000.0,
+      "provision_hkd": 115000.0,
+      "revenue_hkd": [
+        8400000000,
+        8550000000,
+        8620000000
+      ],
+      "margin_pct": [
+        11.0,
+        11.2,
+        11.1
+      ],
+      "liquidity_ratio": [
+        1.85,
+        1.88,
+        1.9
+      ],
+      "leverage": [
+        2.1,
+        2.0,
+        2.0
+      ],
+      "interest_coverage": [
+        4.8,
+        4.7,
+        4.6
+      ],
+      "coverage_assumption": 4.0,
+      "coverage_threshold": 2.5,
+      "next_due_days": 28,
+      "next_due_hkd": 34685000.0,
+      "next_due_date": "28/10/2026",
+      "next_due_source": "Cash flow schedule",
+      "next_contract": "CTR-0002-03",
+      "next_method": "EQUAL_AMORT",
+      "refinancing": false,
+      "watchlist": false,
+      "warnings": [],
+      "full_file": true,
+      "summary": "State Treasury Bureau B has 4 on-balance facilities totalling HKD 198,117,000 and 2 off-balance facilities with property market value HKD 539,697,000. On-balance market value is HKD 323,811,000 and net realizable value is HKD 264,389,000. LTV is 0.61. Current grade is 3 and the original grade is 3. Stage 1, days past due 0, ECL HKD 115,000. Outstanding on 31 Aug 2026 was HKD 198,117,000 and ECL was HKD 129,000. Relationship manager Raymond Au is a demonstration name. Demonstration statements, not on the portfolio file: interest cover 4.6 times against a 2.5 times covenant.",
+      "documents": {
+        "credit_paper": {
+          "title": "Credit extract \u2014 State Treasury Bureau B",
+          "locator": "Property portfolio collateral extract, 30 Sep 2026",
+          "passage": "Current grade 3. Original grade 3. On-balance drawn HKD 198,117,000. Property market value HKD 323,811,000. Net realizable value HKD 264,389,000. LTV 0.61. Stage 1. Days past due 0. ECL HKD 115,000. First charge. Properties: COL000007 Flat D, 6/F, Robinson Chambers, 14 Robinson Road, Mid-Levels (Residential Property, market HKD 172,228,000); COL000008 Unit 104, 6/F, Gloucester House, 14 Gloucester Road, Wan Chai (Commercial Property, market HKD 27,148,000); COL000009 Flat E, 7/F, Queensway Lodge, 16 Queensway, Admiralty (Residential Property, market HKD 55,561,000); COL000010 Unit 105, 7/F, Russell Centre, 16 Russell Street, Causeway Bay (Commercial Property, market HKD 68,874,000)."
+        },
+        "review": {
+          "title": "Position comparison \u2014 State Treasury Bureau B",
+          "locator": "Portfolio extract 31 Aug 2026 and 30 Sep 2026",
+          "passage": "Current PD grade 3 is the grade on every month-end from 31 Dec 2025 through 30 Nov 2026. The original grade on the portfolio file is 3. On-balance outstanding moved from HKD 198,117,000 on 31 Aug 2026 to HKD 198,117,000 on 30 Sep 2026. Stage was 1 on 31 Aug 2026 and is 1 on 30 Sep 2026. Days past due on 30 Sep 2026 are 0. ECL moved from HKD 129,000 to HKD 115,000. Relationship manager, financial statements and the covenant threshold are demonstration fields."
+        },
+        "financials": {
+          "title": "Demonstration statements \u2014 State Treasury Bureau B",
+          "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
+          "passage": "2024 to 2026 revenue HKD 8,400,000,000, HKD 8,550,000,000, HKD 8,620,000,000. Interest cover 4.8 times, 4.7 times, 4.6 times. Covenant 2.5 times. Replace these figures when statements are provided."
+        },
+        "repayment": {
+          "title": "Cash flow schedule \u2014 CTR-0002-03",
+          "locator": "CASH_FLOW as at 30 Sep 2026, 28/10/2026",
+          "passage": "Next principal is HKD 34,685,000 on 28/10/2026 (28 days), contract CTR-0002-03, method Equal Amort, coupon 3.0 percent. Source is the generated cash flow schedule. The monitoring threshold is HKD 5,000,000."
         }
       },
       "repay_draft_id": ""
@@ -902,24 +914,34 @@
   ],
   "industries": [
     {
-      "industry": "Property investment",
-      "customers": 8,
-      "drawn_hkd": 20165941000.0,
-      "stage2": 3,
-      "migrations": 2,
+      "industry": "Property Investment",
+      "customers": 5,
+      "drawn_hkd": 1996813000.0,
+      "stage2": 1,
+      "migrations": 0,
+      "open_warnings": 4,
+      "dpd_accounts": 1,
+      "collateral_hkd": 2926156000.0
+    },
+    {
+      "industry": "Property Development",
+      "customers": 3,
+      "drawn_hkd": 1334089000.0,
+      "stage2": 2,
+      "migrations": 0,
       "open_warnings": 6,
       "dpd_accounts": 2,
-      "collateral_hkd": 31840959000.0
+      "collateral_hkd": 1977091000.0
     },
     {
       "industry": "Government",
       "customers": 2,
-      "drawn_hkd": 4093438000.0,
+      "drawn_hkd": 647250000.0,
       "stage2": 0,
       "migrations": 0,
       "open_warnings": 0,
       "dpd_accounts": 0,
-      "collateral_hkd": 6463321000.0
+      "collateral_hkd": 1045422000.0
     }
   ],
   "news": [
@@ -929,15 +951,15 @@
       "source": "Credit Risk Alert Portal (placeholder feed)",
       "date": "12 Sep 2026",
       "customer_id": "BOR-AGHL",
-      "industry": "Property investment",
+      "industry": "Property Development",
       "body": "A placeholder alert says two commercial floors in the Kowloon towers leased by Apex Global Holdings are still vacant against the budget used at the last review. No loss amount is stated. Replace this item when the live feed is connected.",
       "factors": {
-        "exposure_hkd": 2856268000.0,
-        "security_coverage": 1.58,
+        "exposure_hkd": 517465000.0,
+        "security_coverage": 1.52,
         "guarantor_support": "Apex Group parent comfort letter, unsecured",
-        "financial_strength": "rating 10, interest cover 1.7 times",
-        "warning_signals": 2,
-        "score": 66,
+        "financial_strength": "rating 14, interest cover 1.7 times",
+        "warning_signals": 4,
+        "score": 85,
         "material": true
       }
     },
@@ -947,15 +969,15 @@
       "source": "Credit Risk Alert Portal (placeholder feed)",
       "date": "21 Sep 2026",
       "customer_id": "BOR-IDIC",
-      "industry": "Property investment",
-      "body": "A placeholder court-list note names a contractor claim. The claim amount is not in the property extract. The demonstration file also shows 36 days past due on one instalment.",
+      "industry": "Property Investment",
+      "body": "A placeholder court-list note names a contractor claim. The claim amount is not in the property extract. The portfolio extract itself shows 65 days past due and stage 2 at 30 Sep 2026.",
       "factors": {
-        "exposure_hkd": 2472061000.0,
-        "security_coverage": 1.58,
+        "exposure_hkd": 512405000.0,
+        "security_coverage": 1.53,
         "guarantor_support": "Sponsor completion guarantee on one development site",
         "financial_strength": "rating 11, interest cover 1.4 times",
-        "warning_signals": 2,
-        "score": 81,
+        "warning_signals": 3,
+        "score": 85,
         "material": true
       }
     },
@@ -965,13 +987,13 @@
       "source": "Credit Risk Alert Portal (placeholder feed)",
       "date": "28 Sep 2026",
       "customer_id": null,
-      "industry": "Property investment",
+      "industry": "Property Investment",
       "body": "A sector placeholder says grade-A and fringe office vacancy did not improve in the quarter. It does not name a default. It is here so the industry step has a headline until a live feed arrives.",
       "factors": {
-        "exposure_hkd": 20165941000.0,
-        "security_coverage": "about 1.58 times market value over drawn, from the collateral extract",
+        "exposure_hkd": 1996813000.0,
+        "security_coverage": "1.47 times market value over drawn, from the collateral extract",
         "guarantor_support": "not an industry-level fact",
-        "financial_strength": "property names carry grades 7 to 11 on the cash flow file",
+        "financial_strength": "property investment names carry grades 9 to 11 on the portfolio file",
         "warning_signals": "leasing, vacancy and one contractor claim on the placeholder feed",
         "score": 74,
         "material": true
@@ -986,8 +1008,8 @@
       "industry": "Government",
       "body": "A short commentary mentions land premiums. It does not name Metro Gov Authority A in a default, and it does not give a figure. Scored below the materiality line.",
       "factors": {
-        "exposure_hkd": 1991289000.0,
-        "security_coverage": 1.58,
+        "exposure_hkd": 449133000.0,
+        "security_coverage": 1.61,
         "guarantor_support": "Municipal revenue assignment",
         "financial_strength": "rating 3, interest cover 4.1 times",
         "warning_signals": 0,
@@ -1002,53 +1024,53 @@
       "kind": "Adverse news",
       "subject": "Adverse news \u2014 Apex Global Holdings Limited",
       "customer_id": "BOR-AGHL",
-      "body": "To: yiyangyao2@gmail.com\nSubject: Adverse news \u2014 Apex Global Holdings Limited\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\n12 Sep 2026. Office leasing at Apex Global's Kowloon towers is behind budget.\n\nA placeholder alert says two commercial floors in the Kowloon towers leased by Apex Global Holdings are still vacant against the budget used at the last review. No loss amount is stated. Replace this item when the live feed is connected.\n\nMateriality score 66. Drawn HKD 2,856,268,000. Collateral coverage 1.58. Guarantor: Apex Group parent comfort letter, unsecured. Interest cover on the demonstration statements is 1.7 times.\n\nA second placeholder says a contractor has filed a claim against Industrial Development Investment Corp. Replace both items when the live alert feed is provided.\n\nThis note asks the relationship manager to check the leasing budget. It does not downgrade the name, call default, or exit the relationship.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
+      "body": "To: yiyangyao2@gmail.com\nSubject: Adverse news \u2014 Apex Global Holdings Limited\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\n12 Sep 2026. Office leasing at Apex Global's Kowloon towers is behind budget.\n\nA placeholder alert says two commercial floors in the Kowloon towers leased by Apex Global Holdings are still vacant against the budget used at the last review. No loss amount is stated. Replace this item when the live feed is connected.\n\nMateriality score 85. Drawn HKD 517,465,000. Collateral coverage 1.52. Guarantor: Apex Group parent comfort letter, unsecured. Interest cover on the demonstration statements is 1.7 times.\n\nA second placeholder says a contractor has filed a claim against Industrial Development Investment Corp. Replace both items when the live alert feed is provided.\n\nThis note asks the relationship manager to check the leasing budget. It does not downgrade the name, call default, or exit the relationship.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
     },
     {
       "id": "MAIL-IND-WHOLESALE",
       "kind": "Industry stress",
-      "subject": "Industry review \u2014 Property investment",
+      "subject": "Industry review \u2014 Property Investment",
       "customer_id": "",
-      "body": "To: yiyangyao2@gmail.com\nSubject: Industry review \u2014 Property investment\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\n28 Sep 2026. Hong Kong commercial vacancy stayed high through the third quarter. A sector placeholder says grade-A and fringe office vacancy did not improve in the quarter. It does not name a default. It is here so the industry step has a headline until a live feed arrives.\n\nProperty investment drawn is HKD 20,165,941,000 across 8 groups. Stage 2 names: 3. Migrations: 2. Open warnings: 6.\n\nGovernment drawn is HKD 4,093,438,000 across 2 groups.\n\nOn-balance collateral market value is Residential Property HKD 19,156,555,000, Commercial Property HKD 19,147,725,000. Portfolio LTV on the extract is about 0.63. Grades on the cash flow file did not change between January and September 2026.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
+      "body": "To: yiyangyao2@gmail.com\nSubject: Industry review \u2014 Property Investment\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\n28 Sep 2026. Hong Kong commercial vacancy stayed high through the third quarter. A sector placeholder says grade-A and fringe office vacancy did not improve in the quarter. It does not name a default. It is here so the industry step has a headline until a live feed arrives.\n\nProperty Investment drawn is HKD 1,996,813,000 across 5 groups. Stage 2 names: 1. Migrations since 31 Aug 2026: 0. Open warnings: 4.\n\nProperty Development drawn is HKD 1,334,089,000 across 3 groups. Government drawn is HKD 647,250,000 across 2 groups.\n\nOn-balance collateral market value is Residential Property HKD 3,085,119,000, Commercial Property HKD 2,863,550,000. Portfolio LTV on the on-balance collateral is 0.67. Current PD grades did not change between the December 2025 and November 2026 month-ends.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
     },
     {
       "id": "MAIL-REPAY-LANTERN",
       "kind": "Large repayment",
-      "subject": "Large repayment \u2014 Global Property Investment Holdings Ltd.",
-      "customer_id": "BOR-GPIHL",
-      "body": "To: yiyangyao2@gmail.com\nSubject: Large repayment \u2014 Global Property Investment Holdings Ltd.\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\nGlobal Property Investment Holdings Ltd. has principal of HKD 321,549,000 due on 30/11/2026, 61 days after 30 Sep 2026.\n\nThe amount is on CTR-0007-04, method Declining Amort. It is above the HKD 5,000,000 monitoring threshold.\n\nGroup drawn is HKD 2,574,209,000. On-balance property market value is HKD 4,064,540,000. LTV is 0.63.\n\nThe relationship owner should confirm the funding source for this instalment. The draft does not extend the date and it does not waive the payment.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
+      "subject": "Large repayment \u2014 Industrial Development Investment Corp.",
+      "customer_id": "BOR-IDIC",
+      "body": "To: yiyangyao2@gmail.com\nSubject: Large repayment \u2014 Industrial Development Investment Corp.\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\nIndustrial Development Investment Corp. has principal of HKD 163,443,000 due on 28/10/2026, 28 days after 30 Sep 2026.\n\nThe amount is on CTR-0006-03, method Equal Amort. It is above the HKD 5,000,000 monitoring threshold.\n\nGroup drawn is HKD 512,405,000. On-balance property market value is HKD 785,431,000. LTV is 0.65.\n\nThe relationship owner should confirm the funding source for this instalment. The draft does not extend the date and it does not waive the payment.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
     },
     {
       "id": "MAIL-DPD-LANTERN",
       "kind": "Days past due",
-      "subject": "Days past due \u2014 Industrial Development Investment Corp.",
-      "customer_id": "BOR-IDIC",
-      "body": "To: yiyangyao2@gmail.com\nSubject: Days past due \u2014 Industrial Development Investment Corp.\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\nThe property extract itself shows every facility current. The demonstration ageing, used until a collections file arrives, places Industrial Development Investment Corp. at 36 days past due.\n\nDrawn HKD 2,472,061,000. Relationship manager Alan Siu. One warning records a contractor claim that is also a placeholder.\n\nProvincial Capital Holdings is 12 days past due on the same demonstration file, still inside 30 days.\n\nThe cash-flow dates above HKD 5,000,000 remain future obligations. This draft does not treat those future dates as past due.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
+      "subject": "Days past due \u2014 portfolio extract",
+      "customer_id": "",
+      "body": "To: yiyangyao2@gmail.com\nSubject: Days past due \u2014 portfolio extract\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\nThe portfolio extract at 30 Sep 2026 records days past due on three names: Apex Global Holdings Limited at 65 days, drawn HKD 517,465,000, ECL HKD 10,731,000; Industrial Development Investment Corp. at 65 days, drawn HKD 512,405,000, ECL HKD 3,295,000; Provincial Capital Holdings at 65 days, drawn HKD 571,119,000, ECL HKD 3,604,000.\n\nStage on each of these names is 2, the same stage as 31 Aug 2026. The days-past-due figure is PAST_DUE_DAY on the portfolio file.\n\nThe cash-flow dates above HKD 5,000,000 are future principal dates. This draft does not treat those future dates as past due.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
     },
     {
       "id": "MAIL-COV-APEX",
       "kind": "Covenant scenario",
       "subject": "Covenant test \u2014 Apex Global Holdings Limited",
       "customer_id": "BOR-AGHL",
-      "body": "To: yiyangyao2@gmail.com\nSubject: Covenant test \u2014 Apex Global Holdings Limited\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\nFinancial statements were not in the uploaded files. The figures below are a demonstration so the covenant screen can be used.\n\nLatest demonstration interest cover for Apex Global Holdings Limited is 1.7 times. The covenant is 2.0 times, so the name is outside the covenant on this placeholder.\n\nA revenue decline of 15 percent moves cover to about 1.1 times. Margin, funding cost and liquidity cases are on the financials screen.\n\nWhat is from the extract: drawn HKD 2,856,268,000, property market value HKD 4,509,895,000, LTV 0.63.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
+      "body": "To: yiyangyao2@gmail.com\nSubject: Covenant test \u2014 Apex Global Holdings Limited\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\nFinancial statements were not in the uploaded files. The figures below are a demonstration so the covenant screen can be used.\n\nLatest demonstration interest cover for Apex Global Holdings Limited is 1.7 times. The covenant is 2.0 times, so the name is outside the covenant on this placeholder.\n\nA revenue decline of 15 percent moves cover to about 1.1 times. Margin, funding cost and liquidity cases are on the financials screen.\n\nWhat is from the extract: drawn HKD 517,465,000, property market value HKD 788,670,000, LTV 0.66.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
     }
   ],
   "portfolio": {
     "customers": 10,
-    "facilities_on_balance": 40,
-    "drawn_hkd": 24259379000.0,
-    "ecl_hkd": 449266416.0,
-    "prior_ecl_hkd": 374191397.68,
-    "ecl_coverage": 0.0185,
-    "migrations": 2,
+    "facilities_on_balance": 41,
+    "drawn_hkd": 3978152000.0,
+    "ecl_hkd": 24907000.0,
+    "prior_ecl_hkd": 21811000.0,
+    "ecl_coverage": 0.0063,
+    "migrations": 0,
     "stages": {
       "1": {
         "count": 7,
-        "drawn_hkd": 16555414000.0
+        "drawn_hkd": 2377163000.0
       },
       "2": {
         "count": 3,
-        "drawn_hkd": 7703965000.0
+        "drawn_hkd": 1600989000.0
       },
       "3": {
         "count": 0,
@@ -1057,20 +1079,20 @@
     },
     "dpd": {
       "Current": {
-        "count": 8,
-        "drawn_hkd": 19411682000.0
+        "count": 7,
+        "drawn_hkd": 2377163000.0
       },
       "1\u201329": {
-        "count": 1,
-        "drawn_hkd": 2375636000.0
-      },
-      "30\u201359": {
-        "count": 1,
-        "drawn_hkd": 2472061000.0
-      },
-      "60\u201389": {
         "count": 0,
         "drawn_hkd": 0
+      },
+      "30\u201359": {
+        "count": 0,
+        "drawn_hkd": 0
+      },
+      "60\u201389": {
+        "count": 3,
+        "drawn_hkd": 1600989000.0
       },
       "90\u2013179": {
         "count": 0,
@@ -1082,23 +1104,27 @@
       }
     },
     "collateral": {
-      "Residential Property": 19156555000.0,
-      "Commercial Property": 19147725000.0
+      "Residential Property": 3085119000.0,
+      "Commercial Property": 2863550000.0
     },
     "maturity": {
-      "month": 0.0,
-      "quarter": 1284468000.01,
-      "later": 1177124333.33
+      "month": 823692500.0,
+      "quarter": 0.0,
+      "later": 0.0
     },
     "large_due": [
-      "BOR-APL",
-      "BOR-GPIHL",
+      "BOR-PF",
+      "BOR-PCH",
+      "BOR-AGHL",
       "BOR-IDIC",
+      "BOR-MGAA",
+      "BOR-MAMH",
+      "BOR-GPIHL",
       "BOR-AIIC",
-      "BOR-STBB",
-      "BOR-MGAA"
+      "BOR-APL",
+      "BOR-STBB"
     ],
-    "overdue_reviews": 1,
-    "open_warnings": 6
+    "overdue_reviews": 3,
+    "open_warnings": 10
   }
 }
