@@ -163,6 +163,13 @@ def measure(value, pattern: str) -> str:
 
 def date_bar() -> str:
     chosen = view()
+    count = len(chosen.dates)
+    if count == len(BOOK["dates"]):
+        summary = f"All {count} months · position {chosen.label()}"
+    elif count == 1:
+        summary = chosen.label()
+    else:
+        summary = f"{count} months · position {chosen.label()}"
     boxes = []
     for iso in BOOK["dates"]:
         checked = "checked" if iso in chosen.dates else ""
@@ -170,14 +177,21 @@ def date_bar() -> str:
             f'<label><input type="checkbox" name="d" value="{iso}" {checked}>{escape(chosen.label(iso))}</label>'
         )
     return f"""
-    <form class="dates" method="post" action="/dates">
+    <form class="date-menu" method="post" action="/dates">
       <input type="hidden" name="next" value="{escape(chosen.next_path)}">
-      <div class="label">Reporting dates</div>
-      {''.join(boxes)}
-      <button type="submit" name="preset" value="apply">Apply dates</button>
-      <button type="submit" class="ghost" name="preset" value="all">All dates</button>
-      <button type="submit" class="ghost" name="preset" value="latest">Latest only</button>
-      <span class="hint">Position {escape(chosen.label())}. The trend uses the {len(chosen.dates)} checked date{"s" if len(chosen.dates) != 1 else ""}.</span>
+      <button type="button" class="date-toggle" aria-expanded="false" aria-controls="date-panel">
+        <span class="label">Reporting dates</span>
+        <strong>{escape(summary)}</strong>
+      </button>
+      <div class="date-panel" id="date-panel">
+        {''.join(boxes)}
+        <p class="hint">Position {escape(chosen.label())}. The trend uses the {count} checked date{"s" if count != 1 else ""}.</p>
+        <div class="date-actions">
+          <button type="submit" name="preset" value="apply">Apply dates</button>
+          <button type="submit" class="ghost" name="preset" value="all">All dates</button>
+          <button type="submit" class="ghost" name="preset" value="latest">Latest only</button>
+        </div>
+      </div>
     </form>"""
 
 
@@ -407,8 +421,17 @@ form.dates {{ display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; ba
 form.dates .label {{ width:100%; }}
 form.dates label {{ display:flex; gap:6px; align-items:center; font-size:.84rem; font-weight:600; }}
 form.dates input {{ width:auto; margin:0; }}
-form.dates .hint {{ color:var(--muted); font-size:.82rem; }}
-form.dates button.ghost {{ background:#F7F4F0; color:var(--ink); border:1px solid var(--line); }}
+.date-menu {{ position:relative; display:inline-block; max-width:100%; margin-bottom:16px; }}
+.date-toggle {{ display:block; min-width:280px; max-width:100%; background:var(--card); color:var(--ink); border:1px solid var(--line); text-align:left; }}
+.date-toggle .label {{ display:block; }}
+.date-toggle strong {{ display:block; font-size:1rem; margin-top:2px; }}
+.date-panel {{ display:none; position:absolute; z-index:20; top:calc(100% + 6px); left:0; width:min(320px, 86vw); max-height:70vh; overflow:auto; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; box-shadow:0 12px 28px rgba(44,40,37,.14); }}
+.date-menu.open .date-panel {{ display:block; }}
+.date-panel label {{ display:flex; gap:8px; align-items:center; padding:5px 0; font-weight:600; }}
+.date-panel input {{ width:auto; margin:0; }}
+.date-panel .hint {{ color:var(--muted); font-size:.82rem; }}
+.date-actions {{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }}
+.date-panel button.ghost {{ background:#F7F4F0; color:var(--ink); border:1px solid var(--line); }}
 .trend-chart, #trend-svg {{ width:100%; height:auto; display:block; }}
 .legend {{ display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:8px; font-size:.84rem; }}
 .legend i {{ display:inline-block; width:10px; height:10px; border-radius:99px; margin-right:6px; }}
@@ -433,7 +456,7 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
 <div class="shell" id="shell">
   <nav id="rail">
     <div class="mark">Risk Intelligence<br><span>Platform</span></div>
-    <p>Portfolio numbers are the latest month. The chart on that page has its own filters. Other pages follow the dates you check.</p>
+    <p>Portfolio numbers are the latest month. Other pages keep the date choice in a menu.</p>
     {''.join(links)}
     <a class="logout" href="/logout">Sign out</a>
   </nav>
@@ -462,6 +485,20 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
     if (!narrow) localStorage.setItem("rip-nav", collapsed ? "1" : "0");
   }});
   document.getElementById("backdrop").addEventListener("click", function () {{ apply(true); }});
+  var menu = document.querySelector(".date-menu");
+  if (menu) {{
+    var dateToggle = menu.querySelector(".date-toggle");
+    dateToggle.addEventListener("click", function () {{
+      var open = menu.classList.toggle("open");
+      dateToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    }});
+    document.addEventListener("click", function (event) {{
+      if (!menu.contains(event.target)) {{
+        menu.classList.remove("open");
+        dateToggle.setAttribute("aria-expanded", "false");
+      }}
+    }});
+  }}
 }})();
 </script>
 </body>
