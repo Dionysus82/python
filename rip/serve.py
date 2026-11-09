@@ -88,6 +88,23 @@ def view() -> BookView:
     return VIEW.get()
 
 
+def latest_iso() -> str:
+    return BOOK["dates"][-1]
+
+
+def portfolio_at(iso: str) -> dict:
+    return next(item for item in BOOK["portfolio_history"] if item["date"] == iso)
+
+
+def customer_at(cid: str, iso: str) -> dict:
+    raw = next(row for row in BOOK["customers"] if row["customer_id"] == cid)
+    point = next(item for item in raw["history"] if item["date"] == iso)
+    row = dict(raw)
+    for key in POINT_FIELDS:
+        row[key] = point[key]
+    return row
+
+
 def bind_view(dates: list[str], next_path: str) -> BookView:
     chosen = BookView(dates, next_path)
     VIEW.set(chosen)
@@ -174,6 +191,144 @@ def trend_table(metrics: list[tuple[str, object]]) -> str:
     return f'<div class="scroll"><table class="trend"><thead><tr><th></th>{head}</tr></thead><tbody>{"".join(rows)}</tbody></table></div>'
 
 
+def trend_chart() -> str:
+    history = BOOK["portfolio_history"]
+    chosen = view()
+    payload = {
+        "labels": [datetime.strptime(item["date"], "%Y-%m-%d").strftime("%b %y") for item in history],
+        "full": [chosen.label(item["date"]) for item in history],
+        "series": [
+            {"id": "ecl", "name": "ECL", "unit": "hkd", "on": True, "values": [item["ecl_hkd"] for item in history]},
+            {"id": "dpd60", "name": "Drawn 60 days or more past due", "unit": "hkd", "on": False, "values": [item["dpd60_drawn"] for item in history]},
+            {"id": "stage2", "name": "Drawn in stage 2", "unit": "hkd", "on": False, "values": [item["stage2_drawn"] for item in history]},
+            {"id": "drawn", "name": "Drawn exposure", "unit": "hkd", "on": False, "values": [item["drawn_hkd"] for item in history]},
+            {"id": "pastdue", "name": "Names past due", "unit": "count", "on": False, "values": [item["dpd_names"] for item in history]},
+            {"id": "stage2n", "name": "Stage 2 names", "unit": "count", "on": False, "values": [item["stage2_names"] for item in history]},
+            {"id": "cover", "name": "ECL coverage", "unit": "pct", "on": False, "values": [item["ecl_coverage"] for item in history]},
+            {"id": "ltv", "name": "Portfolio LTV", "unit": "ratio", "on": False, "values": [item["ltv"] for item in history]},
+            {"id": "large", "name": "Large repayments inside 90 days", "unit": "count", "on": False, "values": [len(item["large_due"]) for item in history]},
+        ],
+    }
+    series_boxes = "".join(
+        f'<label><input type="checkbox" data-series="{escape(item["id"])}" {"checked" if item["on"] else ""}>{escape(item["name"])}</label>'
+        for item in payload["series"]
+    )
+    month_boxes = "".join(
+        f'<label><input type="checkbox" data-month="{index}" checked>{escape(label)}</label>'
+        for index, label in enumerate(payload["full"])
+    )
+    script = r"""
+<script>
+(function () {
+  var data = window.TREND_DATA;
+  var svg = document.getElementById("trend-svg");
+  var note = document.getElementById("trend-note");
+  var legend = document.getElementById("trend-legend");
+  var colors = ["#E36F1E", "#B42318", "#8C3E16", "#2457A6", "#1F6B4A", "#6F6862", "#C45112", "#3A342F", "#8A6A2F"];
+  function checked(selector) {
+    return Array.prototype.filter.call(document.querySelectorAll(selector), function (box) { return box.checked; });
+  }
+  function fmt(unit, value) {
+    if (unit === "hkd") {
+      var abs = Math.abs(value);
+      if (abs >= 1e9) return "HKD " + (value / 1e9).toFixed(2) + "bn";
+      if (abs >= 1e6) return "HKD " + (value / 1e6).toFixed(1) + "m";
+      return "HKD " + Math.round(value).toLocaleString("en-HK");
+    }
+    if (unit === "pct") return (value * 100).toFixed(2) + "%";
+    if (unit === "ratio") return Number(value).toFixed(2);
+    return String(Math.round(value));
+  }
+  function draw() {
+    var series = checked("[data-series]").map(function (box) {
+      return data.series.filter(function (item) { return item.id === box.getAttribute("data-series"); })[0];
+    });
+    var months = checked("[data-month]").map(function (box) { return Number(box.getAttribute("data-month")); });
+    if (!series.length || !months.length) {
+      svg.innerHTML = "";
+      legend.innerHTML = "";
+      note.textContent = "Check at least one series and one month.";
+      return;
+    }
+    var W = 760, H = 280, left = 78, right = 16, top = 18, bottom = 36;
+    var plotW = W - left - right, plotH = H - top - bottom;
+    var units = {};
+    series.forEach(function (item) { units[item.unit] = true; });
+    var peaks = series.map(function (item) {
+      return Math.max.apply(null, months.map(function (index) { return item.values[index]; }));
+    });
+    var positive = peaks.filter(function (value) { return value > 0; });
+    var wide = positive.length > 1 && Math.max.apply(null, positive) / Math.min.apply(null, positive) > 20;
+    var indexMode = Object.keys(units).length > 1 || wide;
+    var prepared = series.map(function (item, order) {
+      var slice = months.map(function (index) { return item.values[index]; });
+      var peak = Math.max.apply(null, slice.concat([0]));
+      var plot = indexMode ? slice.map(function (value) { return peak ? value / peak * 100 : 0; }) : slice;
+      return { item: item, slice: slice, plot: plot, color: colors[order % colors.length], last: slice[slice.length - 1] };
+    });
+    var flat = [];
+    prepared.forEach(function (line) { flat = flat.concat(line.plot); });
+    var min = Math.min.apply(null, flat);
+    var max = Math.max.apply(null, flat);
+    if (min === max) { min = min - 1; max = max + 1; }
+    if (!indexMode && min > 0) min = min - (max - min) * 0.08;
+    if (min < 0 && Math.min.apply(null, flat) >= 0) min = 0;
+    max = max + (max - min) * 0.08;
+    function xAt(position) {
+      if (months.length === 1) return left + plotW / 2;
+      return left + plotW * position / (months.length - 1);
+    }
+    function yAt(value) { return top + plotH * (1 - (value - min) / (max - min)); }
+    var parts = [];
+    for (var tick = 0; tick < 4; tick += 1) {
+      var value = min + (max - min) * tick / 3;
+      var y = yAt(value);
+      parts.push('<line x1="' + left + '" y1="' + y + '" x2="' + (W - right) + '" y2="' + y + '" stroke="#E4DDD6"/>');
+      var axis = indexMode ? Math.round(value) : fmt(series[0].unit, value);
+      parts.push('<text x="' + (left - 8) + '" y="' + (y + 4) + '" text-anchor="end" fill="#6F6862" font-size="11">' + axis + '</text>');
+    }
+    months.forEach(function (index, position) {
+      parts.push('<text x="' + xAt(position) + '" y="' + (H - 10) + '" text-anchor="middle" fill="#6F6862" font-size="11">' + data.labels[index] + '</text>');
+    });
+    prepared.forEach(function (line) {
+      var points = line.plot.map(function (value, position) { return xAt(position) + "," + yAt(value); }).join(" ");
+      parts.push('<polyline fill="none" stroke="' + line.color + '" stroke-width="2.5" points="' + points + '"/>');
+      line.plot.forEach(function (value, position) {
+        var actual = fmt(line.item.unit, line.slice[position]);
+        parts.push('<circle cx="' + xAt(position) + '" cy="' + yAt(value) + '" r="3.6" fill="' + line.color + '"><title>' + line.item.name + " " + data.full[months[position]] + " " + actual + '</title></circle>');
+      });
+    });
+    svg.innerHTML = parts.join("");
+    legend.innerHTML = prepared.map(function (line) {
+      return '<span><i style="background:' + line.color + '"></i>' + line.item.name + " " + fmt(line.item.unit, line.last) + "</span>";
+    }).join("");
+    note.textContent = indexMode
+      ? "These series are on different scales, so each line is drawn against its own peak in the checked months. 100 is that peak. The legend is the actual figure at the last checked month."
+      : "The axis is the actual amount. The legend is the figure at the last checked month.";
+  }
+  document.getElementById("trend-filter").addEventListener("change", draw);
+  draw();
+})();
+</script>
+"""
+    return f"""
+    <div class="card" style="margin-top:12px">
+      <div class="label">Trend</div>
+      <div class="dates" id="trend-filter">
+        <div class="label">Series</div>
+        {series_boxes}
+        <div class="label">Months</div>
+        {month_boxes}
+      </div>
+      <svg id="trend-svg" viewBox="0 0 760 280" role="img" aria-label="Portfolio trend"></svg>
+      <div class="legend" id="trend-legend"></div>
+      <p class="lead" id="trend-note"></p>
+    </div>
+    <script>window.TREND_DATA = {json.dumps(payload)};</script>
+    {script}
+    """
+
+
 def page(title: str, active: str, body: str) -> bytes:
     nav = [
         ("dashboard", "Portfolio"),
@@ -254,6 +409,9 @@ form.dates label {{ display:flex; gap:6px; align-items:center; font-size:.84rem;
 form.dates input {{ width:auto; margin:0; }}
 form.dates .hint {{ color:var(--muted); font-size:.82rem; }}
 form.dates button.ghost {{ background:#F7F4F0; color:var(--ink); border:1px solid var(--line); }}
+.trend-chart, #trend-svg {{ width:100%; height:auto; display:block; }}
+.legend {{ display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:8px; font-size:.84rem; }}
+.legend i {{ display:inline-block; width:10px; height:10px; border-radius:99px; margin-right:6px; }}
 .scroll {{ overflow-x:auto; }}
 table.trend th, table.trend td {{ white-space:nowrap; }}
 table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
@@ -275,7 +433,7 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
 <div class="shell" id="shell">
   <nav id="rail">
     <div class="mark">Risk Intelligence<br><span>Platform</span></div>
-    <p>Twelve month-ends, 31 Dec 2025 to 30 Nov 2026. Check the dates to set the position and the trend.</p>
+    <p>Portfolio numbers are the latest month. The chart on that page has its own filters. Other pages follow the dates you check.</p>
     {''.join(links)}
     <a class="logout" href="/logout">Sign out</a>
   </nav>
@@ -283,7 +441,7 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
   <main>
     <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="rail">Hide menu</button>
     <div class="banner">{escape(BOOK["banner"])}</div>
-    {date_bar()}
+    {"" if active == "dashboard" else date_bar()}
     {body}
   </main>
 </div>
@@ -334,7 +492,9 @@ def bars(rows: list[tuple[str, float]], hot: bool = False) -> str:
 
 
 def dashboard() -> str:
-    port = view().portfolio()
+    iso = latest_iso()
+    port = portfolio_at(iso)
+    position = view().label(iso)
     stage_rows = [(f"Stage {key}", port["stages"][str(key)]["drawn_hkd"] if isinstance(port["stages"], dict) and str(key) in port["stages"] else port["stages"][key]["drawn_hkd"]) for key in (1, 2, 3)]
     # stages keys may be int from json load - json dumps int keys as strings
     stages = port["stages"]
@@ -346,7 +506,7 @@ def dashboard() -> str:
     coll_rows = list(port["collateral"].items())
     mat = port["maturity"]
     industry_rows = [(row["industry"], row["drawn_hkd"]) for row in port["industries"][:6]]
-    top = sorted((customer(item["customer_id"]) for item in BOOK["customers"]), key=lambda row: row["drawn_hkd"], reverse=True)[:8]
+    top = sorted((customer_at(item["customer_id"], iso) for item in BOOK["customers"]), key=lambda row: row["drawn_hkd"], reverse=True)[:8]
     table = "".join(
         f'<tr class="click"><td><a href="/customer?id={escape(row["customer_id"])}">{escape(row["legal_name"])}</a><div style="color:var(--muted);font-size:.8rem">{escape(row["rm"])}</div></td>'
         f'<td>{escape(row["industry"])}</td><td>Stage {row["stage"]}</td>'
@@ -356,7 +516,7 @@ def dashboard() -> str:
     )
     body = f"""
     <div class="label">Portfolio</div><h1>Management dashboard</h1>
-    <p class="lead">Position {escape(view().label())}. Drawn balances, collateral, LTV, cash-flow dates, PD grades, stage, ECL and days past due come from the property portfolio at the latest checked date. The trend table follows every checked date. Financial statements, covenants and the news headlines are still demonstration figures.</p>
+    <p class="lead">The number panels are the latest month-end, {escape(position)}. The chart can show any of the twelve months. Financial statements, covenants and the news headlines are still demonstration figures.</p>
     {metrics([
         ("Customers", str(port["customers"]), False),
         ("Drawn exposure", money(port["drawn_hkd"]), False),
@@ -378,19 +538,7 @@ def dashboard() -> str:
       <div class="label">Largest names</div>
       <table><thead><tr><th>Customer</th><th>Industry</th><th>Stage</th><th>Rating</th><th>Drawn</th><th>DPD</th></tr></thead><tbody>{table}</tbody></table>
     </div>
-    <div class="card" style="margin-top:12px"><div class="label">Trend across the checked dates</div>
-      {trend_table([
-        ("Drawn", lambda iso: money(view().portfolio_series()[view().dates.index(iso)]["drawn_hkd"])),
-        ("ECL", lambda iso: money(view().portfolio_series()[view().dates.index(iso)]["ecl_hkd"])),
-        ("ECL coverage", lambda iso: f'{view().portfolio_series()[view().dates.index(iso)]["ecl_coverage"]:.2%}'),
-        ("Stage 2 names", lambda iso: str(view().portfolio_series()[view().dates.index(iso)]["stage2_names"])),
-        ("Drawn in stage 2", lambda iso: money(view().portfolio_series()[view().dates.index(iso)]["stage2_drawn"])),
-        ("Names past due", lambda iso: str(view().portfolio_series()[view().dates.index(iso)]["dpd_names"])),
-        ("Drawn 60 days or more past due", lambda iso: money(view().portfolio_series()[view().dates.index(iso)]["dpd60_drawn"])),
-        ("Portfolio LTV", lambda iso: str(view().portfolio_series()[view().dates.index(iso)]["ltv"])),
-        ("Large repayments inside 90 days", lambda iso: str(len(view().portfolio_series()[view().dates.index(iso)]["large_due"]))),
-      ])}
-    </div>"""
+    {trend_chart()}"""
     return body
 
 
