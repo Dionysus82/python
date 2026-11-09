@@ -1,0 +1,42 @@
+﻿CONTRACT_REFERENCE,BORROWER_NAME,INSTRUMENT,DISCOUNT_RATE,AMORTIZATION_METHOD
+CTR-0001-01,Metro Gov Authority A,Customer Loan,0.030000,BULLET
+CTR-0001-02,Metro Gov Authority A,Customer Loan,0.030000,BULLET
+CTR-0001-03,Metro Gov Authority A,Customer Loan,0.030000,EQUAL_AMORT
+CTR-0001-04,Metro Gov Authority A,Customer Loan,0.030000,EQUAL_AMORT
+CTR-0002-01,State Treasury Bureau B,Customer Loan,0.030000,BULLET
+CTR-0002-02,State Treasury Bureau B,Customer Loan,0.030000,BULLET
+CTR-0002-03,State Treasury Bureau B,Customer Loan,0.030000,EQUAL_AMORT
+CTR-0002-04,State Treasury Bureau B,Customer Loan,0.030000,BULLET
+CTR-0003-01,Apex Infrastructure Investment Corp.,Customer Loan,0.050000,BULLET
+CTR-0003-02,Apex Infrastructure Investment Corp.,Customer Loan,0.050000,BULLET
+CTR-0003-03,Apex Infrastructure Investment Corp.,Customer Loan,0.050000,EQUAL_AMORT
+CTR-0003-04,Apex Infrastructure Investment Corp.,Customer Loan,0.050000,DECLINING_AMORT
+CTR-0004-01,Public Float,Customer Loan,0.055000,BULLET
+CTR-0004-02,Public Float,Customer Loan,0.055000,BULLET
+CTR-0004-03,Public Float,Customer Loan,0.055000,EQUAL_AMORT
+CTR-0004-04,Public Float,Customer Loan,0.055000,BULLET
+CTR-0005-01,Provincial Capital Holdings,Customer Loan,0.060000,BULLET
+CTR-0005-02,Provincial Capital Holdings,Customer Loan,0.060000,BULLET
+CTR-0005-03,Provincial Capital Holdings,Customer Loan,0.060000,EQUAL_AMORT
+CTR-0005-04,Provincial Capital Holdings,Customer Loan,0.060000,BULLET
+CTR-0006-01,Industrial Development Investment Corp.,Customer Loan,0.060000,BULLET
+CTR-0006-02,Industrial Development Investment Corp.,Customer Loan,0.060000,BULLET
+CTR-0006-03,Industrial Development Investment Corp.,Customer Loan,0.060000,EQUAL_AMORT
+CTR-0006-04,Industrial Development Investment Corp.,Customer Loan,0.060000,EQUAL_AMORT
+CTR-0007-01,Global Property Investment Holdings Ltd.,Customer Loan,0.050000,BULLET
+CTR-0007-02,Global Property Investment Holdings Ltd.,Customer Loan,0.050000,BULLET
+CTR-0007-03,Global Property Investment Holdings Ltd.,Customer Loan,0.050000,EQUAL_AMORT
+CTR-0007-04,Global Property Investment Holdings Ltd.,Customer Loan,0.050000,DECLINING_AMORT
+CTR-0008-01,Municipal Asset Mgmt Holdings,Customer Loan,0.055000,BULLET
+CTR-0008-02,Municipal Asset Mgmt Holdings,Customer Loan,0.055000,BULLET
+CTR-0008-03,Municipal Asset Mgmt Holdings,Customer Loan,0.055000,EQUAL_AMORT
+CTR-0008-04,Municipal Asset Mgmt Holdings,Customer Loan,0.055000,BULLET
+CTR-0009-01,Apex Property Limited,Customer Loan,0.045000,BULLET
+CTR-0009-02,Apex Property Limited,Customer Loan,0.045000,BULLET
+CTR-0009-03,Apex Property Limited,Customer Loan,0.045000,EQUAL_AMORT
+CTR-0009-04,Apex Property Limited,Customer Loan,0.045000,DECLINING_AMORT
+CTR-0010-01,Apex Global Holdings Limited,Customer Loan,0.055000,BULLET
+CTR-0010-02,Apex Global Holdings Limited,Customer Loan,0.055000,BULLET
+CTR-0010-03,Apex Global Holdings Limited,Customer Loan,0.055000,EQUAL_AMORT
+CTR-0010-04,Apex Global Holdings Limited,Customer Loan,0.055000,DECLINING_AMORT
+CTR-0010-06,Apex Global Holdings Limited,Bond,0.055000,BULLET
