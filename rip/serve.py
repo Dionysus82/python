@@ -78,12 +78,13 @@ def page(title: str, active: str, body: str) -> bytes:
     for key, label in nav:
         cls = "active" if key == active else ""
         links.append(f'<a class="{cls}" href="/{key}">{escape(label)}</a>')
+    shown = dict(nav).get(title, title.replace("_", " ").title())
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{escape(title)}</title>
+<title>{escape(shown)} · Risk Intelligence Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,560&display=swap" rel="stylesheet">
 <style>
@@ -99,7 +100,7 @@ a {{ color:var(--deep); text-decoration:none; }}
 nav {{ background:var(--rail); color:#E7E0D8; padding:22px 16px; position:sticky; top:0; height:100vh; overflow:auto; }}
 .shell.collapsed {{ grid-template-columns:0 minmax(0,1fr); }}
 .shell.collapsed nav {{ padding:0; overflow:hidden; }}
-nav .mark {{ font-family:"Source Serif 4",serif; color:#fff; font-size:1.25rem; }}
+nav .mark {{ font-family:"Source Serif 4",serif; color:#fff; font-size:1.15rem; line-height:1.2; }}
 nav .mark span {{ color:var(--orange); }}
 nav p {{ color:#C8BEB4; font-size:.78rem; line-height:1.4; }}
 nav a {{ display:block; color:#E7E0D8; padding:9px 10px; border-left:3px solid transparent; border-radius:8px; margin:2px 0; }}
@@ -153,7 +154,7 @@ select, input[type=number] {{ font:inherit; padding:8px; border:1px solid var(--
 <body>
 <div class="shell" id="shell">
   <nav id="rail">
-    <div class="mark">RIP <span>review</span></div>
+    <div class="mark">Risk Intelligence<br><span>Platform</span></div>
     <p>Business-case demonstration on the synthetic book. Position date 30 Sep 2026.</p>
     {''.join(links)}
     <a class="logout" href="/logout">Sign out</a>
@@ -603,7 +604,7 @@ def login_page(message: str = "") -> bytes:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sign in</title>
+<title>Sign in · Risk Intelligence Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,560&display=swap" rel="stylesheet">
 <style>
 body {{ margin:0; min-height:100vh; display:grid; place-items:center; background:#F3EFEA; font-family:"Source Sans 3",sans-serif; color:#2C2825; }}
@@ -619,7 +620,7 @@ code {{ color:#2C2825; }}
 </head>
 <body>
 <form method="post" action="/login">
-  <div style="font-family:'Source Serif 4',serif;font-size:1.3rem">RIP <span style="color:#E36F1E">review</span></div>
+  <div style="font-family:'Source Serif 4',serif;font-size:1.45rem;line-height:1.2">Risk Intelligence<br><span style="color:#E36F1E">Platform</span></div>
   <h1>Sign in</h1>
   <p>Property portfolio review at 30 Sep 2026. Demonstration account <code>cro.shum</code>, password <code>Harbour-Demo-2026</code>.</p>
   {note}
