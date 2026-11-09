@@ -497,6 +497,21 @@ def main() -> None:
     focus = next(item for item in customers if item["repay_draft_id"])
     news = news_items(customers)
     dates, portfolio_history = attach_history(customers, collateral, flows)
+    drafts = letters(customers, focus, industries, drawn, collateral_split, news)
+    anchor_customer = customers[0]["customer_id"]
+    anchor_industry = industries[0]["industry"]
+    property_months = {
+        item["date"]: (item["drawn_hkd"], item["ecl_hkd"], item["customers"])
+        for item in portfolio_history
+    }
+    wholesale_customers, wholesale_sources = load_wholesale({item["customer_id"] for item in customers})
+    customers.extend(wholesale_customers)
+    portfolio_history = rebuild_portfolio_history(customers, dates)
+    for iso in ("2026-10-31", "2026-11-30"):
+        point = next(item for item in portfolio_history if item["date"] == iso)
+        observed = (point["drawn_hkd"], point["ecl_hkd"], point["customers"])
+        if observed != property_months[iso]:
+            raise RuntimeError(f"{iso} changed from {property_months[iso]} to {observed}")
     book = {
         "as_of": dates[-1],
         "as_of_label": "31 Dec 2025 to 30 Nov 2026",
@@ -504,8 +519,9 @@ def main() -> None:
         "portfolio_history": portfolio_history,
         "threshold_hkd": THRESHOLD,
         "notify_to": "yiyangyao2@gmail.com",
-        "default_customer_id": customers[0]["customer_id"],
-        "default_industry": industries[0]["industry"],
+        "default_customer_id": anchor_customer,
+        "default_industry": anchor_industry,
+        "ecl_sources": wholesale_sources,
         "banner": (
             "SYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, "
             "RISK, REGULATORY OR BUSINESS DECISION-MAKING"
@@ -513,7 +529,7 @@ def main() -> None:
         "customers": customers,
         "industries": industries,
         "news": news,
-        "drafts": letters(customers, focus, industries, drawn, collateral_split, news),
+        "drafts": drafts,
         "portfolio": portfolio,
     }
     OUT.write_text(json.dumps(book, indent=2), encoding="utf-8")
@@ -991,6 +1007,333 @@ def letters(customers, focus, industries, drawn, collateral_split, news_feed):
         ],
     )
     return [news, industry, repayment, ageing, covenant]
+
+
+WHOLESALE = Path(__file__).resolve().parent / "property_data" / "wholesale"
+RDW_FILE = WHOLESALE / "RDW_ECL_Monthly_Dataset.csv"
+ANALYTICS_FILE = WHOLESALE / "ECL_MONTHLY_ANALYTICS_202512_202609.csv"
+NAME_STOP = {"ltd", "limited", "corp", "corporation", "group", "the", "and", "of", "plc"}
+
+
+def blank_amount(text: str) -> float:
+    text = (text or "").strip()
+    if not text:
+        return 0.0
+    return float(text)
+
+
+def flagged(text: str) -> bool:
+    text = (text or "").strip()
+    if text in {"", "0", "0.0", "N", "No", "NO", "n"}:
+        return False
+    try:
+        return float(text) > 0
+    except ValueError:
+        return True
+
+
+def as_iso(text: str) -> str:
+    text = text.strip()
+    if len(text) >= 10 and text[4] == "-":
+        return text[:10]
+    return datetime.strptime(text, "%d/%m/%Y").strftime("%Y-%m-%d")
+
+
+def as_dmy(iso: str) -> str:
+    return datetime.strptime(iso, "%Y-%m-%d").strftime("%d/%m/%Y")
+
+
+def security_type(row: dict) -> str:
+    kinds = []
+    for key, label in (
+        ("SECURED_BY_PROP", "Property"),
+        ("SECURED_BY_CASH", "Cash"),
+        ("SECURED_BY_ACFT", "Aircraft"),
+        ("SECURED_BY_OTHE_COL", "Other collateral"),
+    ):
+        if flagged(row.get(key, "")):
+            kinds.append(label)
+    if flagged(row.get("SECURED_BY_GUARANTEE", "")):
+        kinds.append("Guarantee")
+    return ", ".join(kinds) if kinds else "Unsecured"
+
+
+def borrower_id(name: str, taken: set[str]) -> str:
+    words = [word for word in name.replace(".", " ").replace(",", " ").split() if word.lower() not in NAME_STOP]
+    code = "".join(word[0] for word in words).upper()[:8] or "X"
+    cid = f"BOR-{code}"
+    serial = 2
+    while cid in taken:
+        cid = f"BOR-{code}{serial}"
+        serial += 1
+    taken.add(cid)
+    return cid
+
+
+def rebuild_portfolio_history(customers: list[dict], dates: list[str]) -> list[dict]:
+    previous = {}
+    history = []
+    for iso in dates:
+        points = []
+        for customer in customers:
+            point = next((item for item in customer["history"] if item["date"] == iso), None)
+            if point is not None:
+                points.append(point)
+        history.append(portfolio_point(iso, points, previous))
+        previous = {point["legal_name"]: point["stage"] for point in points}
+    return history
+
+
+def wholesale_facility(row: dict, rdw: dict | None) -> dict:
+    balance = blank_amount(row["BAL_OUTSTD"])
+    secured = blank_amount(row["SECURED_COL_TOTAL_AMOUNT"])
+    kind = security_type(row)
+    return {
+        "contract": row["CONTRACT_REFERENCE"],
+        "instrument": row["INSTRUMENT"],
+        "status": row["CONTRACT_STATUS"],
+        "department": row["DEPT"],
+        "stage": int(float(row["STAGE"])),
+        "dpd": int(float(row["PAST_DUE_DAYS"] or 0)),
+        "grade": int(float(row["CURRENT_RATING"])),
+        "original_grade": int(float(row["ORIGINAL_RATING"])),
+        "balance_hkd": round(balance, 2),
+        "nominal_hkd": round(blank_amount(row["BAL_NOMINAL"]), 2),
+        "limit_hkd": round(blank_amount(row["FACILITY_LIMIT"]), 2),
+        "available_hkd": round(blank_amount(row["FACILITY_AVAILABLE"]), 2),
+        "ead_hkd": round(blank_amount(row["EAD_POST_CCF"]), 2),
+        "pd": float(row["SCN_WGT_ANNUAL_PD"]),
+        "lgd": float(row["SCN_WGT_LGD"]),
+        "ecl_hkd": round(blank_amount(row["ECL_HKD"]), 2),
+        "maturity": as_dmy(as_iso(row["MATURITY_DATE_IS9"])),
+        "collateral_id": row["CONTRACT_REFERENCE"],
+        "collateral_type": kind,
+        "address": "",
+        "district": "",
+        "market_hkd": round(secured, 2),
+        "nrv_hkd": 0,
+        "ltv": round(balance / secured, 6) if balance and secured else 0,
+        "ltv_nrv": 0,
+        "charge": "1" if secured else "",
+        "data_health": (rdw or {}).get("DATA_HEALTH_ACTION", ""),
+        "rdw_borrower": (rdw or {}).get("BORROWER1", ""),
+    }
+
+
+def wholesale_documents(name: str, rdw_names: list[str], point: dict) -> dict:
+    other = ""
+    if rdw_names:
+        other = " The RDW extract records this borrower as " + "; ".join(rdw_names) + "."
+    return {
+        "credit_paper": {
+            "title": "ECL monthly analytics",
+            "locator": "ECL_MONTHLY_ANALYTICS_202512_202609.csv",
+            "passage": (
+                f"{name} on 30 Sep 2026 is rating {point['rating']}, original rating {point['prior_rating']}, "
+                f"stage {point['stage']}, {point['dpd']} days past due, drawn {money_words(point['drawn_hkd'])}, "
+                f"ECL {money_words(point['ecl_hkd'])}. Secured amount {money_words(point['collateral_hkd'])}. "
+                "The displayed legal name is the analytics name." + other
+            ),
+        },
+        "review": {
+            "title": "RDW ECL monthly dataset",
+            "locator": "RDW_ECL_Monthly_Dataset.csv",
+            "passage": (
+                "Outstanding balances match the analytics file. Where the RDW row records a data-health action, "
+                "exposure at default uses the analytics figure. Net realizable value and a property address are not in either file."
+            ),
+        },
+        "financials": {
+            "title": "Financial statements",
+            "locator": "Not in the ECL monthly files",
+            "passage": "Revenue, margin, liquidity, leverage and interest cover are not in the uploaded ECL files.",
+        },
+        "repayment": {
+            "title": "Stated maturity",
+            "locator": "MATURITY_DATE_IS9",
+            "passage": (
+                f"No cash-flow schedule was supplied. The next date is the earliest on-balance maturity, "
+                f"{point['next_due_date']}, for {money_words(point['next_due_hkd'])}."
+            ),
+        },
+    }
+
+
+def load_wholesale(taken: set[str]) -> tuple[list[dict], list[dict]]:
+    analytics = load(ANALYTICS_FILE)
+    rdw_rows = load(RDW_FILE)
+    rdw_index = {(row["CONTRACT_REFERENCE"], as_iso(row["REPORTING_DATE"])): row for row in rdw_rows}
+    if len(rdw_index) != len(rdw_rows):
+        raise RuntimeError("duplicate RDW contract and reporting date")
+    by_borrower = defaultdict(lambda: defaultdict(list))
+    for row in analytics:
+        iso = as_iso(row["REPORTING_DATE"])
+        by_borrower[row["BORROWER1"]][iso].append(row)
+    customers = []
+    for borrower, months in sorted(by_borrower.items()):
+        cid = borrower_id(borrower, taken)
+        history = []
+        previous_stage = None
+        previous_ecl = None
+        for iso in sorted(months):
+            rows = months[iso]
+            reporting = datetime.strptime(iso, "%Y-%m-%d")
+            facilities = []
+            for row in rows:
+                facilities.append(wholesale_facility(row, rdw_index.get((row["CONTRACT_REFERENCE"], iso))))
+            on_balance = [item for item in facilities if item["instrument"] != "Off-Bal"]
+            drawn = round(sum(item["balance_hkd"] for item in on_balance), 2)
+            secured = round(sum(item["market_hkd"] for item in on_balance), 2)
+            ead = round(sum(item["ead_hkd"] for item in on_balance), 2)
+            nominal = round(sum(item["nominal_hkd"] for item in on_balance), 2)
+            ecl = round(sum(item["ecl_hkd"] for item in facilities), 2)
+            stage = max(item["stage"] for item in facilities)
+            dpd = max(item["dpd"] for item in facilities)
+            rated = on_balance or facilities
+            rating = max(item["grade"] for item in rated)
+            anchor = max(on_balance or facilities, key=lambda item: item["balance_hkd"])
+            source_anchor = next(row for row in rows if row["CONTRACT_REFERENCE"] == anchor["contract"])
+            next_due = None
+            for item in on_balance:
+                if item["balance_hkd"] <= 0:
+                    continue
+                maturity = datetime.strptime(item["maturity"], "%d/%m/%Y")
+                days = (maturity - reporting).days
+                candidate = (days, -item["balance_hkd"], item["maturity"], item["contract"], item["balance_hkd"])
+                if next_due is None or candidate < next_due:
+                    next_due = candidate
+            if next_due is None:
+                maturity = datetime.strptime(anchor["maturity"], "%d/%m/%Y")
+                next_due = ((maturity - reporting).days, -anchor["balance_hkd"], anchor["maturity"], anchor["contract"], anchor["balance_hkd"])
+            history.append({
+                "date": iso,
+                "legal_name": borrower,
+                "customer_id": cid,
+                "industry": source_anchor["INDUSTRY_SECTOR"],
+                "drawn_hkd": drawn,
+                "committed_hkd": round(sum(item["limit_hkd"] for item in facilities), 2),
+                "ecl_hkd": ecl,
+                "prior_ecl_hkd": previous_ecl if previous_ecl is not None else ecl,
+                "stage": stage,
+                "prior_stage": previous_stage if previous_stage is not None else stage,
+                "dpd": dpd,
+                "rating": rating,
+                "collateral_hkd": secured,
+                "nrv_hkd": 0,
+                "ead_hkd": ead,
+                "nominal_hkd": nominal,
+                "ltv": round(drawn / secured, 2) if secured else None,
+                "coverage_ratio": round(secured / drawn, 2) if drawn else None,
+                "next_due_days": next_due[0],
+                "next_due_hkd": round(next_due[4], 2),
+                "next_due_date": next_due[2],
+                "next_contract": next_due[3],
+                "next_method": "MATURITY",
+                "refinancing": False,
+                "facilities": facilities,
+            })
+            previous_stage = stage
+            previous_ecl = ecl
+        latest = history[-1]
+        rdw_names = sorted({
+            item["rdw_borrower"]
+            for point in history
+            for item in point["facilities"]
+            if item["rdw_borrower"] and item["rdw_borrower"] != borrower
+        })
+        original = max(item["original_grade"] for item in latest["facilities"])
+        guarantors = sorted({
+            (row.get("GUARANTOR") or "").strip()
+            for rows in months.values()
+            for row in rows
+            if (row.get("GUARANTOR") or "").strip()
+        })
+        actions = sorted({
+            item["data_health"]
+            for item in latest["facilities"]
+            if item["data_health"] and item["data_health"] != "VERIFIED_OK"
+        })
+        warnings = []
+        if any(row["DEFAULT_INDICATOR"] == "Y" for row in months[latest["date"]]):
+            warnings.append({"description": "Default indicator is Y on the ECL extract."})
+        if any(row["WATCHLIST_INDICATOR"] == "Y" for row in months[latest["date"]]):
+            warnings.append({"description": "Watchlist indicator is Y on the ECL extract."})
+        if any(row["SICR_INDICATOR"] == "Y" for row in months[latest["date"]]):
+            warnings.append({"description": "SICR indicator is Y on the ECL extract."})
+        if any(row["RESTRUCTURED_INDICATOR"] == "Y" for row in months[latest["date"]]):
+            warnings.append({"description": "Restructured indicator is Y on the ECL extract."})
+        if actions:
+            warnings.append({"description": "RDW data-health action on the latest month: " + ", ".join(actions) + "."})
+        if rdw_names:
+            warnings.append({"description": "RDW borrower name differs from the analytics name: " + "; ".join(rdw_names) + "."})
+        loans = [item for item in latest["facilities"] if item["instrument"] != "Off-Bal"]
+        customers.append({
+            "customer_id": cid,
+            "legal_name": borrower,
+            "group_id": cid,
+            "group_name": borrower,
+            "rm": f"{len(loans)} on-balance facilities",
+            "industry": latest["industry"],
+            "jurisdiction": "Not on the ECL extract",
+            "rating": latest["rating"],
+            "prior_rating": original,
+            "prior_rating_date": "original rating on the ECL extract",
+            "stage": latest["stage"],
+            "prior_stage": latest["prior_stage"],
+            "drawn_hkd": latest["drawn_hkd"],
+            "committed_hkd": latest["committed_hkd"],
+            "collateral_hkd": latest["collateral_hkd"],
+            "collateral_type": "Secured amount on the ECL extract",
+            "coverage_ratio": latest["coverage_ratio"],
+            "ltv": latest["ltv"],
+            "guarantor": "; ".join(guarantors) if guarantors else "None on the extract",
+            "dpd": latest["dpd"],
+            "dpd_component": "Portfolio extract" if latest["dpd"] else "None",
+            "ecl_hkd": latest["ecl_hkd"],
+            "prior_ecl_hkd": latest["prior_ecl_hkd"],
+            "provision_hkd": latest["ecl_hkd"],
+            "revenue_hkd": [None, None, None],
+            "margin_pct": [None, None, None],
+            "liquidity_ratio": [None, None, None],
+            "leverage": [None, None, None],
+            "interest_coverage": [None, None, None],
+            "coverage_assumption": None,
+            "coverage_threshold": None,
+            "next_due_days": latest["next_due_days"],
+            "next_due_hkd": latest["next_due_hkd"],
+            "next_due_date": latest["next_due_date"],
+            "next_due_source": "Maturity on the ECL extract",
+            "next_contract": latest["next_contract"],
+            "next_method": "MATURITY",
+            "refinancing": False,
+            "watchlist": latest["stage"] >= 2 or latest["dpd"] > 0,
+            "warnings": warnings,
+            "full_file": True,
+            "summary": (
+                f"{borrower} is on the wholesale ECL extracts for {len(history)} month-ends through {as_dmy(latest['date'])}. "
+                f"{len(loans)} on-balance facilities, drawn {money_words(latest['drawn_hkd'])}, "
+                f"ECL {money_words(latest['ecl_hkd'])}, stage {latest['stage']}, {latest['dpd']} days past due. "
+                "October and November 2026 are not in these files."
+            ),
+            "documents": wholesale_documents(borrower, rdw_names, {**latest, "prior_rating": original}),
+            "repay_draft_id": "",
+            "history": history,
+            "rdw_legal_names": rdw_names,
+            "source": "ECL monthly analytics and RDW ECL monthly dataset",
+        })
+    sources = [
+        {
+            "file": "property_data/wholesale/RDW_ECL_Monthly_Dataset.csv",
+            "rows": len(rdw_rows),
+            "role": "RDW extract, including the data-health action. Balances match the analytics file.",
+        },
+        {
+            "file": "property_data/wholesale/ECL_MONTHLY_ANALYTICS_202512_202609.csv",
+            "rows": len(analytics),
+            "role": "Analytics extract. Stage, sector, PD, LGD, security and the displayed legal name come from this file.",
+        },
+    ]
+    return customers, sources
 
 
 if __name__ == "__main__":

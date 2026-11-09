@@ -49,26 +49,33 @@ class BookView:
     def label(self, iso: str | None = None) -> str:
         return datetime.strptime(iso or self.focus, "%Y-%m-%d").strftime("%-d %b %Y")
 
-    def point(self, raw: dict, iso: str) -> dict:
-        return next(item for item in raw["history"] if item["date"] == iso)
+    def point(self, raw: dict, iso: str) -> dict | None:
+        return next((item for item in raw["history"] if item["date"] == iso), None)
 
     def project(self, raw: dict) -> dict:
         row = dict(raw)
         point = self.point(raw, self.focus)
+        on_position = point is not None
+        if point is None:
+            earlier = [item for item in raw["history"] if item["date"] <= self.focus]
+            point = earlier[-1] if earlier else raw["history"][-1]
         for key in POINT_FIELDS:
             row[key] = point[key]
         row["nrv_hkd"] = point["nrv_hkd"]
         row["ead_hkd"] = point["ead_hkd"]
         row["nominal_hkd"] = point["nominal_hkd"]
-        row["series"] = [self.point(raw, date) for date in self.dates]
+        row["series"] = [self.point(raw, date) or blank_observation(date) for date in self.dates]
         row["facilities"] = point["facilities"]
+        row["on_position"] = on_position
+        row["observed"] = point["date"]
         row["dpd_component"] = "Portfolio extract" if point["dpd"] else "None"
-        row["position"] = self.focus
+        row["position"] = point["date"]
+        when = self.label(point["date"])
         extract = []
         if point["dpd"] > 0:
-            extract.append({"description": f"Portfolio extract at {self.label()}: {point['dpd']} days past due."})
+            extract.append({"description": f"Portfolio extract at {when}: {point['dpd']} days past due."})
         if point["stage"] >= 2:
-            extract.append({"description": f"Stage {point['stage']} on the portfolio extract at {self.label()}."})
+            extract.append({"description": f"Stage {point['stage']} on the portfolio extract at {when}."})
         demo = [
             item for item in raw["warnings"]
             if not item["description"].startswith("Portfolio extract") and not item["description"].startswith("Stage ")
@@ -96,9 +103,11 @@ def portfolio_at(iso: str) -> dict:
     return next(item for item in BOOK["portfolio_history"] if item["date"] == iso)
 
 
-def customer_at(cid: str, iso: str) -> dict:
+def customer_at(cid: str, iso: str) -> dict | None:
     raw = next(row for row in BOOK["customers"] if row["customer_id"] == cid)
-    point = next(item for item in raw["history"] if item["date"] == iso)
+    point = next((item for item in raw["history"] if item["date"] == iso), None)
+    if point is None:
+        return None
     row = dict(raw)
     for key in POINT_FIELDS:
         row[key] = point[key]
@@ -123,6 +132,33 @@ def dates_from_cookie(header: str | None) -> list[str]:
 def date_cookie(dates: list[str]) -> str:
     value = ",".join(dates)
     return f"rip-dates={value}; HttpOnly; SameSite=Lax; Path=/; Max-Age=31536000"
+
+
+def blank_observation(iso: str) -> dict:
+    return {
+        "date": iso,
+        "drawn_hkd": None,
+        "committed_hkd": None,
+        "ecl_hkd": None,
+        "prior_ecl_hkd": None,
+        "ead_hkd": None,
+        "nominal_hkd": None,
+        "stage": "—",
+        "prior_stage": "—",
+        "dpd": "—",
+        "rating": "—",
+        "collateral_hkd": None,
+        "nrv_hkd": None,
+        "ltv": "—",
+        "coverage_ratio": "—",
+        "next_due_days": "—",
+        "next_due_hkd": None,
+        "next_due_date": "—",
+        "next_contract": "—",
+        "next_method": "—",
+        "refinancing": False,
+        "facilities": [],
+    }
 
 
 def money(value: float | int | None) -> str:
@@ -543,7 +579,8 @@ def dashboard() -> str:
     coll_rows = list(port["collateral"].items())
     mat = port["maturity"]
     industry_rows = [(row["industry"], row["drawn_hkd"]) for row in port["industries"][:6]]
-    top = sorted((customer_at(item["customer_id"], iso) for item in BOOK["customers"]), key=lambda row: row["drawn_hkd"], reverse=True)[:8]
+    present = [row for row in (customer_at(item["customer_id"], iso) for item in BOOK["customers"]) if row]
+    top = sorted(present, key=lambda row: row["drawn_hkd"], reverse=True)[:8]
     table = "".join(
         f'<tr class="click"><td><a href="/customer?id={escape(row["customer_id"])}">{escape(row["legal_name"])}</a><div style="color:var(--muted);font-size:.8rem">{escape(row["rm"])}</div></td>'
         f'<td>{escape(row["industry"])}</td><td>Stage {row["stage"]}</td>'
@@ -645,13 +682,27 @@ def news_position(item: dict) -> str:
 
 def industry_on(iso: str, name: str) -> dict:
     point = next(item for item in view().portfolio_series() if item["date"] == iso)
-    return next(item for item in point["industries"] if item["industry"] == name)
+    found = next((item for item in point["industries"] if item["industry"] == name), None)
+    if found:
+        return found
+    return {
+        "industry": name,
+        "drawn_hkd": 0,
+        "ecl_hkd": 0,
+        "stage2": 0,
+        "migrations": 0,
+        "dpd_accounts": 0,
+        "collateral_hkd": 0,
+    }
 
 
 def industry_page(name: str) -> str:
     port = view().portfolio()
     row = next((item for item in port["industries"] if item["industry"] == name), port["industries"][0])
-    members = [customer(item["customer_id"]) for item in BOOK["customers"] if item["industry"] == row["industry"]]
+    members = [
+        person for person in (customer(item["customer_id"]) for item in BOOK["customers"] if item["industry"] == row["industry"])
+        if person and person.get("on_position", True)
+    ]
     members.sort(key=lambda item: item["drawn_hkd"], reverse=True)
     open_warnings = sum(len(item["warnings"]) for item in members)
     body_rows = "".join(
@@ -693,7 +744,7 @@ def industry_page(name: str) -> str:
 
 
 def repayment_page(window: int) -> str:
-    people = [customer(item["customer_id"]) for item in BOOK["customers"]]
+    people = [person for person in (customer(item["customer_id"]) for item in BOOK["customers"]) if person and person.get("on_position", True)]
     rows = []
     for item in people:
         if item["next_due_hkd"] < THRESHOLD or item["next_due_days"] > window:
@@ -953,7 +1004,7 @@ def drafts_page() -> str:
 
 def live_letter(draft: dict) -> str:
     port = view().portfolio()
-    people = [customer(item["customer_id"]) for item in BOOK["customers"]]
+    people = [person for person in (customer(item["customer_id"]) for item in BOOK["customers"]) if person and person.get("on_position", True)]
     checked = ", ".join(view().label(date) for date in view().dates)
     late = [item for item in people if item["dpd"] > 0]
     late_line = "; ".join(
@@ -1018,7 +1069,9 @@ def customer_page(cid: str) -> str:
     def facility_metric(field: str, contract: str, money_field: bool = False):
         def getter(iso: str, contract: str = contract) -> str:
             point = customer(row["customer_id"])["series"][view().dates.index(iso)]
-            found = next(item for item in point["facilities"] if item["contract"] == contract)
+            found = next((item for item in point["facilities"] if item["contract"] == contract), None)
+            if found is None:
+                return "—"
             return money(found[field]) if money_field else str(found[field])
         return getter
 
@@ -1038,7 +1091,7 @@ def customer_page(cid: str) -> str:
     )
     return f"""
     <div class="label">Customer</div><h1>{escape(row["legal_name"])}</h1>
-    <p class="lead">Position {escape(view().label())}. {escape(row["legal_name"])} has drawn {money(row["drawn_hkd"])}, ECL {money(row["ecl_hkd"])}, stage {row["stage"]} and {row["dpd"]} days past due. Original grade {row["prior_rating"]}, current grade {row["rating"]}. Next principal {money(row["next_due_hkd"])} on {escape(row["next_due_date"])}.</p>
+    <p class="lead">Position {escape(view().label(row.get("observed") or view().focus))}. {escape(row["legal_name"])} has drawn {money(row["drawn_hkd"])}, ECL {money(row["ecl_hkd"])}, stage {row["stage"]} and {row["dpd"]} days past due. Original grade {row["prior_rating"]}, current grade {row["rating"]}. Next principal {money(row["next_due_hkd"])} on {escape(row["next_due_date"])}.</p>
     {metrics([
         ("Drawn", money(row["drawn_hkd"]), False),
         ("ECL", money(row["ecl_hkd"]), True),
