@@ -5,6 +5,8 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+from contextvars import ContextVar
+from datetime import datetime
 from html import escape
 from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -28,6 +30,82 @@ SCENARIOS = {
     "liquidity": "Liquidity ratio down 0.15",
 }
 SHIFTS = {"base": 0.0, "revenue_decline": -0.6, "margin_compression": -0.4, "funding_cost": -0.3, "liquidity": -0.2}
+VIEW: ContextVar["BookView"] = ContextVar("rip_view")
+POINT_FIELDS = (
+    "drawn_hkd", "committed_hkd", "ecl_hkd", "prior_ecl_hkd", "stage", "prior_stage", "dpd",
+    "rating", "collateral_hkd", "ltv", "coverage_ratio", "next_due_days", "next_due_hkd",
+    "next_due_date", "next_contract", "next_method", "refinancing",
+)
+
+
+class BookView:
+    def __init__(self, dates: list[str], next_path: str):
+        known = BOOK["dates"]
+        chosen = [item for item in known if item in dates]
+        self.dates = chosen or list(known)
+        self.focus = self.dates[-1]
+        self.next_path = next_path if next_path.startswith("/") and not next_path.startswith("//") else "/dashboard"
+
+    def label(self, iso: str | None = None) -> str:
+        return datetime.strptime(iso or self.focus, "%Y-%m-%d").strftime("%-d %b %Y")
+
+    def point(self, raw: dict, iso: str) -> dict:
+        return next(item for item in raw["history"] if item["date"] == iso)
+
+    def project(self, raw: dict) -> dict:
+        row = dict(raw)
+        point = self.point(raw, self.focus)
+        for key in POINT_FIELDS:
+            row[key] = point[key]
+        row["nrv_hkd"] = point["nrv_hkd"]
+        row["ead_hkd"] = point["ead_hkd"]
+        row["nominal_hkd"] = point["nominal_hkd"]
+        row["series"] = [self.point(raw, date) for date in self.dates]
+        row["facilities"] = point["facilities"]
+        row["dpd_component"] = "Portfolio extract" if point["dpd"] else "None"
+        row["position"] = self.focus
+        extract = []
+        if point["dpd"] > 0:
+            extract.append({"description": f"Portfolio extract at {self.label()}: {point['dpd']} days past due."})
+        if point["stage"] >= 2:
+            extract.append({"description": f"Stage {point['stage']} on the portfolio extract at {self.label()}."})
+        demo = [
+            item for item in raw["warnings"]
+            if not item["description"].startswith("Portfolio extract") and not item["description"].startswith("Stage ")
+        ]
+        row["warnings"] = extract + demo
+        row["watchlist"] = point["stage"] >= 2 or point["dpd"] > 0
+        return row
+
+    def portfolio(self) -> dict:
+        return next(item for item in BOOK["portfolio_history"] if item["date"] == self.focus)
+
+    def portfolio_series(self) -> list[dict]:
+        return [next(item for item in BOOK["portfolio_history"] if item["date"] == date) for date in self.dates]
+
+
+def view() -> BookView:
+    return VIEW.get()
+
+
+def bind_view(dates: list[str], next_path: str) -> BookView:
+    chosen = BookView(dates, next_path)
+    VIEW.set(chosen)
+    return chosen
+
+
+def dates_from_cookie(header: str | None) -> list[str]:
+    jar = SimpleCookie()
+    jar.load(header or "")
+    morsel = jar.get("rip-dates")
+    if morsel is None or not morsel.value:
+        return list(BOOK["dates"])
+    return [item for item in morsel.value.split(",") if item in BOOK["dates"]]
+
+
+def date_cookie(dates: list[str]) -> str:
+    value = ",".join(dates)
+    return f"rip-dates={value}; HttpOnly; SameSite=Lax; Path=/; Max-Age=31536000"
 
 
 def money(value: float | int | None) -> str:
@@ -47,7 +125,10 @@ def default_industry() -> str:
 def customer(cid: str | None) -> dict | None:
     if not cid:
         return None
-    return next((row for row in BOOK["customers"] if row["customer_id"] == cid), None)
+    raw = next((row for row in BOOK["customers"] if row["customer_id"] == cid), None)
+    if raw is None:
+        return None
+    return view().project(raw)
 
 
 def project(row: dict, scenario: str) -> float | None:
@@ -61,6 +142,36 @@ def measure(value, pattern: str) -> str:
     if value is None:
         return "—"
     return pattern.format(value)
+
+
+def date_bar() -> str:
+    chosen = view()
+    boxes = []
+    for iso in BOOK["dates"]:
+        checked = "checked" if iso in chosen.dates else ""
+        boxes.append(
+            f'<label><input type="checkbox" name="d" value="{iso}" {checked}>{escape(chosen.label(iso))}</label>'
+        )
+    return f"""
+    <form class="dates" method="post" action="/dates">
+      <input type="hidden" name="next" value="{escape(chosen.next_path)}">
+      <div class="label">Reporting dates</div>
+      {''.join(boxes)}
+      <button type="submit" name="preset" value="apply">Apply dates</button>
+      <button type="submit" class="ghost" name="preset" value="all">All dates</button>
+      <button type="submit" class="ghost" name="preset" value="latest">Latest only</button>
+      <span class="hint">Position {escape(chosen.label())}. The trend uses the {len(chosen.dates)} checked date{"s" if len(chosen.dates) != 1 else ""}.</span>
+    </form>"""
+
+
+def trend_table(metrics: list[tuple[str, object]]) -> str:
+    chosen = view()
+    head = "".join(f"<th>{escape(chosen.label(iso))}</th>" for iso in chosen.dates)
+    rows = []
+    for label, getter in metrics:
+        cells = "".join(f"<td>{getter(iso)}</td>" for iso in chosen.dates)
+        rows.append(f"<tr><th>{escape(label)}</th>{cells}</tr>")
+    return f'<div class="scroll"><table class="trend"><thead><tr><th></th>{head}</tr></thead><tbody>{"".join(rows)}</tbody></table></div>'
 
 
 def page(title: str, active: str, body: str) -> bytes:
@@ -137,6 +248,15 @@ textarea {{ width:100%; min-height:420px; font:14px/1.45 ui-monospace,monospace;
 .cite {{ font-size:.82rem; color:var(--muted); border-left:3px solid var(--orange); padding-left:10px; margin:8px 0; }}
 form.inline {{ display:flex; gap:8px; flex-wrap:wrap; align-items:end; }}
 select, input[type=number] {{ font:inherit; padding:8px; border:1px solid var(--line); border-radius:8px; background:#fff; }}
+form.dates {{ display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:16px; }}
+form.dates .label {{ width:100%; }}
+form.dates label {{ display:flex; gap:6px; align-items:center; font-size:.84rem; font-weight:600; }}
+form.dates input {{ width:auto; margin:0; }}
+form.dates .hint {{ color:var(--muted); font-size:.82rem; }}
+form.dates button.ghost {{ background:#F7F4F0; color:var(--ink); border:1px solid var(--line); }}
+.scroll {{ overflow-x:auto; }}
+table.trend th, table.trend td {{ white-space:nowrap; }}
+table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
 @media (max-width:900px) {{
   .shell {{ display:block; }}
   nav {{
@@ -155,7 +275,7 @@ select, input[type=number] {{ font:inherit; padding:8px; border:1px solid var(--
 <div class="shell" id="shell">
   <nav id="rail">
     <div class="mark">Risk Intelligence<br><span>Platform</span></div>
-    <p>Business-case demonstration on the synthetic book. Position date 30 Sep 2026.</p>
+    <p>Twelve month-ends, 31 Dec 2025 to 30 Nov 2026. Check the dates to set the position and the trend.</p>
     {''.join(links)}
     <a class="logout" href="/logout">Sign out</a>
   </nav>
@@ -163,6 +283,7 @@ select, input[type=number] {{ font:inherit; padding:8px; border:1px solid var(--
   <main>
     <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="rail">Hide menu</button>
     <div class="banner">{escape(BOOK["banner"])}</div>
+    {date_bar()}
     {body}
   </main>
 </div>
@@ -213,7 +334,7 @@ def bars(rows: list[tuple[str, float]], hot: bool = False) -> str:
 
 
 def dashboard() -> str:
-    port = BOOK["portfolio"]
+    port = view().portfolio()
     stage_rows = [(f"Stage {key}", port["stages"][str(key)]["drawn_hkd"] if isinstance(port["stages"], dict) and str(key) in port["stages"] else port["stages"][key]["drawn_hkd"]) for key in (1, 2, 3)]
     # stages keys may be int from json load - json dumps int keys as strings
     stages = port["stages"]
@@ -224,8 +345,8 @@ def dashboard() -> str:
     dpd_rows = [(name, slot["drawn_hkd"]) for name, slot in port["dpd"].items()]
     coll_rows = list(port["collateral"].items())
     mat = port["maturity"]
-    industry_rows = [(row["industry"], row["drawn_hkd"]) for row in BOOK["industries"][:6]]
-    top = sorted(BOOK["customers"], key=lambda row: row["drawn_hkd"], reverse=True)[:8]
+    industry_rows = [(row["industry"], row["drawn_hkd"]) for row in port["industries"][:6]]
+    top = sorted((customer(item["customer_id"]) for item in BOOK["customers"]), key=lambda row: row["drawn_hkd"], reverse=True)[:8]
     table = "".join(
         f'<tr class="click"><td><a href="/customer?id={escape(row["customer_id"])}">{escape(row["legal_name"])}</a><div style="color:var(--muted);font-size:.8rem">{escape(row["rm"])}</div></td>'
         f'<td>{escape(row["industry"])}</td><td>Stage {row["stage"]}</td>'
@@ -235,7 +356,7 @@ def dashboard() -> str:
     )
     body = f"""
     <div class="label">Portfolio</div><h1>Management dashboard</h1>
-    <p class="lead">Position 30 Sep 2026. Drawn balances, collateral, LTV, cash-flow dates, PD grades, stage, ECL and days past due come from the property portfolio. Financial statements, covenants and the news headlines are still demonstration figures.</p>
+    <p class="lead">Position {escape(view().label())}. Drawn balances, collateral, LTV, cash-flow dates, PD grades, stage, ECL and days past due come from the property portfolio at the latest checked date. The trend table follows every checked date. Financial statements, covenants and the news headlines are still demonstration figures.</p>
     {metrics([
         ("Customers", str(port["customers"]), False),
         ("Drawn exposure", money(port["drawn_hkd"]), False),
@@ -249,13 +370,26 @@ def dashboard() -> str:
       <div class="card"><div class="label">Collateral by type</div>{bars(coll_rows)}</div>
       <div class="card"><div class="label">Largest industries</div>{bars(industry_rows, hot=True)}<p><a href="/industry?name={escape(default_industry())}">Open the {escape(default_industry())} review</a></p></div>
       <div class="card"><div class="label">ECL and LTV</div>
-        <p>ECL coverage of drawn exposure is {port["ecl_coverage"]:.2%}. ECL movement versus 31 Aug 2026 is {money(port["ecl_hkd"] - port["prior_ecl_hkd"])}.</p>
+        <p>ECL coverage of drawn exposure is {port["ecl_coverage"]:.2%}. ECL movement versus the previous month-end is {money(port["ecl_hkd"] - port["prior_ecl_hkd"])}.</p>
         <p>Portfolio LTV is exposure divided by recorded collateral. Open a customer to see the ratio used in news materiality.</p>
       </div>
     </div>
     <div class="card" style="margin-top:12px">
       <div class="label">Largest names</div>
       <table><thead><tr><th>Customer</th><th>Industry</th><th>Stage</th><th>Rating</th><th>Drawn</th><th>DPD</th></tr></thead><tbody>{table}</tbody></table>
+    </div>
+    <div class="card" style="margin-top:12px"><div class="label">Trend across the checked dates</div>
+      {trend_table([
+        ("Drawn", lambda iso: money(view().portfolio_series()[view().dates.index(iso)]["drawn_hkd"])),
+        ("ECL", lambda iso: money(view().portfolio_series()[view().dates.index(iso)]["ecl_hkd"])),
+        ("ECL coverage", lambda iso: f'{view().portfolio_series()[view().dates.index(iso)]["ecl_coverage"]:.2%}'),
+        ("Stage 2 names", lambda iso: str(view().portfolio_series()[view().dates.index(iso)]["stage2_names"])),
+        ("Drawn in stage 2", lambda iso: money(view().portfolio_series()[view().dates.index(iso)]["stage2_drawn"])),
+        ("Names past due", lambda iso: str(view().portfolio_series()[view().dates.index(iso)]["dpd_names"])),
+        ("Drawn 60 days or more past due", lambda iso: money(view().portfolio_series()[view().dates.index(iso)]["dpd60_drawn"])),
+        ("Portfolio LTV", lambda iso: str(view().portfolio_series()[view().dates.index(iso)]["ltv"])),
+        ("Large repayments inside 90 days", lambda iso: str(len(view().portfolio_series()[view().dates.index(iso)]["large_due"]))),
+      ])}
     </div>"""
     return body
 
@@ -273,7 +407,7 @@ def news_page(selected: list[str]) -> str:
             f'<tr><td colspan="4" style="color:var(--muted)">{escape(item["body"])} '
             f'Exposure {money(factors["exposure_hkd"])}. Coverage {factors["security_coverage"]}. '
             f'Guarantor {factors["guarantor_support"]}. Strength {factors["financial_strength"]}. '
-            f'Warnings {factors["warning_signals"]}.</td></tr>'
+            f'Warnings {factors["warning_signals"]}.{news_position(item)}</td></tr>'
         )
     follow = ""
     if selected:
@@ -305,13 +439,36 @@ def news_page(selected: list[str]) -> str:
       <p><button type="submit">Review selected news</button></p>
     </form>
     {follow}
+    <div class="card" style="margin-top:12px"><div class="label">ECL of the names named in the feed</div>
+      {trend_table([(customer(item["customer_id"])["legal_name"], lambda iso, cid=item["customer_id"]: money(customer(cid)["series"][view().dates.index(iso)]["ecl_hkd"])) for item in BOOK["news"] if item["customer_id"]])}
+    </div>
+    <div class="card" style="margin-top:12px"><div class="label">Days past due of the names named in the feed</div>
+      {trend_table([(customer(item["customer_id"])["legal_name"], lambda iso, cid=item["customer_id"]: str(customer(cid)["series"][view().dates.index(iso)]["dpd"])) for item in BOOK["news"] if item["customer_id"]])}
+    </div>
     """
 
 
+def news_position(item: dict) -> str:
+    if not item["customer_id"]:
+        return ""
+    person = customer(item["customer_id"])
+    return (
+        f" At {view().label()}: drawn {money(person['drawn_hkd'])}, ECL {money(person['ecl_hkd'])}, "
+        f"stage {person['stage']}, {person['dpd']} days past due."
+    )
+
+
+def industry_on(iso: str, name: str) -> dict:
+    point = next(item for item in view().portfolio_series() if item["date"] == iso)
+    return next(item for item in point["industries"] if item["industry"] == name)
+
+
 def industry_page(name: str) -> str:
-    row = next((item for item in BOOK["industries"] if item["industry"] == name), BOOK["industries"][0])
-    members = [item for item in BOOK["customers"] if item["industry"] == row["industry"]]
+    port = view().portfolio()
+    row = next((item for item in port["industries"] if item["industry"] == name), port["industries"][0])
+    members = [customer(item["customer_id"]) for item in BOOK["customers"] if item["industry"] == row["industry"]]
     members.sort(key=lambda item: item["drawn_hkd"], reverse=True)
+    open_warnings = sum(len(item["warnings"]) for item in members)
     body_rows = "".join(
         f'<tr><td><a href="/customer?id={escape(item["customer_id"])}">{escape(item["legal_name"])}</a></td>'
         f'<td>{item["prior_rating"]} → {item["rating"]}</td><td>Stage {item["stage"]}</td>'
@@ -321,29 +478,39 @@ def industry_page(name: str) -> str:
     )
     options = "".join(
         f'<option {"selected" if item["industry"]==row["industry"] else ""}>{escape(item["industry"])}</option>'
-        for item in BOOK["industries"]
+        for item in port["industries"]
     )
     return f"""
     <div class="label">Industry</div><h1>{escape(row["industry"])}</h1>
-    <p class="lead">Signals are read against this industry's drawn exposure and collateral, so a sector headline is judged by what the book actually holds.</p>
+    <p class="lead">Position {escape(view().label())}. Signals use this industry's drawn exposure, ECL and days past due at that date. The trend follows the checked dates.</p>
     <form class="inline" method="get" action="/industry"><label>Industry<br><select name="name" onchange="this.form.submit()">{options}</select></label></form>
     {metrics([
         ("Drawn", money(row["drawn_hkd"]), False),
         ("Stage 2 names", str(row["stage2"]), True),
         ("Migrations", str(row["migrations"]), row["migrations"] > 0),
-        ("Open warnings", str(row["open_warnings"]), row["open_warnings"] > 0),
+        ("Open warnings", str(open_warnings), open_warnings > 0),
     ])}
     <div class="card">
       <table><thead><tr><th>Customer</th><th>Rating</th><th>Stage</th><th>Drawn</th><th>Coverage</th><th>Warnings</th><th>DPD</th></tr></thead>
       <tbody>{body_rows}</tbody></table>
+    </div>
+    <div class="card" style="margin-top:12px"><div class="label">Trend across the checked dates</div>
+      {trend_table([
+        ("Drawn", lambda iso, industry=row["industry"]: money(industry_on(iso, industry)["drawn_hkd"])),
+        ("ECL", lambda iso, industry=row["industry"]: money(industry_on(iso, industry)["ecl_hkd"])),
+        ("Stage 2 names", lambda iso, industry=row["industry"]: str(industry_on(iso, industry)["stage2"])),
+        ("Names past due", lambda iso, industry=row["industry"]: str(industry_on(iso, industry)["dpd_accounts"])),
+        ("Collateral", lambda iso, industry=row["industry"]: money(industry_on(iso, industry)["collateral_hkd"])),
+      ])}
     </div>
     <p><a class="btn" href="/email?id=MAIL-IND-WHOLESALE">Open the industry email draft</a></p>
     """
 
 
 def repayment_page(window: int) -> str:
+    people = [customer(item["customer_id"]) for item in BOOK["customers"]]
     rows = []
-    for item in BOOK["customers"]:
+    for item in people:
         if item["next_due_hkd"] < THRESHOLD or item["next_due_days"] > window:
             continue
         rows.append(item)
@@ -365,12 +532,12 @@ def repayment_page(window: int) -> str:
     body = "".join(lines) or '<tr><td colspan="6">No obligation above HKD 5,000,000 falls in this window.</td></tr>'
     ageing = "".join(
         f'<tr><td><a href="/customer?id={escape(item["customer_id"])}">{escape(item["legal_name"])}</a></td><td>{item["dpd"]}</td><td>{escape(item["dpd_component"])}</td><td>{money(item["drawn_hkd"])}</td></tr>'
-        for item in sorted(BOOK["customers"], key=lambda row: row["dpd"], reverse=True)[:6]
+        for item in sorted(people, key=lambda row: row["dpd"], reverse=True)
         if item["dpd"] > 0
     )
     return f"""
     <div class="label">Repayment</div><h1>Obligations above HKD 5,000,000</h1>
-    <p class="lead">Due dates and amounts are the next principal on the cash flow schedule. The window is {window} days. Days past due in the table below are the portfolio extract at 30 Sep 2026.</p>
+    <p class="lead">Position {escape(view().label())}. Due dates and amounts are the next principal on that date's cash flow schedule. The window is {window} days. Days past due follow the same position, and the trend shows how both move across the checked dates.</p>
     <form class="inline" method="get" action="/repayment">
       <label>Window (days)<br><input type="number" name="window" min="7" max="365" value="{window}"></label>
       <button type="submit">Apply</button>
@@ -381,6 +548,12 @@ def repayment_page(window: int) -> str:
     <div class="card" style="margin-top:12px"><div class="label">Approaching 30, 60, 90 and 180 days</div>
       <table><thead><tr><th>Customer</th><th>DPD</th><th>Component</th><th>Drawn</th></tr></thead><tbody>{ageing}</tbody></table>
       <p><a href="/email?id=MAIL-DPD-LANTERN">Open the days-past-due draft</a></p>
+    </div>
+    <div class="card" style="margin-top:12px"><div class="label">Days past due across the checked dates</div>
+      {trend_table([(item["legal_name"], lambda iso, cid=item["customer_id"]: str(customer(cid)["series"][view().dates.index(iso)]["dpd"])) for item in people if any(point["dpd"] > 0 for point in item["series"])])}
+    </div>
+    <div class="card" style="margin-top:12px"><div class="label">Next principal across the checked dates</div>
+      {trend_table([(item["legal_name"], lambda iso, cid=item["customer_id"]: money(customer(cid)["series"][view().dates.index(iso)]["next_due_hkd"]) + " on " + customer(cid)["series"][view().dates.index(iso)]["next_due_date"]) for item in people])}
     </div>"""
 
 
@@ -416,7 +589,7 @@ def financial_page(cid: str, scenario: str) -> str:
     )
     return f"""
     <div class="label">Financial analysis</div><h1>{escape(row["legal_name"])}</h1>
-    <p class="lead">Revenue, margin, liquidity, leverage and interest cover are demonstration figures, so the covenant tests can be run before statements arrive. Drawn balance, collateral and LTV on the customer page still come from the property extract.</p>
+    <p class="lead">Revenue, margin, liquidity, leverage and interest cover are demonstration figures, so the covenant tests can be run before statements arrive. Drawn balance, collateral, ECL and days past due below follow the checked reporting dates.</p>
     <form class="inline" method="get" action="/financial">
       <label>Customer<br><select name="customer">{options}</select></label>
       <label>Scenario<br><select name="scenario">{shocks}</select></label>
@@ -432,12 +605,23 @@ def financial_page(cid: str, scenario: str) -> str:
       <p>Credit assumption at approval: {measure(row["coverage_assumption"], "{:.1f}x")}. Scenario: {escape(SCENARIOS[scenario])}. Result: {scenario_status}.</p>
       <p>Statement extract: {escape(row["documents"]["financials"]["passage"])}</p>
       <p><a href="/email?id=MAIL-COV-APEX">Open the covenant email draft</a></p>
+    </div>
+    <div class="card" style="margin-top:12px"><div class="label">Portfolio extract across the checked dates</div>
+      {trend_table([
+        ("Drawn", lambda iso, cid=row["customer_id"]: money(customer(cid)["series"][view().dates.index(iso)]["drawn_hkd"])),
+        ("ECL", lambda iso, cid=row["customer_id"]: money(customer(cid)["series"][view().dates.index(iso)]["ecl_hkd"])),
+        ("EAD", lambda iso, cid=row["customer_id"]: money(customer(cid)["series"][view().dates.index(iso)]["ead_hkd"])),
+        ("Stage", lambda iso, cid=row["customer_id"]: str(customer(cid)["series"][view().dates.index(iso)]["stage"])),
+        ("Days past due", lambda iso, cid=row["customer_id"]: str(customer(cid)["series"][view().dates.index(iso)]["dpd"])),
+        ("LTV", lambda iso, cid=row["customer_id"]: str(customer(cid)["series"][view().dates.index(iso)]["ltv"])),
+        ("Next principal", lambda iso, cid=row["customer_id"]: money(customer(cid)["series"][view().dates.index(iso)]["next_due_hkd"])),
+      ])}
     </div>"""
 
 
 def reports_page(kind: str, detail: str, cid: str) -> str:
     row = customer(cid) or customer(default_customer_id())
-    port = BOOK["portfolio"]
+    port = view().portfolio()
     if kind == "customer":
         title = f"Customer Status Report — {row['legal_name']}"
         summary = (
@@ -456,7 +640,7 @@ def reports_page(kind: str, detail: str, cid: str) -> str:
             f"<p>Drawn exposure {money(port['drawn_hkd'])} across {port['customers']} customers. "
             f"ECL {money(port['ecl_hkd'])}. Stage migrations {port['migrations']}. "
             f"Obligations above HKD 5,000,000 inside 90 days: {len(port['large_due'])}.</p>"
-            f"<p>{escape(BOOK['industries'][0]['industry'])} is the largest industry on this extract, with drawn exposure {money(BOOK['industries'][0]['drawn_hkd'])}.</p>"
+            f"<p>{escape(port['industries'][0]['industry'])} is the largest industry at {escape(view().label())}, with drawn exposure {money(port['industries'][0]['drawn_hkd'])}.</p>"
         )
         extra = "<h2>Stage and DPD</h2>" + bars(
             [(f"Stage {key}", port["stages"][str(key)]["drawn_hkd"]) for key in (1, 2, 3)],
@@ -481,7 +665,15 @@ def reports_page(kind: str, detail: str, cid: str) -> str:
       <label>Customer<br><select name="customer">{customers}</select></label>
       <button type="submit">Prepare</button>
     </form>
-    <div class="card" style="margin-top:12px">{summary}{extra}</div>"""
+    <div class="card" style="margin-top:12px">{summary}{extra}
+      <h2>Trend across the checked dates</h2>
+      {trend_table([
+        ("Drawn", lambda iso: money(view().portfolio_series()[view().dates.index(iso)]["drawn_hkd"]) if kind != "customer" else money(customer(row["customer_id"])["series"][view().dates.index(iso)]["drawn_hkd"])),
+        ("ECL", lambda iso: money(view().portfolio_series()[view().dates.index(iso)]["ecl_hkd"]) if kind != "customer" else money(customer(row["customer_id"])["series"][view().dates.index(iso)]["ecl_hkd"])),
+        ("Days past due" if kind == "customer" else "Names past due", lambda iso: str(customer(row["customer_id"])["series"][view().dates.index(iso)]["dpd"]) if kind == "customer" else str(view().portfolio_series()[view().dates.index(iso)]["dpd_names"])),
+        ("Stage" if kind == "customer" else "Stage 2 names", lambda iso: str(customer(row["customer_id"])["series"][view().dates.index(iso)]["stage"]) if kind == "customer" else str(view().portfolio_series()[view().dates.index(iso)]["stage2_names"])),
+      ])}
+    </div>"""
 
 
 def assistant_page(question: str, cid: str) -> str:
@@ -521,22 +713,29 @@ def answer_for(row: dict, question: str) -> tuple[str, list[dict]]:
     text = question.lower()
     docs = row["documents"]
     if any(word in text for word in ("rating", "downgrade", "notch", "why")):
+        grades = ", ".join(f"{view().label(point['date'])} grade {point['rating']}" for point in row["series"])
+        stages = ", ".join(f"{view().label(point['date'])} stage {point['stage']}" for point in row["series"])
         return (
-            f"The current PD grade is {row['rating']}. The original grade on the portfolio file is {row['prior_rating']}. "
-            f"The current grade did not change across the month-ends from December 2025 to November 2026. "
-            f"Stage is {row['stage']}, and it was {row['prior_stage']} on 31 Aug 2026.",
+            f"At {view().label()} the current PD grade is {row['rating']}. The original grade on the portfolio file is {row['prior_rating']}. "
+            f"Across the checked dates: {grades}. Stages: {stages}.",
             [docs["review"], docs["credit_paper"]],
         )
     if any(word in text for word in ("repay", "due", "maturity", "instal")):
+        schedule = ", ".join(
+            f"{view().label(point['date'])} {money(point['next_due_hkd'])} due {point['next_due_date']} ({point['next_due_days']} days)"
+            for point in row["series"]
+        )
         return (
-            f"The next obligation is {money(row['next_due_hkd'])} in {row['next_due_days']} days, from the {row['next_due_source']}. "
-            f"Days past due are {row['dpd']} on {row['dpd_component']}. The monitoring threshold is HKD 5,000,000.",
+            f"At {view().label()} the next obligation is {money(row['next_due_hkd'])} in {row['next_due_days']} days, from the cash flow schedule. "
+            f"Days past due are {row['dpd']}. The monitoring threshold is HKD 5,000,000. Checked dates: {schedule}.",
             [docs["repayment"]],
         )
     if any(word in text for word in ("since", "develop", "change", "latest", "review")):
+        first = row["series"][0]
         return (
-            f"From 31 Aug 2026 to 30 Sep 2026, drawn exposure is {money(row['drawn_hkd'])}. "
-            f"ECL moved from {money(row['prior_ecl_hkd'])} to {money(row['ecl_hkd'])}. Days past due are {row['dpd']}. "
+            f"From {view().label(first['date'])} to {view().label()}, drawn exposure is {money(row['drawn_hkd'])}. "
+            f"ECL moved from {money(first['ecl_hkd'])} to {money(row['ecl_hkd'])}. "
+            f"Days past due moved from {first['dpd']} to {row['dpd']}. Stage moved from {first['stage']} to {row['stage']}. "
             f"Interest cover on the demonstration statements is {measure(row['interest_coverage'][-1], '{:.1f} times')} "
             f"and the demonstration covenant is {measure(row['coverage_threshold'], '{:.1f} times')}. "
             f"Demonstration revenue in the latest year is {money(row['revenue_hkd'][-1])}.",
@@ -567,13 +766,60 @@ def drafts_page() -> str:
     <div class="card"><table><thead><tr><th>Subject</th><th>Kind</th><th>To</th></tr></thead><tbody>{rows}</tbody></table></div>"""
 
 
+def live_letter(draft: dict) -> str:
+    port = view().portfolio()
+    people = [customer(item["customer_id"]) for item in BOOK["customers"]]
+    checked = ", ".join(view().label(date) for date in view().dates)
+    late = [item for item in people if item["dpd"] > 0]
+    late_line = "; ".join(
+        f"{item['legal_name']} at {item['dpd']} days, ECL {money(item['ecl_hkd'])}, drawn {money(item['drawn_hkd'])}"
+        for item in late
+    ) or "none"
+    banner = BOOK["banner"]
+    intro = (
+        f"To: {NOTIFY}\nSubject: {draft['subject']}\n\n{banner}\n\nDear colleague,\n\n"
+        f"Position {view().label()}. Checked dates: {checked}. "
+        f"Drawn {money(port['drawn_hkd'])}. ECL {money(port['ecl_hkd'])}. "
+        "This draft follows the checked dates. It is not a credit decision.\n\n"
+    )
+    if draft["id"] == "MAIL-DPD-LANTERN":
+        body = f"Days past due at the position date: {late_line}.\n\nThe cash-flow dates above HKD 5,000,000 are future principal dates. This draft does not treat those future dates as past due.\n"
+    elif draft["id"] == "MAIL-REPAY-LANTERN":
+        due = [item for item in people if item["next_due_hkd"] >= THRESHOLD and item["next_due_days"] <= 90]
+        due.sort(key=lambda item: item["next_due_hkd"], reverse=True)
+        focus = due[0] if due else people[0]
+        body = (
+            f"{focus['legal_name']} has principal of {money(focus['next_due_hkd'])} due on {focus['next_due_date']}, "
+            f"{focus['next_due_days']} days after {view().label()}.\n\n"
+            f"The amount is on {focus['next_contract']}, method {focus['next_method'].replace('_', ' ').title()}. "
+            f"Group drawn is {money(focus['drawn_hkd'])}. LTV is {focus['ltv']}.\n"
+        )
+    elif draft["id"] == "MAIL-IND-WHOLESALE":
+        lines = [f"{item['industry']}: drawn {money(item['drawn_hkd'])}, ECL {money(item['ecl_hkd'])}, stage 2 names {item['stage2']}, names past due {item['dpd_accounts']}." for item in port["industries"]]
+        body = "\n".join(lines) + f"\n\nPortfolio LTV at the position date is {port['ltv']}.\n"
+    elif draft["id"] == "MAIL-COV-APEX":
+        apex = customer("BOR-AGHL")
+        body = (
+            f"Financial statements were not in the uploaded files. The covenant test still uses the demonstration statements.\n\n"
+            f"What follows the checked dates for {apex['legal_name']}: drawn {money(apex['drawn_hkd'])}, "
+            f"ECL {money(apex['ecl_hkd'])}, stage {apex['stage']}, {apex['dpd']} days past due, LTV {apex['ltv']}.\n"
+        )
+    else:
+        apex = customer("BOR-AGHL")
+        body = (
+            f"Adverse-news placeholders are not a live feed. At {view().label()}, {apex['legal_name']} is drawn {money(apex['drawn_hkd'])}, "
+            f"ECL {money(apex['ecl_hkd'])}, stage {apex['stage']}, {apex['dpd']} days past due.\n"
+        )
+    return intro + body + "\nPlease send this from your own mailbox if you want it delivered.\n"
+
+
 def email_page(draft_id: str) -> str:
     draft = next((item for item in BOOK["drafts"] if item["id"] == draft_id), BOOK["drafts"][0])
     return f"""
     <div class="label">{escape(draft["kind"])}</div><h1>{escape(draft["subject"])}</h1>
-    <p class="lead">To {escape(NOTIFY)}. Download the draft and send it from your own mailbox.</p>
+    <p class="lead">To {escape(NOTIFY)}. The letter uses the checked reporting dates. Download it and send it from your own mailbox.</p>
     <p><a class="btn" href="/email.eml?id={escape(draft["id"])}">Download .eml</a></p>
-    <textarea readonly>{escape(draft["body"])}</textarea>"""
+    <textarea readonly>{escape(live_letter(draft))}</textarea>"""
 
 
 def customer_page(cid: str) -> str:
@@ -584,20 +830,73 @@ def customer_page(cid: str) -> str:
         f'<p class="cite"><strong>{escape(doc["title"])}</strong> · {escape(doc["locator"])}<br>{escape(doc["passage"])}</p>'
         for doc in row["documents"].values()
     )
+    def facility_metric(field: str, contract: str, money_field: bool = False):
+        def getter(iso: str, contract: str = contract) -> str:
+            point = customer(row["customer_id"])["series"][view().dates.index(iso)]
+            found = next(item for item in point["facilities"] if item["contract"] == contract)
+            return money(found[field]) if money_field else str(found[field])
+        return getter
+
+    moving = [item for item in row["facilities"] if item["instrument"] != "Off-Bal"]
+    facility_rows = "".join(
+        "<tr>"
+        f"<td>{escape(item['contract'])}</td><td>{escape(item['instrument'])}</td><td>{escape(item['status'])}</td>"
+        f"<td>{money(item['balance_hkd'])}</td><td>{money(item['limit_hkd'])}</td><td>{money(item['available_hkd'])}</td>"
+        f"<td>{money(item['ead_hkd'])}</td><td>{item['pd']}</td><td>{item['lgd']}</td><td>{money(item['ecl_hkd'])}</td>"
+        f"<td>{item['stage']}</td><td>{item['dpd']}</td><td>{item['original_grade']} → {item['grade']}</td>"
+        f"<td>{escape(item['maturity'])}</td><td>{item['ltv']}</td><td>{item['ltv_nrv']}</td>"
+        f"<td>{escape(item['collateral_id'])}</td><td>{escape(item['collateral_type'])}</td>"
+        f"<td>{money(item['market_hkd'])}</td><td>{money(item['nrv_hkd'])}</td>"
+        f"<td>{escape(item['address'])}</td>"
+        "</tr>"
+        for item in row["facilities"]
+    )
     return f"""
     <div class="label">Customer</div><h1>{escape(row["legal_name"])}</h1>
-    <p class="lead">{escape(row["summary"])}</p>
+    <p class="lead">Position {escape(view().label())}. {escape(row["legal_name"])} has drawn {money(row["drawn_hkd"])}, ECL {money(row["ecl_hkd"])}, stage {row["stage"]} and {row["dpd"]} days past due. Original grade {row["prior_rating"]}, current grade {row["rating"]}. Next principal {money(row["next_due_hkd"])} on {escape(row["next_due_date"])}.</p>
     {metrics([
         ("Drawn", money(row["drawn_hkd"]), False),
+        ("ECL", money(row["ecl_hkd"]), True),
         ("Rating", f'{row["prior_rating"]} → {row["rating"]}', row["rating"] > row["prior_rating"]),
-        ("LTV", str(row["ltv"]), (row["ltv"] or 0) > 1),
         ("DPD", str(row["dpd"]), row["dpd"] >= 30),
     ])}
-    <div class="card"><p>Industry {escape(row["industry"])}. Stage {row["prior_stage"]} to {row["stage"]}. RM {escape(row["rm"])}.</p>
-    <p>Collateral {escape(row["collateral_type"])} {money(row["collateral_hkd"])}. Coverage {row["coverage_ratio"]}.</p>
-    <p>Next obligation {money(row["next_due_hkd"])} in {row["next_due_days"]} days, from the {escape(row["next_due_source"])}.</p>
-    {docs}
-    <p><a href="/assistant?customer={escape(row["customer_id"])}&q=What+are+the+key+risks+for+this+customer%3F">Ask about this customer</a></p></div>"""
+    <div class="card"><div class="label">Trend across the checked dates</div>
+      {trend_table([
+        ("Drawn", lambda iso, cid=row["customer_id"]: money(customer(cid)["series"][view().dates.index(iso)]["drawn_hkd"])),
+        ("Committed limit", lambda iso, cid=row["customer_id"]: money(customer(cid)["series"][view().dates.index(iso)]["committed_hkd"])),
+        ("EAD", lambda iso, cid=row["customer_id"]: money(customer(cid)["series"][view().dates.index(iso)]["ead_hkd"])),
+        ("ECL", lambda iso, cid=row["customer_id"]: money(customer(cid)["series"][view().dates.index(iso)]["ecl_hkd"])),
+        ("Stage", lambda iso, cid=row["customer_id"]: str(customer(cid)["series"][view().dates.index(iso)]["stage"])),
+        ("Days past due", lambda iso, cid=row["customer_id"]: str(customer(cid)["series"][view().dates.index(iso)]["dpd"])),
+        ("Grade", lambda iso, cid=row["customer_id"]: str(customer(cid)["series"][view().dates.index(iso)]["rating"])),
+        ("LTV", lambda iso, cid=row["customer_id"]: str(customer(cid)["series"][view().dates.index(iso)]["ltv"])),
+        ("Collateral", lambda iso, cid=row["customer_id"]: money(customer(cid)["series"][view().dates.index(iso)]["collateral_hkd"])),
+        ("Next principal", lambda iso, cid=row["customer_id"]: money(customer(cid)["series"][view().dates.index(iso)]["next_due_hkd"])),
+        ("Next principal date", lambda iso, cid=row["customer_id"]: customer(cid)["series"][view().dates.index(iso)]["next_due_date"]),
+      ])}
+    </div>
+    <div class="card" style="margin-top:12px"><div class="label">Facility ECL across the checked dates</div>
+      {trend_table([(item["contract"], facility_metric("ecl_hkd", item["contract"], True)) for item in moving])}
+    </div>
+    <div class="card" style="margin-top:12px"><div class="label">Facility EAD across the checked dates</div>
+      {trend_table([(item["contract"], facility_metric("ead_hkd", item["contract"], True)) for item in moving])}
+    </div>
+    <div class="card" style="margin-top:12px"><div class="label">Facility days past due across the checked dates</div>
+      {trend_table([(item["contract"], facility_metric("dpd", item["contract"])) for item in moving])}
+    </div>
+    <div class="card" style="margin-top:12px"><div class="label">Facility maturity across the checked dates</div>
+      {trend_table([(item["contract"], facility_metric("maturity", item["contract"])) for item in moving])}
+    </div>
+    <div class="card" style="margin-top:12px"><div class="label">Every facility at {escape(view().label())}</div>
+      <div class="scroll"><table><thead><tr>
+        <th>Contract</th><th>Instrument</th><th>Status</th><th>Balance</th><th>Limit</th><th>Available</th>
+        <th>EAD</th><th>PD</th><th>LGD</th><th>ECL</th><th>Stage</th><th>DPD</th><th>Grade</th>
+        <th>Maturity</th><th>LTV</th><th>LTV on NRV</th><th>Collateral</th><th>Type</th><th>Market</th><th>NRV</th><th>Address</th>
+      </tr></thead><tbody>{facility_rows}</tbody></table></div>
+      <p>Industry {escape(row["industry"])}. Collateral coverage {row["coverage_ratio"]}. RM {escape(row["rm"])} is a demonstration name.</p>
+      {docs}
+      <p><a href="/assistant?customer={escape(row["customer_id"])}&q=What+are+the+key+risks+for+this+customer%3F">Ask about this customer</a></p>
+    </div>"""
 
 
 def login_page(message: str = "") -> bytes:
@@ -625,7 +924,7 @@ code {{ color:#2C2825; }}
 <form method="post" action="/login">
   <div style="font-family:'Source Serif 4',serif;font-size:1.45rem;line-height:1.2">Risk Intelligence<br><span style="color:#E36F1E">Platform</span></div>
   <h1>Sign in</h1>
-  <p>Property portfolio review at 30 Sep 2026. Demonstration account <code>cro.shum</code>, password <code>Harbour-Demo-2026</code>.</p>
+  <p>Property portfolio from 31 Dec 2025 to 30 Nov 2026. After sign-in, check the reporting dates. Demonstration account <code>cro.shum</code>, password <code>Harbour-Demo-2026</code>.</p>
   {note}
   <label>User<input name="user" autocomplete="username" required></label>
   <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
@@ -677,9 +976,11 @@ class Handler(BaseHTTPRequestHandler):
         if not signed_in:
             self._redirect("/login")
             return
+        requested = query.get("d") or dates_from_cookie(self.headers.get("Cookie"))
+        bind_view(requested, parsed.path + (("?" + parsed.query) if parsed.query else ""))
         if key == "email.eml":
             draft = next((item for item in BOOK["drafts"] if item["id"] == (query.get("id") or [""])[0]), BOOK["drafts"][0])
-            payload = draft["body"].encode("utf-8")
+            payload = live_letter(draft).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "message/rfc822")
             self.send_header("Content-Disposition", f'attachment; filename="{draft["id"]}.eml"')
@@ -694,14 +995,33 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
-        if parsed.path.strip("/") != "login":
-            self.send_error(404)
-            return
+        action = parsed.path.strip("/")
         length = int(self.headers.get("Content-Length") or 0)
-        if length > 4096:
+        if length > 20000:
             self.send_error(413)
             return
         form = parse_qs(self.rfile.read(length).decode("utf-8"))
+        if action == "dates":
+            if not session_ok(self.headers.get("Cookie")):
+                self._redirect("/login")
+                return
+            preset = (form.get("preset") or ["apply"])[0]
+            if preset == "all":
+                chosen = list(BOOK["dates"])
+            elif preset == "latest":
+                chosen = [BOOK["dates"][-1]]
+            else:
+                chosen = [item for item in BOOK["dates"] if item in form.get("d", [])]
+                if not chosen:
+                    chosen = [BOOK["dates"][-1]]
+            nxt = (form.get("next") or ["/dashboard"])[0]
+            if not nxt.startswith("/") or nxt.startswith("//"):
+                nxt = "/dashboard"
+            self._redirect(nxt, date_cookie(chosen))
+            return
+        if action != "login":
+            self.send_error(404)
+            return
         user = (form.get("user") or [""])[0]
         password = (form.get("password") or [""])[0]
         user_ok = hmac.compare_digest(hashlib.sha256(user.encode()).hexdigest(), hashlib.sha256(DEMO_USER.encode()).hexdigest())

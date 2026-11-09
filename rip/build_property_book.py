@@ -54,6 +54,222 @@ def borrower_facts(rows: list[dict]) -> dict[str, dict]:
     return facts
 
 
+def iso_to_dmy(iso: str) -> str:
+    year, month, day = iso.split("-")
+    return f"{day}/{month}/{year}"
+
+
+def attach_history(customers: list[dict], collateral: list[dict], flows: list[dict]) -> tuple[list[str], list[dict]]:
+    """One snapshot per month-end, so the screens can follow any checked date."""
+    meta = {item["legal_name"]: item for item in customers}
+    collateral_by_date = defaultdict(dict)
+    for row in collateral:
+        collateral_by_date[row["REPORTING_DATE"]][row["CONTRACT_REFERENCE"]] = row
+    flows_by = defaultdict(lambda: defaultdict(list))
+    for row in flows:
+        flows_by[row["REPORTING_DATE"]][row["CONTRACT_REFERENCE"]].append(row)
+    for contracts in flows_by.values():
+        for rows in contracts.values():
+            rows.sort(key=lambda item: parse_date(item["CASH_FLOW_DATE"]))
+
+    dates = []
+    portfolio_history = []
+    histories = defaultdict(list)
+    previous_stage = {}
+    previous_ecl = {}
+    for path in sorted((ROOT / "source").glob("IFRS9_Property_Portfolio_*.csv")):
+        source_rows = load(path)
+        iso = source_rows[0]["REPORTING_DATE"]
+        dmy = iso_to_dmy(iso)
+        reporting = parse_date(dmy)
+        dates.append(iso)
+        grouped = defaultdict(list)
+        for row in source_rows:
+            grouped[row["BORROWER1"]].append(row)
+        month_points = []
+        for borrower, items in grouped.items():
+            point = history_point(
+                borrower, items, collateral_by_date[dmy], flows_by[dmy], reporting,
+                previous_stage.get(borrower), previous_ecl.get(borrower), meta[borrower]["customer_id"],
+            )
+            histories[borrower].append(point)
+            month_points.append(point)
+        portfolio_history.append(portfolio_point(iso, month_points, previous_stage))
+        previous_stage = {point["legal_name"]: point["stage"] for point in month_points}
+        previous_ecl = {point["legal_name"]: point["ecl_hkd"] for point in month_points}
+    for customer in customers:
+        customer["history"] = histories[customer["legal_name"]]
+        if len(customer["history"]) != 12:
+            raise RuntimeError(f"{customer['legal_name']} has {len(customer['history'])} months")
+    return dates, portfolio_history
+
+
+def history_point(borrower, items, collateral, flows, reporting, prior_stage, prior_ecl, customer_id) -> dict:
+    on_balance = [row for row in items if row["INSTRUMENT"] != "Off-Bal"]
+    drawn = round(sum(float(row["BAL_OUTSTD"]) for row in on_balance), 2)
+    market = round(sum(float(row["MARKET_VALUE_HKD"]) for row in on_balance), 2)
+    nrv = round(sum(float(row["NET_REALIZABLE_VALUE_HKD"]) for row in on_balance), 2)
+    ead = round(sum(float(row["EAD_POST_CCF"]) for row in on_balance), 2)
+    nominal = round(sum(float(row["BAL_NOMINAL"]) for row in on_balance), 2)
+    facilities = [facility_row(row, collateral.get(row["CONTRACT_REFERENCE"])) for row in items]
+    next_principal = None
+    for row in on_balance:
+        ref = row["CONTRACT_REFERENCE"]
+        for flow in flows.get(ref, []):
+            if flow["CASH_FLOW_TYPE"] != "N" or float(flow["CASH_FLOW_AMOUNT"]) <= 0:
+                continue
+            days = (parse_date(flow["CASH_FLOW_DATE"]) - reporting).days
+            candidate = {
+                "days": days,
+                "amount": round(float(flow["CASH_FLOW_AMOUNT"]), 2),
+                "date": flow["CASH_FLOW_DATE"],
+                "contract": ref,
+                "method": flow["AMORTIZATION_METHOD"],
+            }
+            if next_principal is None or (candidate["days"], -candidate["amount"]) < (next_principal["days"], -next_principal["amount"]):
+                next_principal = candidate
+            break
+    if next_principal is None:
+        raise RuntimeError(f"no principal for {borrower} at {reporting.date()}")
+    stage = max(int(row["STAGE"]) for row in items)
+    return {
+        "date": reporting.strftime("%Y-%m-%d"),
+        "legal_name": borrower,
+        "customer_id": customer_id,
+        "industry": items[0]["INDUSTRY_SECTOR"],
+        "drawn_hkd": drawn,
+        "committed_hkd": round(sum(float(row["FACILITY_LIMIT"]) for row in items), 2),
+        "ecl_hkd": round(sum(float(row["ECL_HKD"]) for row in items), 2),
+        "prior_ecl_hkd": prior_ecl if prior_ecl is not None else round(sum(float(row["ECL_HKD"]) for row in items), 2),
+        "stage": stage,
+        "prior_stage": prior_stage if prior_stage is not None else stage,
+        "dpd": max(int(row["PAST_DUE_DAY"]) for row in items),
+        "rating": int(items[0]["CURRENT_PD_GRADE"]),
+        "collateral_hkd": market,
+        "nrv_hkd": nrv,
+        "ead_hkd": ead,
+        "nominal_hkd": nominal,
+        "ltv": round(drawn / market, 2) if market else None,
+        "coverage_ratio": round(market / drawn, 2) if drawn else None,
+        "next_due_days": next_principal["days"],
+        "next_due_hkd": next_principal["amount"],
+        "next_due_date": next_principal["date"],
+        "next_contract": next_principal["contract"],
+        "next_method": next_principal["method"],
+        "refinancing": next_principal["method"] == "BULLET" and next_principal["days"] <= 90,
+        "facilities": facilities,
+    }
+
+
+def facility_row(source: dict, collateral: dict | None) -> dict:
+    balance = float(source["BAL_OUTSTD"])
+    market = float(source["MARKET_VALUE_HKD"])
+    nrv = float(source["NET_REALIZABLE_VALUE_HKD"])
+    return {
+        "contract": source["CONTRACT_REFERENCE"],
+        "instrument": source["INSTRUMENT"],
+        "status": source["STATUS"],
+        "department": source["DEPT"],
+        "stage": int(source["STAGE"]),
+        "dpd": int(source["PAST_DUE_DAY"]),
+        "grade": int(source["CURRENT_PD_GRADE"]),
+        "original_grade": int(source["ORIGINAL_PD_GRADE"]),
+        "balance_hkd": round(balance, 2),
+        "nominal_hkd": round(float(source["BAL_NOMINAL"]), 2),
+        "limit_hkd": round(float(source["FACILITY_LIMIT"]), 2),
+        "available_hkd": round(float(source["FACILITY_AVAILABLE"]), 2),
+        "ead_hkd": round(float(source["EAD_POST_CCF"]), 2),
+        "pd": float(source["SCN_WGT_ANNUAL_PD"]),
+        "lgd": float(source["SCN_WGT_LGD"]),
+        "ecl_hkd": round(float(source["ECL_HKD"]), 2),
+        "maturity": source["MATURITY_DATE"],
+        "collateral_id": source["COLLATERAL_ID"],
+        "collateral_type": source["COLLATERAL_TYPE"],
+        "address": collateral["PROPERTY_ADDRESS"] if collateral else "",
+        "district": collateral["DISTRICT"] if collateral else "",
+        "market_hkd": round(market, 2),
+        "nrv_hkd": round(nrv, 2),
+        "ltv": round(balance / market, 6) if balance and market else 0,
+        "ltv_nrv": round(balance / nrv, 6) if balance and nrv else 0,
+        "charge": "1",
+    }
+
+
+def portfolio_point(iso: str, points: list[dict], previous_stage: dict) -> dict:
+    drawn = round(sum(point["drawn_hkd"] for point in points), 2)
+    ecl = round(sum(point["ecl_hkd"] for point in points), 2)
+    market = round(sum(point["collateral_hkd"] for point in points), 2)
+    stages = {}
+    for key in (1, 2, 3):
+        members = [point for point in points if point["stage"] == key]
+        stages[str(key)] = {"count": len(members), "drawn_hkd": round(sum(point["drawn_hkd"] for point in members), 2)}
+    bands = (
+        ("Current", lambda days: days == 0),
+        ("1–29", lambda days: 1 <= days <= 29),
+        ("30–59", lambda days: 30 <= days <= 59),
+        ("60–89", lambda days: 60 <= days <= 89),
+        ("90–179", lambda days: 90 <= days <= 179),
+        ("180+", lambda days: days >= 180),
+    )
+    dpd = {}
+    for name, test in bands:
+        members = [point for point in points if test(point["dpd"])]
+        dpd[name] = {"count": len(members), "drawn_hkd": round(sum(point["drawn_hkd"] for point in members), 2)}
+    maturity = {"month": 0.0, "quarter": 0.0, "later": 0.0}
+    for point in points:
+        if point["next_due_days"] <= 30:
+            maturity["month"] += point["next_due_hkd"]
+        elif point["next_due_days"] <= 90:
+            maturity["quarter"] += point["next_due_hkd"]
+        else:
+            maturity["later"] += point["next_due_hkd"]
+    collateral = defaultdict(float)
+    facilities_on_balance = 0
+    for point in points:
+        for facility in point["facilities"]:
+            if facility["instrument"] == "Off-Bal":
+                continue
+            facilities_on_balance += 1
+            collateral[facility["collateral_type"]] += facility["market_hkd"]
+    industries = []
+    for name in sorted({point["industry"] for point in points}):
+        members = [point for point in points if point["industry"] == name]
+        industries.append({
+            "industry": name,
+            "customers": len(members),
+            "drawn_hkd": round(sum(point["drawn_hkd"] for point in members), 2),
+            "ecl_hkd": round(sum(point["ecl_hkd"] for point in members), 2),
+            "stage2": sum(1 for point in members if point["stage"] == 2),
+            "migrations": sum(1 for point in members if point["stage"] > previous_stage.get(point["legal_name"], point["stage"])),
+            "dpd_accounts": sum(1 for point in members if point["dpd"] > 0),
+            "collateral_hkd": round(sum(point["collateral_hkd"] for point in members), 2),
+        })
+    industries.sort(key=lambda item: item["drawn_hkd"], reverse=True)
+    return {
+        "date": iso,
+        "customers": len(points),
+        "facilities_on_balance": facilities_on_balance,
+        "drawn_hkd": drawn,
+        "ecl_hkd": ecl,
+        "prior_ecl_hkd": round(sum(point["prior_ecl_hkd"] for point in points), 2),
+        "ecl_coverage": round(ecl / drawn, 4) if drawn else 0,
+        "migrations": sum(1 for point in points if point["stage"] > previous_stage.get(point["legal_name"], point["stage"])),
+        "stage2_names": stages["2"]["count"],
+        "stage2_drawn": stages["2"]["drawn_hkd"],
+        "dpd_names": sum(1 for point in points if point["dpd"] > 0),
+        "dpd60_drawn": round(sum(point["drawn_hkd"] for point in points if point["dpd"] >= 60), 2),
+        "market_hkd": market,
+        "ltv": round(drawn / market, 2) if market else None,
+        "stages": stages,
+        "dpd": dpd,
+        "collateral": {key: round(value, 2) for key, value in collateral.items()},
+        "maturity": {key: round(value, 2) for key, value in maturity.items()},
+        "large_due": [point["customer_id"] for point in points if point["next_due_hkd"] >= THRESHOLD and point["next_due_days"] <= 90],
+        "overdue_reviews": sum(1 for point in points if point["dpd"] >= 30),
+        "industries": industries,
+    }
+
+
 def main() -> None:
     collateral = load(COLL)
     flows = load(FLOW)
@@ -280,9 +496,12 @@ def main() -> None:
     }
     focus = next(item for item in customers if item["repay_draft_id"])
     news = news_items(customers)
+    dates, portfolio_history = attach_history(customers, collateral, flows)
     book = {
-        "as_of": "2026-09-30",
-        "as_of_label": "30 Sep 2026",
+        "as_of": dates[-1],
+        "as_of_label": "31 Dec 2025 to 30 Nov 2026",
+        "dates": dates,
+        "portfolio_history": portfolio_history,
         "threshold_hkd": THRESHOLD,
         "notify_to": "yiyangyao2@gmail.com",
         "default_customer_id": customers[0]["customer_id"],
@@ -588,7 +807,7 @@ def news_items(customers: list[dict]) -> list[dict]:
             "industry": idic["industry"],
             "body": (
                 "A placeholder court-list note names a contractor claim. The claim amount is not in the property extract. "
-                f"The portfolio extract itself shows {idic['dpd']} days past due and stage {idic['stage']} at 30 Sep 2026."
+                "Days past due and stage follow the reporting dates selected on the page."
             ),
             "factors": materiality(idic, direct_hit=True),
         },
