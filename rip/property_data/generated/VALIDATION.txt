@@ -1,0 +1,13 @@
+Cash-flow contract-months: 492 (40 customer loans + 1 bond, each month).
+Customer-loan amortization across 12 months: 24 bullet, 12 equal, 4 declining, unchanged by contract.
+Bond CTR-0010-06 is included because its outstanding balance is positive. It is bullet at 5.5%.
+Off-balance facilities with zero outstanding are excluded from cash flow and kept on collateral with LTV 0.
+Largest present-value gap: 0.00333135038667459846 (limit 0.005).
+Loans whose maturity equals the reporting date, kept as one discounted repayment that day:
+  28/02/2026 CTR-0001-01 26957000.00
+  28/02/2026 CTR-0003-01 47982000.00
+  28/02/2026 CTR-0005-01 157962000.00
+  28/02/2026 CTR-0007-01 54926000.00
+  28/02/2026 CTR-0009-01 92428000.00
+Collateral rows: 720. Distinct collateral addresses: 60.
+Source rows with a positive balance: 492.
