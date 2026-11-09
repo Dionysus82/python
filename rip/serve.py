@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import json
 from html import escape
+from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -12,6 +15,10 @@ ROOT = Path(__file__).resolve().parent
 BOOK = json.loads((ROOT / "book.json").read_text(encoding="utf-8"))
 NOTIFY = BOOK["notify_to"]
 THRESHOLD = BOOK["threshold_hkd"]
+
+DEMO_USER = "cro.shum"
+DEMO_PASSWORD = "Harbour-Demo-2026"
+SESSION = hashlib.sha256(b"rip-demo-session-v1").hexdigest()
 
 SCENARIOS = {
     "base": "Latest extract, no shock",
@@ -88,14 +95,19 @@ def page(title: str, active: str, body: str) -> bytes:
 * {{ box-sizing:border-box; }}
 body {{ margin:0; font-family:"Source Sans 3",sans-serif; color:var(--ink); background:var(--ground); }}
 a {{ color:var(--deep); text-decoration:none; }}
-.shell {{ display:grid; grid-template-columns:232px 1fr; min-height:100vh; }}
-nav {{ background:var(--rail); color:#E7E0D8; padding:22px 16px; }}
+.shell {{ display:grid; grid-template-columns:248px minmax(0,1fr); min-height:100vh; }}
+nav {{ background:var(--rail); color:#E7E0D8; padding:22px 16px; position:sticky; top:0; height:100vh; overflow:auto; }}
+.shell.collapsed {{ grid-template-columns:0 minmax(0,1fr); }}
+.shell.collapsed nav {{ padding:0; overflow:hidden; }}
 nav .mark {{ font-family:"Source Serif 4",serif; color:#fff; font-size:1.25rem; }}
 nav .mark span {{ color:var(--orange); }}
 nav p {{ color:#C8BEB4; font-size:.78rem; line-height:1.4; }}
 nav a {{ display:block; color:#E7E0D8; padding:9px 10px; border-left:3px solid transparent; border-radius:8px; margin:2px 0; }}
 nav a.active {{ background:rgba(227,111,30,.18); color:#fff; border-left-color:var(--orange); }}
-main {{ padding:28px 32px 64px; }}
+nav a.logout {{ margin-top:18px; color:#C8BEB4; }}
+.nav-toggle {{ background:var(--rail); margin-bottom:12px; }}
+.backdrop {{ display:none; }}
+main {{ padding:28px 32px 64px; min-width:0; }}
 .banner {{ background:var(--wash); color:var(--red); border-radius:10px; padding:10px 12px; font-size:.84rem; margin-bottom:16px; }}
 h1 {{ font-family:"Source Serif 4",serif; color:var(--title); font-weight:560; margin:0 0 8px; }}
 .lead {{ color:var(--muted); max-width:760px; line-height:1.5; }}
@@ -125,22 +137,53 @@ textarea {{ width:100%; min-height:420px; font:14px/1.45 ui-monospace,monospace;
 form.inline {{ display:flex; gap:8px; flex-wrap:wrap; align-items:end; }}
 select, input[type=number] {{ font:inherit; padding:8px; border:1px solid var(--line); border-radius:8px; background:#fff; }}
 @media (max-width:900px) {{
-  .shell, .metrics, .grid, .grid3 {{ grid-template-columns:1fr; }}
+  .shell {{ display:block; }}
+  nav {{
+    position:fixed; z-index:30; left:0; top:0; bottom:0; width:min(280px,86vw); height:auto;
+    box-shadow:8px 0 24px rgba(0,0,0,.25);
+  }}
+  .shell.collapsed nav {{ transform:translateX(-105%); padding:22px 16px; width:min(280px,86vw); overflow:auto; }}
+  .backdrop {{ position:fixed; inset:0; background:rgba(44,40,37,.35); z-index:25; }}
+  .shell:not(.collapsed) .backdrop {{ display:block; }}
+  .metrics, .grid, .grid3 {{ grid-template-columns:1fr; }}
+  main {{ padding:16px 16px 72px; }}
 }}
 </style>
 </head>
 <body>
-<div class="shell">
-  <nav>
+<div class="shell" id="shell">
+  <nav id="rail">
     <div class="mark">RIP <span>review</span></div>
     <p>Business-case demonstration on the synthetic book. Position date 30 Sep 2026.</p>
     {''.join(links)}
+    <a class="logout" href="/logout">Sign out</a>
   </nav>
+  <div class="backdrop" id="backdrop"></div>
   <main>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="rail">Hide menu</button>
     <div class="banner">{escape(BOOK["banner"])}</div>
     {body}
   </main>
 </div>
+<script>
+(function () {{
+  var shell = document.getElementById("shell");
+  var toggle = document.getElementById("nav-toggle");
+  var narrow = window.matchMedia("(max-width: 900px)").matches;
+  function apply(collapsed) {{
+    shell.classList.toggle("collapsed", collapsed);
+    toggle.textContent = collapsed ? "Menu" : "Hide menu";
+    toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+  }}
+  apply(narrow ? true : localStorage.getItem("rip-nav") === "1");
+  toggle.addEventListener("click", function () {{
+    var collapsed = !shell.classList.contains("collapsed");
+    apply(collapsed);
+    if (!narrow) localStorage.setItem("rip-nav", collapsed ? "1" : "0");
+  }});
+  document.getElementById("backdrop").addEventListener("click", function () {{ apply(true); }});
+}})();
+</script>
 </body>
 </html>"""
     return html.encode("utf-8")
@@ -191,7 +234,7 @@ def dashboard() -> str:
     )
     body = f"""
     <div class="label">Portfolio</div><h1>Management dashboard</h1>
-    <p class="lead">Synthetic book as at 30 Sep 2026. Ten borrower groups and forty on-balance facilities from the property portfolio. Collateral value and LTV come from the collateral extract. Repayment dates come from the cash flow schedule. ECL and stage migration are not on those extracts, so those figures stay at zero.</p>
+    <p class="lead">Position 30 Sep 2026. Drawn balances, collateral and the next cash-flow dates come from the property extract. ECL, stage, days past due, financial statements and the news feed are demonstration figures until those files arrive.</p>
     {metrics([
         ("Customers", str(port["customers"]), False),
         ("Drawn exposure", money(port["drawn_hkd"]), False),
@@ -255,7 +298,7 @@ def news_page(selected: list[str]) -> str:
         follow = "".join(blocks)
     return f"""
     <div class="label">Step 1 of 3</div><h1>Adverse news</h1>
-    <p class="lead">The feed is a demonstration stand-in for the Credit Risk Alert Portal. Materiality uses exposure, security coverage, guarantor support, financial strength and open warnings. Select a news item to open the group review, then the industry review.</p>
+    <p class="lead">These four headlines are placeholders for the Credit Risk Alert Portal. Materiality uses exposure, security coverage, guarantor support, financial strength and open warnings. Select a news item to open the group review, then the industry review. Replace the feed when it is provided.</p>
     <form method="get" action="/news">
       <table><thead><tr><th>Item</th><th>Industry</th><th>Score</th><th></th></tr></thead><tbody>{''.join(rows)}</tbody></table>
       <p><button type="submit">Review selected news</button></p>
@@ -326,7 +369,7 @@ def repayment_page(window: int) -> str:
     )
     return f"""
     <div class="label">Repayment</div><h1>Obligations above HKD 5,000,000</h1>
-    <p class="lead">Dates and amounts come from the watchlist or the credit proposal. The window is {window} days.</p>
+    <p class="lead">Due dates and amounts are the next principal on the cash flow schedule. The window is {window} days. Days past due in the table below are demonstration ageing, because the extract shows every facility current.</p>
     <form class="inline" method="get" action="/repayment">
       <label>Window (days)<br><input type="number" name="window" min="7" max="365" value="{window}"></label>
       <button type="submit">Apply</button>
@@ -372,7 +415,7 @@ def financial_page(cid: str, scenario: str) -> str:
     )
     return f"""
     <div class="label">Financial analysis</div><h1>{escape(row["legal_name"])}</h1>
-    <p class="lead">Figures are extracted from the demonstration financial statements. The Google financial-analysis agent is the intended reader of uploaded or HKEX statements. This screen shows the same tests on the synthetic file.</p>
+    <p class="lead">Revenue, margin, liquidity, leverage and interest cover are demonstration figures, so the covenant tests can be run before statements arrive. Drawn balance, collateral and LTV on the customer page still come from the property extract.</p>
     <form class="inline" method="get" action="/financial">
       <label>Customer<br><select name="customer">{options}</select></label>
       <label>Scenario<br><select name="scenario">{shocks}</select></label>
@@ -553,6 +596,51 @@ def customer_page(cid: str) -> str:
     <p><a href="/assistant?customer={escape(row["customer_id"])}&q=What+are+the+key+risks+for+this+customer%3F">Ask about this customer</a></p></div>"""
 
 
+def login_page(message: str = "") -> bytes:
+    note = f'<p class="banner">{escape(message)}</p>' if message else ""
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,560&display=swap" rel="stylesheet">
+<style>
+body {{ margin:0; min-height:100vh; display:grid; place-items:center; background:#F3EFEA; font-family:"Source Sans 3",sans-serif; color:#2C2825; }}
+form {{ width:min(420px, calc(100% - 32px)); background:#FFFCF9; border:1px solid #E4DDD6; border-radius:16px; padding:28px; }}
+h1 {{ font-family:"Source Serif 4",serif; color:#8C3E16; font-weight:560; margin:8px 0; }}
+p {{ color:#6F6862; line-height:1.45; }}
+label {{ display:block; font-size:.78rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#6F6862; margin:12px 0; }}
+input {{ width:100%; font:inherit; padding:10px 12px; border:1px solid #E4DDD6; border-radius:8px; margin-top:6px; }}
+button {{ font:inherit; background:#E36F1E; color:#fff; border:0; border-radius:8px; padding:10px 14px; font-weight:700; margin-top:8px; }}
+.banner {{ background:#F8E8E4; color:#B42318; border-radius:10px; padding:10px 12px; }}
+code {{ color:#2C2825; }}
+</style>
+</head>
+<body>
+<form method="post" action="/login">
+  <div style="font-family:'Source Serif 4',serif;font-size:1.3rem">RIP <span style="color:#E36F1E">review</span></div>
+  <h1>Sign in</h1>
+  <p>Property portfolio review at 30 Sep 2026. Demonstration account <code>cro.shum</code>, password <code>Harbour-Demo-2026</code>.</p>
+  {note}
+  <label>User<input name="user" autocomplete="username" required></label>
+  <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+  <button type="submit">Sign in</button>
+</form>
+</body>
+</html>"""
+    return html.encode("utf-8")
+
+
+def session_ok(header: str | None) -> bool:
+    jar = SimpleCookie()
+    jar.load(header or "")
+    morsel = jar.get("rip")
+    if morsel is None:
+        return False
+    return hmac.compare_digest(morsel.value, SESSION)
+
+
 ROUTES = {
     "dashboard": lambda q: dashboard(),
     "news": lambda q: news_page(q.get("selected", [])),
@@ -572,6 +660,19 @@ class Handler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         key = parsed.path.strip("/") or "dashboard"
         query = parse_qs(parsed.query)
+        signed_in = session_ok(self.headers.get("Cookie"))
+        if key == "logout":
+            self._redirect("/login", "rip=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0")
+            return
+        if key == "login":
+            if signed_in:
+                self._redirect("/dashboard")
+                return
+            self._html(login_page())
+            return
+        if not signed_in:
+            self._redirect("/login")
+            return
         if key == "email.eml":
             draft = next((item for item in BOOK["drafts"] if item["id"] == (query.get("id") or [""])[0]), BOOK["drafts"][0])
             payload = draft["body"].encode("utf-8")
@@ -585,11 +686,43 @@ class Handler(BaseHTTPRequestHandler):
         if key not in ROUTES:
             key = "dashboard"
         body = page(key, "drafts" if key == "email" else key, ROUTES[key](query))
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.send_header("Content-Length", str(len(body)))
+        self._html(body)
+
+    def do_POST(self) -> None:  # noqa: N802
+        parsed = urlparse(self.path)
+        if parsed.path.strip("/") != "login":
+            self.send_error(404)
+            return
+        length = int(self.headers.get("Content-Length") or 0)
+        if length > 4096:
+            self.send_error(413)
+            return
+        form = parse_qs(self.rfile.read(length).decode("utf-8"))
+        user = (form.get("user") or [""])[0]
+        password = (form.get("password") or [""])[0]
+        user_ok = hmac.compare_digest(hashlib.sha256(user.encode()).hexdigest(), hashlib.sha256(DEMO_USER.encode()).hexdigest())
+        password_ok = hmac.compare_digest(
+            hashlib.sha256(password.encode()).hexdigest(),
+            hashlib.sha256(DEMO_PASSWORD.encode()).hexdigest(),
+        )
+        if user_ok and password_ok:
+            self._redirect("/dashboard", f"rip={SESSION}; HttpOnly; SameSite=Lax; Path=/")
+            return
+        self._html(login_page("The user name or password does not match the demonstration account."), 401)
+
+    def _redirect(self, location: str, cookie: str | None = None) -> None:
+        self.send_response(303)
+        if cookie:
+            self.send_header("Set-Cookie", cookie)
+        self.send_header("Location", location)
         self.end_headers()
-        self.wfile.write(body)
+
+    def _html(self, payload: bytes, status: int = 200) -> None:
+        self.send_response(status)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(payload)))
+        self.end_headers()
+        self.wfile.write(payload)
 
     def log_message(self, fmt: str, *args) -> None:
         return
