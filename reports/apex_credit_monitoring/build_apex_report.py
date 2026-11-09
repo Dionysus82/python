@@ -274,12 +274,13 @@ def build():
     subhead(doc, "A5 : Security details and coverage")
     table(
         doc,
-        ["Security", "Latest valuation"],
+        ["Security", "Address", "Latest valuation"],
         [
-            ["Grade-A office building, Central", "HK$620.0 million"],
-            ["Retail shops, Tsim Sha Tsui", "HK$200.0 million"],
-            ["Total collateral value", "HK$820.0 million"],
+            ["Grade-A office building, Central", "Apex Central Tower, Central, Hong Kong", "HK$620.0 million"],
+            ["Retail shops, Tsim Sha Tsui", "Harbour Retail Plaza, Tsim Sha Tsui, Kowloon, Hong Kong", "HK$200.0 million"],
+            ["Total collateral value", "", "HK$820.0 million"],
         ],
+        [5.2, 8.2, 4.2],
     )
     table(
         doc,
