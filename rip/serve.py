@@ -29,14 +29,31 @@ def money(value: float | int | None) -> str:
     return f"HKD {value:,.0f}"
 
 
+def default_customer_id() -> str:
+    return BOOK.get("default_customer_id") or BOOK["customers"][0]["customer_id"]
+
+
+def default_industry() -> str:
+    return BOOK.get("default_industry") or BOOK["industries"][0]["industry"]
+
+
 def customer(cid: str | None) -> dict | None:
     if not cid:
         return None
     return next((row for row in BOOK["customers"] if row["customer_id"] == cid), None)
 
 
-def project(row: dict, scenario: str) -> float:
-    return round(row["interest_coverage"][-1] + SHIFTS.get(scenario, 0.0), 1)
+def project(row: dict, scenario: str) -> float | None:
+    latest = row["interest_coverage"][-1]
+    if latest is None:
+        return None
+    return round(latest + SHIFTS.get(scenario, 0.0), 1)
+
+
+def measure(value, pattern: str) -> str:
+    if value is None:
+        return "—"
+    return pattern.format(value)
 
 
 def page(title: str, active: str, body: str) -> bytes:
@@ -144,9 +161,9 @@ def bars(rows: list[tuple[str, float]], hot: bool = False) -> str:
     for label, value in rows:
         width = max(2, round(value / peak * 100))
         lines.append(
-            f'<div style="display:grid;grid-template-columns:168px 1fr 132px;gap:8px;align-items:center;margin:8px 0">'
+            f'<div style="display:grid;grid-template-columns:minmax(168px,240px) 1fr 176px;gap:8px;align-items:center;margin:8px 0">'
             f'<div>{escape(label)}</div><div class="bar {"hot" if hot else ""}"><span style="width:{width}%"></span></div>'
-            f'<div style="text-align:right;color:var(--muted)">{money(value)}</div></div>'
+            f'<div style="text-align:right;color:var(--muted);white-space:nowrap">{money(value)}</div></div>'
         )
     return "".join(lines)
 
@@ -174,7 +191,7 @@ def dashboard() -> str:
     )
     body = f"""
     <div class="label">Portfolio</div><h1>Management dashboard</h1>
-    <p class="lead">Synthetic book as at 30 Sep 2026. Charts use the seeded customers, with demonstration fields for stage, ECL, LTV, maturity and days past due.</p>
+    <p class="lead">Synthetic book as at 30 Sep 2026. Ten borrower groups and forty on-balance facilities from the property portfolio. Collateral value and LTV come from the collateral extract. Repayment dates come from the cash flow schedule. ECL and stage migration are not on those extracts, so those figures stay at zero.</p>
     {metrics([
         ("Customers", str(port["customers"]), False),
         ("Drawn exposure", money(port["drawn_hkd"]), False),
@@ -186,7 +203,7 @@ def dashboard() -> str:
       <div class="card"><div class="label">Days past due by drawn exposure</div>{bars(dpd_rows)}</div>
       <div class="card"><div class="label">Maturity of next obligations</div>{bars([("Within 30 days", mat["month"]), ("31 to 90 days", mat["quarter"]), ("After 90 days", mat["later"])])}<p class="lead">Input is the maturity profile on each loan. Amounts are the next obligation, not the whole drawn balance.</p></div>
       <div class="card"><div class="label">Collateral by type</div>{bars(coll_rows)}</div>
-      <div class="card"><div class="label">Largest industries</div>{bars(industry_rows, hot=True)}<p><a href="/industry?name=Wholesale%20trade">Open the wholesale-trade review</a></p></div>
+      <div class="card"><div class="label">Largest industries</div>{bars(industry_rows, hot=True)}<p><a href="/industry?name={escape(default_industry())}">Open the {escape(default_industry())} review</a></p></div>
       <div class="card"><div class="label">ECL and LTV</div>
         <p>ECL coverage of drawn exposure is {port["ecl_coverage"]:.2%}. Provision movement versus the prior rating base is {money(port["ecl_hkd"] - port["prior_ecl_hkd"])}.</p>
         <p>Portfolio LTV is exposure divided by recorded collateral. Open a customer to see the ratio used in news materiality.</p>
@@ -232,7 +249,7 @@ def news_page(selected: list[str]) -> str:
             else:
                 blocks.append(
                     f'<div class="card" style="margin-top:12px"><div class="label">Selected sector news</div>'
-                    f'<p>{escape(item["headline"])}</p><p><a href="/industry?name=Wholesale%20trade">Continue to the wholesale-trade review</a> · '
+                    f'<p>{escape(item["headline"])}</p><p><a href="/industry?name={escape(item["industry"])}">Continue to the {escape(item["industry"])} review</a> · '
                     f'<a href="/email?id=MAIL-IND-WHOLESALE">Open the industry email draft</a></p></div>'
                 )
         follow = "".join(blocks)
@@ -287,13 +304,21 @@ def repayment_page(window: int) -> str:
             continue
         rows.append(item)
     rows.sort(key=lambda item: item["next_due_days"])
-    body = "".join(
-        f'<tr><td><a href="/customer?id={escape(item["customer_id"])}">{escape(item["legal_name"])}</a><div style="color:var(--muted);font-size:.8rem">{escape(item["rm"])} · {escape(item["group_name"])}</div></td>'
-        f'<td>{money(item["next_due_hkd"])}</td><td>{item["next_due_days"]} days</td><td>{escape(item["next_due_source"])}</td>'
-        f'<td>{"Refinancing" if item["refinancing"] else "Instalment"}</td>'
-        f'<td>{("<a href='/email?id=MAIL-REPAY-LANTERN'>Draft</a>") if item["customer_id"]=="CUS-LFLL-0003" else "—"}</td></tr>'
-        for item in rows
-    ) or '<tr><td colspan="6">No obligation above HKD 5,000,000 falls in this window.</td></tr>'
+    lines = []
+    for item in rows:
+        draft = (
+            f'<a href="/email?id={escape(item["repay_draft_id"])}">Draft</a>'
+            if item.get("repay_draft_id")
+            else "—"
+        )
+        kind = "Refinancing" if item["refinancing"] else "Instalment"
+        lines.append(
+            f'<tr><td><a href="/customer?id={escape(item["customer_id"])}">{escape(item["legal_name"])}</a>'
+            f'<div style="color:var(--muted);font-size:.8rem">{escape(item["rm"])} · {escape(item["group_name"])}</div></td>'
+            f'<td>{money(item["next_due_hkd"])}</td><td>{item["next_due_days"]} days</td>'
+            f'<td>{escape(item["next_due_source"])}</td><td>{kind}</td><td>{draft}</td></tr>'
+        )
+    body = "".join(lines) or '<tr><td colspan="6">No obligation above HKD 5,000,000 falls in this window.</td></tr>'
     ageing = "".join(
         f'<tr><td><a href="/customer?id={escape(item["customer_id"])}">{escape(item["legal_name"])}</a></td><td>{item["dpd"]}</td><td>{escape(item["dpd_component"])}</td><td>{money(item["drawn_hkd"])}</td></tr>'
         for item in sorted(BOOK["customers"], key=lambda row: row["dpd"], reverse=True)[:6]
@@ -305,22 +330,27 @@ def repayment_page(window: int) -> str:
     <form class="inline" method="get" action="/repayment">
       <label>Window (days)<br><input type="number" name="window" min="7" max="365" value="{window}"></label>
       <button type="submit">Apply</button>
-      <a class="btn ghost" href="/repayment?window=30">One month</a>
-      <a class="btn ghost" href="/repayment?window=90">One quarter</a>
+      <a class="btn ghost" href="/repayment?window=31">One month</a>
+      <a class="btn ghost" href="/repayment?window=92">One quarter</a>
     </form>
     <div class="card" style="margin-top:12px"><table><thead><tr><th>Customer</th><th>Amount</th><th>Due</th><th>Source</th><th>Type</th><th></th></tr></thead><tbody>{body}</tbody></table></div>
     <div class="card" style="margin-top:12px"><div class="label">Approaching 30, 60, 90 and 180 days</div>
       <table><thead><tr><th>Customer</th><th>DPD</th><th>Component</th><th>Drawn</th></tr></thead><tbody>{ageing}</tbody></table>
-      <p><a href="/email?id=MAIL-DPD-LANTERN">Open the Lantern Ferry ageing draft</a></p>
+      <p><a href="/email?id=MAIL-DPD-LANTERN">Open the days-past-due draft</a></p>
     </div>"""
 
 
 def financial_page(cid: str, scenario: str) -> str:
-    row = customer(cid) or customer("CUS-AHTL-0001")
+    row = customer(cid) or customer(default_customer_id())
     projected = project(row, scenario)
+    latest = row["interest_coverage"][-1]
     threshold = row["coverage_threshold"]
-    status = "Inside covenant" if row["interest_coverage"][-1] >= threshold else "Outside covenant"
-    scenario_status = "Headroom remains" if projected >= threshold else "Projected breach"
+    if latest is None or threshold is None:
+        status = "Not on file"
+        scenario_status = "Not on file"
+    else:
+        status = "Inside covenant" if latest >= threshold else "Outside covenant"
+        scenario_status = "Headroom remains" if projected >= threshold else "Projected breach"
     options = "".join(
         f'<option value="{escape(item["customer_id"])}" {"selected" if item["customer_id"]==row["customer_id"] else ""}>{escape(item["legal_name"])}</option>'
         for item in BOOK["customers"] if item["full_file"]
@@ -334,10 +364,10 @@ def financial_page(cid: str, scenario: str) -> str:
         f'<tr><td>{label}</td>' + "".join(f"<td>{value}</td>" for value in values) + "</tr>"
         for label, values in (
             ("Revenue", [money(v) for v in row["revenue_hkd"]]),
-            ("Margin", [f"{v:.1f}%" for v in row["margin_pct"]]),
-            ("Liquidity ratio", [f"{v:.2f}" for v in row["liquidity_ratio"]]),
-            ("Leverage", [f"{v:.1f}x" for v in row["leverage"]]),
-            ("Interest coverage", [f"{v:.1f}x" for v in row["interest_coverage"]]),
+            ("Margin", [measure(v, "{:.1f}%") for v in row["margin_pct"]]),
+            ("Liquidity ratio", [measure(v, "{:.2f}") for v in row["liquidity_ratio"]]),
+            ("Leverage", [measure(v, "{:.1f}x") for v in row["leverage"]]),
+            ("Interest coverage", [measure(v, "{:.1f}x") for v in row["interest_coverage"]]),
         )
     )
     return f"""
@@ -349,20 +379,20 @@ def financial_page(cid: str, scenario: str) -> str:
       <button type="submit">Run</button>
     </form>
     {metrics([
-        ("Latest coverage", f'{row["interest_coverage"][-1]:.1f}x', False),
-        ("Covenant", f'{threshold:.1f}x', False),
-        ("Today", status, row["interest_coverage"][-1] < threshold),
-        ("Scenario", f"{projected:.1f}x", projected < threshold),
+        ("Latest coverage", measure(latest, "{:.1f}x"), False),
+        ("Covenant", measure(threshold, "{:.1f}x"), False),
+        ("Today", status, False),
+        ("Scenario", measure(projected, "{:.1f}x"), False),
     ])}
     <div class="card"><table><thead><tr><th>Measure</th>{"".join(f"<th>{year}</th>" for year in years)}</tr></thead><tbody>{fin_rows}</tbody></table>
-      <p>Credit assumption at approval: {row["coverage_assumption"]:.1f}x. Scenario: {escape(SCENARIOS[scenario])}. Result: {scenario_status}.</p>
+      <p>Credit assumption at approval: {measure(row["coverage_assumption"], "{:.1f}x")}. Scenario: {escape(SCENARIOS[scenario])}. Result: {scenario_status}.</p>
       <p>Statement extract: {escape(row["documents"]["financials"]["passage"])}</p>
-      <p>{'<a href="/email?id=MAIL-COV-APEX">Open the covenant email draft</a>' if row["customer_id"]=="CUS-AHTL-0001" else "The worked covenant letter is written for Apex Harbour Trading."}</p>
+      <p><a href="/email?id=MAIL-COV-APEX">Open the covenant email draft</a></p>
     </div>"""
 
 
 def reports_page(kind: str, detail: str, cid: str) -> str:
-    row = customer(cid) or customer("CUS-AHTL-0001")
+    row = customer(cid) or customer(default_customer_id())
     port = BOOK["portfolio"]
     if kind == "customer":
         title = f"Customer Status Report — {row['legal_name']}"
@@ -382,7 +412,7 @@ def reports_page(kind: str, detail: str, cid: str) -> str:
             f"<p>Drawn exposure {money(port['drawn_hkd'])} across {port['customers']} customers. "
             f"ECL {money(port['ecl_hkd'])}. Stage migrations {port['migrations']}. "
             f"Obligations above HKD 5,000,000 inside 90 days: {len(port['large_due'])}.</p>"
-            f"<p>Wholesale trade is the industry carried into the review because of rating migration and the sector news of 2 Oct 2026.</p>"
+            f"<p>{escape(BOOK['industries'][0]['industry'])} is the largest industry on this extract, with drawn exposure {money(BOOK['industries'][0]['drawn_hkd'])}.</p>"
         )
         extra = "<h2>Stage and DPD</h2>" + bars(
             [(f"Stage {key}", port["stages"][str(key)]["drawn_hkd"]) for key in (1, 2, 3)],
@@ -411,7 +441,7 @@ def reports_page(kind: str, detail: str, cid: str) -> str:
 
 
 def assistant_page(question: str, cid: str) -> str:
-    row = customer(cid) or customer("CUS-AHTL-0001")
+    row = customer(cid) or customer(default_customer_id())
     answer, cites = answer_for(row, question)
     options = "".join(
         f'<option value="{escape(item["customer_id"])}" {"selected" if item["customer_id"]==row["customer_id"] else ""}>{escape(item["legal_name"])}</option>'
@@ -448,7 +478,7 @@ def answer_for(row: dict, question: str) -> tuple[str, list[dict]]:
     docs = row["documents"]
     if any(word in text for word in ("rating", "downgrade", "notch", "why")):
         return (
-            f"The internal rating moved from {row['prior_rating']} on {row['prior_rating_date']} to {row['rating']} on 30 Sep 2026. "
+            f"The internal rating is {row['rating']}. It was {row['prior_rating']} on {row['prior_rating_date']} and is unchanged at 30 Sep 2026. "
             f"Stage is now {row['stage']}, from {row['prior_stage']}.",
             [docs["review"], docs["credit_paper"]],
         )
@@ -460,8 +490,9 @@ def answer_for(row: dict, question: str) -> tuple[str, list[dict]]:
         )
     if any(word in text for word in ("since", "develop", "change", "latest", "review")):
         return (
-            f"Since the prior rating point, coverage is {row['interest_coverage'][-1]:.1f} times against a covenant of {row['coverage_threshold']:.1f} times. "
-            f"Revenue in the latest year is {money(row['revenue_hkd'][-1])}. Drawn exposure is {money(row['drawn_hkd'])}.",
+            f"Since 31 Aug 2026, drawn exposure is {money(row['drawn_hkd'])}. "
+            f"Interest cover is {measure(row['interest_coverage'][-1], '{:.1f} times')} and the covenant threshold is {measure(row['coverage_threshold'], '{:.1f} times')}. "
+            f"Revenue in the latest year is {money(row['revenue_hkd'][-1])}.",
             [docs["review"], docs["financials"]],
         )
     if any(word in text for word in ("risk", "key", "concern", "group")):
@@ -525,11 +556,11 @@ def customer_page(cid: str) -> str:
 ROUTES = {
     "dashboard": lambda q: dashboard(),
     "news": lambda q: news_page(q.get("selected", [])),
-    "industry": lambda q: industry_page((q.get("name") or ["Wholesale trade"])[0]),
-    "repayment": lambda q: repayment_page(int((q.get("window") or ["90"])[0] or 90)),
-    "financial": lambda q: financial_page((q.get("customer") or ["CUS-AHTL-0001"])[0], (q.get("scenario") or ["revenue_decline"])[0]),
-    "reports": lambda q: reports_page((q.get("kind") or ["mir"])[0], (q.get("detail") or ["summary"])[0], (q.get("customer") or ["CUS-AHTL-0001"])[0]),
-    "assistant": lambda q: assistant_page((q.get("q") or ["What are the key risks for this customer?"])[0], (q.get("customer") or ["CUS-AHTL-0001"])[0]),
+    "industry": lambda q: industry_page((q.get("name") or [default_industry()])[0]),
+    "repayment": lambda q: repayment_page(int((q.get("window") or ["92"])[0] or 92)),
+    "financial": lambda q: financial_page((q.get("customer") or [default_customer_id()])[0], (q.get("scenario") or ["revenue_decline"])[0]),
+    "reports": lambda q: reports_page((q.get("kind") or ["mir"])[0], (q.get("detail") or ["summary"])[0], (q.get("customer") or [default_customer_id()])[0]),
+    "assistant": lambda q: assistant_page((q.get("q") or ["What are the key risks for this customer?"])[0], (q.get("customer") or [default_customer_id()])[0]),
     "drafts": lambda q: drafts_page(),
     "email": lambda q: email_page((q.get("id") or ["MAIL-NEWS-APEX"])[0]),
     "customer": lambda q: customer_page((q.get("id") or [""])[0]),
