@@ -7,6 +7,7 @@ __pycache__/
 .env
 data/
 .pytest_data/
+rip/report_files/uploads/
 dist/
 build/
 *.egg-info/

@@ -5,8 +5,9 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import re
 from contextvars import ContextVar
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from html import escape
 from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -15,6 +16,23 @@ from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).resolve().parent
 BOOK = json.loads((ROOT / "book.json").read_text(encoding="utf-8"))
+REPORT_FILES = ROOT / "report_files"
+UPLOADS = REPORT_FILES / "uploads"
+UPLOAD_INDEX = UPLOADS / "index.json"
+HK = timezone(timedelta(hours=8))
+SEEDED_PROPOSALS = [
+    {
+        "id": "apex-annual-review",
+        "title": "Annual Review — Apex Group",
+        "rm": "Sophie Chan",
+        "stored": "31 Oct 2026",
+        "filename": "Apex_Group_Annual_Review_Proposal.docx",
+        "file": "Apex_Group_Annual_Review_Proposal.docx",
+        "output_title": "Apex Group Credit Monitoring Report",
+        "output_file": "Apex_Group_Credit_Monitoring_Report_31Oct2026.docx",
+        "output_name": "Apex_Group_Credit_Monitoring_Report_31Oct2026.docx",
+    }
+]
 NOTIFY = BOOK["notify_to"]
 THRESHOLD = BOOK["threshold_hkd"]
 
@@ -902,7 +920,69 @@ def financial_page(cid: str, scenario: str) -> str:
     </div>"""
 
 
-def reports_page(kind: str, detail: str, cid: str) -> str:
+def proposal_records() -> list[dict]:
+    rows = list(SEEDED_PROPOSALS)
+    if UPLOAD_INDEX.exists():
+        rows.extend(json.loads(UPLOAD_INDEX.read_text(encoding="utf-8")))
+    return rows
+
+
+def proposal_by_id(proposal_id: str) -> dict | None:
+    return next((item for item in proposal_records() if item["id"] == proposal_id), None)
+
+
+def proposal_path(item: dict) -> Path:
+    base = UPLOADS if item.get("uploaded") else REPORT_FILES
+    return base / item["file"]
+
+
+def save_proposal(rm: str, filename: str, payload: bytes) -> str:
+    UPLOADS.mkdir(parents=True, exist_ok=True)
+    stored = json.loads(UPLOAD_INDEX.read_text(encoding="utf-8")) if UPLOAD_INDEX.exists() else []
+    stamp = datetime.now(HK).strftime("%Y%m%d%H%M%S")
+    item_id = f"upload-{stamp}-{len(stored) + 1}"
+    display = Path(filename).name.replace('"', "").replace("/", "").replace("\\", "") or "proposal.docx"
+    if not display.lower().endswith(".docx"):
+        display += ".docx"
+    target_name = f"{item_id}.docx"
+    (UPLOADS / target_name).write_bytes(payload)
+    stored.append({
+        "id": item_id,
+        "title": Path(display).stem,
+        "rm": rm.strip() or "Relationship manager",
+        "stored": datetime.now(HK).strftime("%-d %b %Y %H:%M HKT"),
+        "filename": display,
+        "file": target_name,
+        "uploaded": True,
+    })
+    UPLOAD_INDEX.write_text(json.dumps(stored, indent=2), encoding="utf-8")
+    return item_id
+
+
+def parse_multipart(content_type: str, body: bytes) -> dict[str, dict]:
+    marker = "boundary="
+    if marker not in content_type:
+        return {}
+    boundary = content_type.split(marker, 1)[1].split(";", 1)[0].strip().strip('"')
+    fields: dict[str, dict] = {}
+    for part in body.split(b"--" + boundary.encode()):
+        if b"Content-Disposition" not in part:
+            continue
+        header, _, data = part.partition(b"\r\n\r\n")
+        if data.endswith(b"\r\n"):
+            data = data[:-2]
+        header_text = header.decode("utf-8", "replace")
+        disposition = next((line for line in header_text.splitlines() if "Content-Disposition" in line), "")
+        name_match = re.search(r'name="([^"]*)"', disposition)
+        file_match = re.search(r'filename="([^"]*)"', disposition)
+        name = name_match.group(1) if name_match else ""
+        filename = file_match.group(1) if file_match else ""
+        if name:
+            fields[name] = {"filename": filename, "data": data}
+    return fields
+
+
+def reports_page(kind: str, detail: str, cid: str, generated: str = "") -> str:
     row = customer(cid) or customer(default_customer_id())
     port = view().portfolio()
     if kind == "customer":
@@ -933,8 +1013,56 @@ def reports_page(kind: str, detail: str, cid: str) -> str:
         f'<option value="{escape(item["customer_id"])}" {"selected" if item["customer_id"]==row["customer_id"] else ""}>{escape(item["legal_name"])}</option>'
         for item in BOOK["customers"] if item["full_file"]
     )
+    proposal_rows = []
+    for item in proposal_records():
+        generate = (
+            f'<a class="btn" href="/reports?generated={escape(item["id"])}">Generate full report</a>'
+            if item.get("output_file")
+            else "Stored"
+        )
+        proposal_rows.append(
+            f'<tr><td>{escape(item["title"])}</td><td>{escape(item["rm"])}</td><td>{escape(item["stored"])}</td>'
+            f'<td><a href="/proposal-file?id={escape(item["id"])}">{escape(item["filename"])}</a></td>'
+            f'<td>{generate}</td></tr>'
+        )
+    chosen_proposal = proposal_by_id(generated) if generated else None
+    if chosen_proposal and chosen_proposal.get("output_file"):
+        generated_card = f"""
+        <div class="card" style="margin-top:12px">
+          <div class="label">Full report</div>
+          <h2>{escape(chosen_proposal["output_title"])}</h2>
+          <p>Input is the stored proposal, {escape(chosen_proposal["filename"])}. Output is the credit monitoring report. A person still reviews it. It is not an approval.</p>
+          <p><a class="btn" href="/report-file?id={escape(chosen_proposal["id"])}">Download the full report</a>
+             <a class="btn ghost" href="/proposal-file?id={escape(chosen_proposal["id"])}">Download the proposal</a></p>
+          <div class="label">A5 collateral</div>
+          <table><thead><tr><th>Security</th><th>Address</th><th>Latest valuation</th></tr></thead><tbody>
+            <tr><td>Grade-A office building, Central</td><td>Apex Central Tower, Central, Hong Kong</td><td>HK$620.0 million</td></tr>
+            <tr><td>Retail shops, Tsim Sha Tsui</td><td>Harbour Retail Plaza, Tsim Sha Tsui, Kowloon, Hong Kong</td><td>HK$200.0 million</td></tr>
+            <tr><td>Total collateral value</td><td></td><td>HK$820.0 million</td></tr>
+          </tbody></table>
+        </div>"""
+    elif generated:
+        generated_card = '<div class="card" style="margin-top:12px"><p>This stored proposal is kept on file. This first version generates the full report for the Apex annual review.</p></div>'
+    else:
+        generated_card = ""
     return f"""
-    <div class="label">Reports</div><h1>{escape(title)}</h1>
+    <div class="label">Reports</div><h1>Reports</h1>
+    <p class="lead">Relationship managers store a proposal here. Generate full report reads that proposal and prepares the credit monitoring report.</p>
+    <div class="card">
+      <div class="label">Proposals on file</div>
+      <div class="scroll"><table><thead><tr><th>Proposal</th><th>RM</th><th>Stored</th><th>File</th><th></th></tr></thead>
+      <tbody>{''.join(proposal_rows)}</tbody></table></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="label">Upload a proposal</div>
+      <form class="inline" method="post" action="/proposals" enctype="multipart/form-data">
+        <label>Relationship manager<br><input name="rm" required></label>
+        <label>Proposal file<br><input name="proposal" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required></label>
+        <button type="submit">Save proposal</button>
+      </form>
+    </div>
+    {generated_card}
+    <div class="label" style="margin-top:18px">Portfolio extract</div><h2>{escape(title)}</h2>
     <p class="lead">Draft for discussion. A person still reviews it. The draft is not an approval.</p>
     <form class="inline" method="get" action="/reports">
       <label>Report<br><select name="kind">
@@ -1235,7 +1363,7 @@ ROUTES = {
     "industry": lambda q: industry_page((q.get("name") or [default_industry()])[0]),
     "repayment": lambda q: repayment_page(int((q.get("window") or ["92"])[0] or 92)),
     "financial": lambda q: financial_page((q.get("customer") or [default_customer_id()])[0], (q.get("scenario") or ["revenue_decline"])[0]),
-    "reports": lambda q: reports_page((q.get("kind") or ["mir"])[0], (q.get("detail") or ["summary"])[0], (q.get("customer") or [default_customer_id()])[0]),
+    "reports": lambda q: reports_page((q.get("kind") or ["mir"])[0], (q.get("detail") or ["summary"])[0], (q.get("customer") or [default_customer_id()])[0], (q.get("generated") or [""])[0]),
     "assistant": lambda q: assistant_page((q.get("q") or ["What are the key risks for this customer?"])[0], (q.get("customer") or [default_customer_id()])[0]),
     "drafts": lambda q: drafts_page(),
     "email": lambda q: email_page((q.get("id") or ["MAIL-NEWS-APEX"])[0]),
@@ -1263,6 +1391,31 @@ class Handler(BaseHTTPRequestHandler):
             return
         requested = query.get("d") or dates_from_cookie(self.headers.get("Cookie"))
         bind_view(requested, parsed.path + (("?" + parsed.query) if parsed.query else ""))
+        if key in {"proposal-file", "report-file"}:
+            item = proposal_by_id((query.get("id") or [""])[0])
+            if item is None:
+                self.send_error(404)
+                return
+            if key == "report-file":
+                if not item.get("output_file"):
+                    self.send_error(404)
+                    return
+                path = REPORT_FILES / item["output_file"]
+                download_name = item["output_name"]
+            else:
+                path = proposal_path(item)
+                download_name = item["filename"]
+            if not path.is_file():
+                self.send_error(404)
+                return
+            payload = path.read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            self.send_header("Content-Disposition", f'attachment; filename="{download_name}"')
+            self.send_header("Content-Length", str(len(payload)))
+            self.end_headers()
+            self.wfile.write(payload)
+            return
         if key == "email.eml":
             draft = next((item for item in BOOK["drafts"] if item["id"] == (query.get("id") or [""])[0]), BOOK["drafts"][0])
             payload = live_letter(draft).encode("utf-8")
@@ -1282,6 +1435,24 @@ class Handler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         action = parsed.path.strip("/")
         length = int(self.headers.get("Content-Length") or 0)
+        if action == "proposals":
+            if not session_ok(self.headers.get("Cookie")):
+                self._redirect("/login")
+                return
+            if length > 8_000_000:
+                self.send_error(413)
+                return
+            fields = parse_multipart(self.headers.get("Content-Type", ""), self.rfile.read(length))
+            upload = fields.get("proposal") or {}
+            filename = upload.get("filename") or ""
+            payload = upload.get("data") or b""
+            rm = (fields.get("rm") or {}).get("data", b"").decode("utf-8", "replace")
+            if not filename.lower().endswith(".docx") or not payload.startswith(b"PK"):
+                self._redirect("/reports")
+                return
+            save_proposal(rm, filename, payload)
+            self._redirect("/reports")
+            return
         if length > 20000:
             self.send_error(413)
             return
