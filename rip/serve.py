@@ -874,7 +874,7 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
       <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="rail">Hide menu</button>
     </div>
     <div class="banner">{escape(BOOK["banner"])}</div>
-    {"" if active in {"news", "reports-external"} else date_bar()}
+    {"" if active in {"news", "reports-external", "assistant"} else date_bar()}
     {body}
   </main>
 </div>
@@ -2637,6 +2637,8 @@ class Handler(BaseHTTPRequestHandler):
             return
         scope = date_scope(parsed.path + (("?" + parsed.query) if parsed.query else ""))
         requested = query.get("d") or dates_from_cookie(self.headers.get("Cookie"), scope)
+        if key == "assistant":
+            requested = list(BOOK["dates"])
         bind_view(requested, parsed.path + (("?" + parsed.query) if parsed.query else ""))
         if key in {"proposal-file", "report-file"}:
             requested_id = (query.get("id") or [""])[0]
