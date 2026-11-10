@@ -370,6 +370,23 @@ def trend_table(metrics: list[tuple[str, object]]) -> str:
     return f'<div class="scroll"><table class="trend"><thead><tr><th></th>{head}</tr></thead><tbody>{"".join(rows)}</tbody></table></div>'
 
 
+def month_repayment_over_million(iso: str) -> float:
+    """Principal due within 31 days when that principal is at least HKD 1 million."""
+    total = 0.0
+    for raw in BOOK["customers"]:
+        point = next((item for item in raw.get("history") or [] if item.get("date") == iso), None)
+        if not point:
+            continue
+        amount = float(point.get("next_due_hkd") or 0)
+        try:
+            days = int(point.get("next_due_days"))
+        except (TypeError, ValueError):
+            continue
+        if amount >= 1_000_000 and 0 <= days <= 31:
+            total += amount
+    return round(total, 2)
+
+
 def trend_chart() -> str:
     history = BOOK["portfolio_history"]
     chosen = view()
@@ -377,15 +394,9 @@ def trend_chart() -> str:
         "labels": [datetime.strptime(item["date"], "%Y-%m-%d").strftime("%b %y") for item in history],
         "full": [chosen.label(item["date"]) for item in history],
         "series": [
+            {"id": "outstanding", "name": "Outstanding", "unit": "hkd", "on": True, "values": [item["drawn_hkd"] for item in history]},
             {"id": "ecl", "name": "ECL", "unit": "hkd", "on": True, "values": [item["ecl_hkd"] for item in history]},
-            {"id": "dpd60", "name": "Drawn 60 days or more past due", "unit": "hkd", "on": False, "values": [item["dpd60_drawn"] for item in history]},
-            {"id": "stage2", "name": "Drawn in stage 2", "unit": "hkd", "on": False, "values": [item["stage2_drawn"] for item in history]},
-            {"id": "drawn", "name": "Drawn exposure", "unit": "hkd", "on": False, "values": [item["drawn_hkd"] for item in history]},
-            {"id": "pastdue", "name": "Names past due", "unit": "count", "on": False, "values": [item["dpd_names"] for item in history]},
-            {"id": "stage2n", "name": "Stage 2 names", "unit": "count", "on": False, "values": [item["stage2_names"] for item in history]},
-            {"id": "cover", "name": "ECL coverage", "unit": "pct", "on": False, "values": [item["ecl_coverage"] for item in history]},
-            {"id": "ltv", "name": "Portfolio LTV", "unit": "ratio", "on": False, "values": [item["ltv"] for item in history]},
-            {"id": "large", "name": "Large repayments inside 90 days", "unit": "count", "on": False, "values": [len(item["large_due"]) for item in history]},
+            {"id": "repay", "name": "Repayment over 1 million within the month", "unit": "hkd", "on": True, "values": [month_repayment_over_million(item["date"]) for item in history]},
         ],
     }
     series_boxes = "".join(
@@ -486,8 +497,25 @@ def trend_chart() -> str:
       });
     });
     svg.innerHTML = parts.join("");
+    function unitName(unit) {
+      if (unit === "hkd") return "HKD";
+      if (unit === "count") return "Count";
+      if (unit === "pct") return "Percent";
+      return "Ratio";
+    }
+    function magnitude(unit, value) {
+      if (unit === "hkd") {
+        var abs = Math.abs(value);
+        if (abs >= 1e9) return (value / 1e9).toFixed(2) + "bn";
+        if (abs >= 1e6) return (value / 1e6).toFixed(1) + "m";
+        return Math.round(value).toLocaleString("en-HK");
+      }
+      if (unit === "pct") return (value * 100).toFixed(2);
+      if (unit === "ratio") return Number(value).toFixed(2);
+      return String(Math.round(value));
+    }
     legend.innerHTML = prepared.map(function (line) {
-      return '<span><i style="background:' + line.color + '"></i>' + line.item.name + " " + fmt(line.item.unit, line.last) + "</span>";
+      return '<div class="legend-item"><i style="background:' + line.color + '"></i><div><strong>' + line.item.name + '</strong><span class="unit">' + unitName(line.item.unit) + '</span><span class="value">' + magnitude(line.item.unit, line.last) + '</span></div></div>';
     }).join("");
     note.textContent = indexMode
       ? "These series are on different scales, so each line is drawn against its own peak in the checked months. 100 is that peak. The legend is the actual figure at the last checked month."
@@ -507,11 +535,13 @@ def trend_chart() -> str:
     <div class="card" style="margin-top:12px">
       <div class="label">Trend</div>
       <div class="dates" id="trend-filter">
-        <div class="label">Series</div>
+        <div class="label">Trend series</div>
         {series_boxes}
       </div>
-      <svg id="trend-svg" viewBox="0 0 760 280" role="img" aria-label="Portfolio trend"></svg>
-      <div class="legend" id="trend-legend"></div>
+      <div class="trend-layout">
+        <svg id="trend-svg" viewBox="0 0 760 280" role="img" aria-label="Portfolio trend"></svg>
+        <div class="legend legend-vertical" id="trend-legend"></div>
+      </div>
       <p class="lead" id="trend-note"></p>
     </div>
     <script>window.TREND_DATA = {json.dumps(payload)};</script>
@@ -678,8 +708,21 @@ form.hkex-search input[type=number] {{ width:7.5rem; }}
 .date-actions {{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }}
 .date-panel button.ghost {{ background:#F7F4F0; color:var(--ink); border:1px solid var(--line); }}
 .trend-chart, #trend-svg {{ width:100%; height:auto; display:block; }}
+.trend-layout {{ display:grid; grid-template-columns:minmax(0,1fr) 250px; gap:8px 18px; align-items:center; }}
 .legend {{ display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:8px; font-size:.84rem; }}
-.legend i {{ display:inline-block; width:10px; height:10px; border-radius:99px; margin-right:6px; }}
+.legend-vertical {{ flex-direction:column; flex-wrap:nowrap; gap:14px; margin:0; align-items:stretch; }}
+.legend-item {{ display:grid; grid-template-columns:14px minmax(0,1fr); gap:8px; align-items:start; }}
+.legend i, .legend-item i {{ display:block; width:12px; height:12px; border-radius:99px; margin-top:4px; }}
+.legend-item strong {{ display:block; line-height:1.3; }}
+.legend-item .unit {{ display:block; margin-top:2px; color:var(--muted); font-size:.72rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }}
+.legend-item .value {{ display:block; margin-top:2px; font-weight:700; }}
+#trend-filter {{ display:flex; flex-wrap:wrap; align-items:center; margin-bottom:8px; }}
+#trend-filter .label {{ width:100%; }}
+#trend-filter label {{ display:flex; gap:6px; align-items:center; margin:4px 14px 4px 0; font-weight:600; }}
+#trend-filter input {{ width:auto; margin:0; }}
+@media (max-width:900px) {{
+  .trend-layout {{ grid-template-columns:1fr; }}
+}}
 .scroll {{ overflow-x:auto; }}
 body.news-lock {{ height:100vh; overflow:hidden; }}
 body.news-lock .shell {{ height:100vh; min-height:0; }}
