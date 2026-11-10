@@ -2653,7 +2653,7 @@ class Handler(BaseHTTPRequestHandler):
         if key == "logout":
             self._redirect("/login", "rip=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0")
             return
-        if key in {"bea-rip-antigravity.zip", "RIP-Executive-Presentation.pptx"}:
+        if key in {"bea-rip-antigravity.zip", "RIP-Executive-Presentation.pptx", "RIP-Revised-Capacity.pptx"}:
             self._public_file(key)
             return
         if key == "login":
