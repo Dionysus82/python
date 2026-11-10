@@ -519,7 +519,7 @@ def main() -> None:
         "dates": dates,
         "portfolio_history": portfolio_history,
         "threshold_hkd": THRESHOLD,
-        "notify_to": "yiyangyao2@gmail.com",
+        "notify_to": "credit.desk@hkbea.example",
         "default_customer_id": anchor_customer,
         "default_industry": anchor_industry,
         "ecl_sources": wholesale_sources,
@@ -952,7 +952,7 @@ def letter(subject, kind, customer_id, paragraphs: list[str]) -> dict:
     )
     body = "\n".join(
         [
-            "To: yiyangyao2@gmail.com",
+            "To: credit.desk@hkbea.example",
             f"Subject: {subject}",
             "",
             banner,
