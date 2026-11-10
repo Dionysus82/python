@@ -11,6 +11,7 @@ rip/report_files/uploads/
 rip/news_state.json
 rip/news_state.tmp
 rip/bea-rip-antigravity.zip
+rip/RIP-Executive-Presentation.pptx
 dist/
 build/
 *.egg-info/

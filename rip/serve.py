@@ -2653,8 +2653,8 @@ class Handler(BaseHTTPRequestHandler):
         if key == "logout":
             self._redirect("/login", "rip=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0")
             return
-        if key == "bea-rip-antigravity.zip":
-            self._handoff_zip()
+        if key in {"bea-rip-antigravity.zip", "RIP-Executive-Presentation.pptx"}:
+            self._public_file(key)
             return
         if key == "login":
             if signed_in:
@@ -2813,15 +2813,16 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(raw)
 
-    def _handoff_zip(self) -> None:
-        path = ROOT / "bea-rip-antigravity.zip"
+    def _public_file(self, name: str) -> None:
+        path = ROOT / name
         if not path.is_file():
             self.send_error(404)
             return
+        kind = "application/vnd.openxmlformats-officedocument.presentationml.presentation" if name.endswith(".pptx") else "application/zip"
         payload = path.read_bytes()
         self.send_response(200)
-        self.send_header("Content-Type", "application/zip")
-        self.send_header("Content-Disposition", 'attachment; filename="bea-rip-antigravity.zip"')
+        self.send_header("Content-Type", kind)
+        self.send_header("Content-Disposition", f'attachment; filename="{name}"')
         self.send_header("Content-Length", str(len(payload)))
         self.end_headers()
         self.wfile.write(payload)
