@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -790,78 +791,105 @@ def materiality(customer: dict, direct_hit: bool) -> dict:
     }
 
 
+NEWS_FILE = Path(__file__).resolve().parent / "property_data" / "apex_negative_news_v3.xlsx"
+MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+SEVERITY_SCORE = {"CRITICAL": 95, "HIGH": 80, "MEDIUM": 60, "LOW": 35}
+SEVERITY_EN = {"中": "MEDIUM", "低": "LOW", "高": "HIGH", "严重": "CRITICAL", "嚴重": "CRITICAL"}
+PROPERTY_SECTORS = {"香港商業地產市場", "香港零售物業市場"}
+
+
+def at_latest(customer: dict) -> dict:
+    point = customer["history"][-1]
+    row = dict(customer)
+    for key, value in point.items():
+        if key not in {"customer_id", "date", "legal_name", "industry", "facilities"}:
+            row[key] = value
+    return row
+
+
+def split_source(source: str) -> tuple[str, str]:
+    english = re.search(r"(\d{1,2}\s+[A-Za-z]{3}\s+\d{4})\s*$", source)
+    if english:
+        when = datetime.strptime(english.group(1), "%d %b %Y")
+        return source[: english.start()].rstrip(" -"), f"{when.day} {when.strftime('%b %Y')}"
+    chinese = re.search(r"（(\d{4})年(\d{1,2})月）", source)
+    if chinese:
+        year, month = int(chinese.group(1)), int(chinese.group(2))
+        return source[: chinese.start()] + source[chinese.end() :], f"{MONTHS[month - 1]} {year}"
+    return source, ""
+
+
 def news_items(customers: list[dict]) -> list[dict]:
-    by_id = {customer["customer_id"]: customer for customer in customers}
-    apex = by_id["BOR-AGHL"]
-    idic = by_id["BOR-IDIC"]
-    metro = by_id["BOR-MGAA"]
-    property_names = [item for item in customers if item["industry"] == "Property Investment"]
+    from openpyxl import load_workbook
+
+    latest = [at_latest(customer) for customer in customers]
+    by_name = {customer["legal_name"]: customer for customer in latest}
+    property_names = [item for item in latest if item["industry"] == "Property Investment"]
     property_drawn = sum(item["drawn_hkd"] for item in property_names)
     property_market = sum(item["collateral_hkd"] for item in property_names)
     property_grades = [item["rating"] for item in property_names]
-    return [
-        {
-            "id": "NEWS-AGHL-LEASE",
-            "headline": "Office leasing at Apex Global's Kowloon towers is behind budget",
-            "source": "Credit Risk Alert Portal (placeholder feed)",
-            "date": "12 Sep 2026",
-            "customer_id": apex["customer_id"],
-            "industry": apex["industry"],
-            "body": (
-                "A placeholder alert says two commercial floors in the Kowloon towers leased by Apex Global Holdings "
-                "are still vacant against the budget used at the last review. No loss amount is stated. "
-                "Replace this item when the live feed is connected."
-            ),
-            "factors": materiality(apex, direct_hit=True),
-        },
-        {
-            "id": "NEWS-IDIC-CLAIM",
-            "headline": "Contractor files a payment claim against Industrial Development Investment Corp.",
-            "source": "Credit Risk Alert Portal (placeholder feed)",
-            "date": "21 Sep 2026",
-            "customer_id": idic["customer_id"],
-            "industry": idic["industry"],
-            "body": (
-                "A placeholder court-list note names a contractor claim. The claim amount is not in the property extract. "
-                "Days past due and stage follow the reporting dates selected on the page."
-            ),
-            "factors": materiality(idic, direct_hit=True),
-        },
-        {
-            "id": "NEWS-PROP-VACANCY",
-            "headline": "Hong Kong commercial vacancy stayed high through the third quarter",
-            "source": "Credit Risk Alert Portal (placeholder feed)",
-            "date": "28 Sep 2026",
-            "customer_id": None,
-            "industry": "Property Investment",
-            "body": (
-                "A sector placeholder says grade-A and fringe office vacancy did not improve in the quarter. "
-                "It does not name a default. It is here so the industry step has a headline until a live feed arrives."
-            ),
-            "factors": {
-                "exposure_hkd": property_drawn,
-                "security_coverage": f"{property_market / property_drawn:.2f} times market value over drawn, from the collateral extract",
-                "guarantor_support": "not an industry-level fact",
-                "financial_strength": f"property investment names carry grades {min(property_grades)} to {max(property_grades)} on the portfolio file",
-                "warning_signals": "leasing, vacancy and one contractor claim on the placeholder feed",
-                "score": 74,
-                "material": True,
-            },
-        },
-        {
-            "id": "NEWS-GOV-LAND",
-            "headline": "Commentary notes slower land-premium receipts for local authorities",
-            "source": "Credit Risk Alert Portal (placeholder feed)",
-            "date": "4 Sep 2026",
-            "customer_id": metro["customer_id"],
-            "industry": metro["industry"],
-            "body": (
-                "A short commentary mentions land premiums. It does not name Metro Gov Authority A in a default, "
-                "and it does not give a figure. Scored below the materiality line."
-            ),
-            "factors": materiality(metro, direct_hit=False),
-        },
-    ]
+    sector_factors = {
+        "exposure_hkd": property_drawn,
+        "security_coverage": f"{property_market / property_drawn:.2f} times market value over drawn, from the collateral extract",
+        "guarantor_support": "not an industry-level fact",
+        "financial_strength": f"property investment names carry grades {min(property_grades)} to {max(property_grades)} on the portfolio file",
+        "warning_signals": "see the Apex negative-news file",
+    }
+    workbook = load_workbook(NEWS_FILE, data_only=True)
+    items = []
+    for sheet_no, sheet in enumerate(workbook.worksheets, start=1):
+        rows = list(sheet.iter_rows(values_only=True))
+        for row in rows[1:]:
+            if not row or row[0] is None:
+                continue
+            number, headline, source, details, news_type, entities, signal, severity = row[:8]
+            severity = SEVERITY_EN.get(str(severity or "").strip(), str(severity or "").strip().upper())
+            source_name, when = split_source(str(source or ""))
+            named = [by_name[part.strip()] for part in str(entities or "").split(",") if part.strip() in by_name]
+            customer = named[0] if named else None
+            sector = customer is None and any(part.strip() in PROPERTY_SECTORS for part in str(entities or "").split(","))
+            score = SEVERITY_SCORE.get(str(severity or "").strip(), 35)
+            if customer:
+                factors = materiality(customer, direct_hit=True)
+                factors["score"] = score
+                factors["material"] = score >= 50
+                industry = customer["industry"]
+                customer_id = customer["customer_id"]
+            elif sector:
+                factors = dict(sector_factors)
+                factors["score"] = score
+                factors["material"] = score >= 50
+                industry = "Property Investment"
+                customer_id = None
+            else:
+                factors = {
+                    "exposure_hkd": 0,
+                    "security_coverage": "not a book obligor",
+                    "guarantor_support": "not a book obligor",
+                    "financial_strength": "not a book obligor",
+                    "warning_signals": 0,
+                    "score": score,
+                    "material": score >= 50,
+                }
+                industry = str(news_type or "")
+                customer_id = None
+            items.append(
+                {
+                    "id": f"NEWS-XLS-{sheet_no}-{int(number):02d}",
+                    "headline": str(headline),
+                    "source": source_name,
+                    "date": when,
+                    "severity": str(severity).strip(),
+                    "customer_id": customer_id,
+                    "industry": industry,
+                    "body": (
+                        f"{details} News type: {news_type}. Signal: {signal}. "
+                        f"Severity: {severity}. Entities: {entities}."
+                    ),
+                    "factors": factors,
+                }
+            )
+    return items
 
 
 def documents(borrower, grade, original, drawn, market, net, ltv, addresses, nxt, prior, stage, prior_stage, dpd, ecl, prior_ecl):
@@ -948,8 +976,8 @@ def letters(customers, focus, industries, drawn, collateral_split, news_feed):
         for item in late
     )
     apex = next(item for item in customers if item["customer_id"] == "BOR-AGHL")
-    apex_news = next(item for item in news_feed if item["id"] == "NEWS-AGHL-LEASE")
-    vacancy = next(item for item in news_feed if item["id"] == "NEWS-PROP-VACANCY")
+    apex_news = next(item for item in news_feed if item["customer_id"] == apex["customer_id"])
+    vacancy = next(item for item in news_feed if item["customer_id"] is None and item["industry"] == "Property Investment")
     news = letter(
         f"Adverse news — {apex['legal_name']}",
         ("MAIL-NEWS-APEX", "Adverse news"),
@@ -957,9 +985,9 @@ def letters(customers, focus, industries, drawn, collateral_split, news_feed):
         [
             f"{apex_news['date']}. {apex_news['headline']}.",
             apex_news["body"],
-            f"Materiality score {apex_news['factors']['score']}. Drawn {money_words(apex['drawn_hkd'])}. Collateral coverage {apex['coverage_ratio']}. Guarantor: {apex['guarantor']}. Interest cover on the demonstration statements is {apex['interest_coverage'][-1]:.1f} times.",
-            "A second placeholder says a contractor has filed a claim against Industrial Development Investment Corp. Replace both items when the live alert feed is provided.",
-            "This note asks the relationship manager to check the leasing budget. It does not downgrade the name, call default, or exit the relationship.",
+            f"Severity {apex_news['severity']}. Drawn {money_words(apex['drawn_hkd'])}. Collateral coverage {apex['coverage_ratio']}. Guarantor: {apex['guarantor']}. Interest cover on the demonstration statements is {apex['interest_coverage'][-1]:.1f} times.",
+            "The other items in the Apex negative-news file are on the adverse-news page.",
+            "This note does not downgrade the name, call default, or exit the relationship.",
         ],
     )
     industry = letter(
