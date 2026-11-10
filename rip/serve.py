@@ -407,12 +407,6 @@ def trend_chart() -> str:
     var text = (Number(value) / 1e6).toLocaleString("en-HK", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     return text + " mil";
   }
-  function share(part, whole) {
-    if (!(whole > 0)) return "—";
-    var value = part / whole * 100;
-    var digits = value > 0 && value < 0.1 ? 2 : 1;
-    return value.toLocaleString("en-HK", { minimumFractionDigits: digits, maximumFractionDigits: digits }) + "%";
-  }
   function attr(value) {
     return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
   }
@@ -493,7 +487,7 @@ def trend_chart() -> str:
     lineLegend.innerHTML = series.map(function (line) { return legendItem(line.color, line.name, "HKD mil"); }).join("");
   }
   function drawDonut(months, outstanding, ecl) {
-    legend.innerHTML = legendItem(lineColors.outstanding, "Outstanding", "HKD mil · 100%") + legendItem(lineColors.ecl, "ECL", "HKD mil · inside outstanding");
+    legend.innerHTML = legendItem(lineColors.outstanding, "Outstanding", "HKD mil") + legendItem(lineColors.ecl, "ECL", "HKD mil");
     if (!months.length) {
       svg.innerHTML = "";
       return;
@@ -508,15 +502,13 @@ def trend_chart() -> str:
     parts.push(ring(cx, cy, outer, 26, lineColors.outstanding, ""));
     parts.push(ring(cx, cy, inner, 22, "#E7E0D8", ""));
     if (ratio > 0) parts.push(arc(cx, cy, inner, ratio, 22, lineColors.ecl, ""));
-    parts.push(ring(cx, cy, outer, 34, "transparent", ' class="donut-hit" data-name="Outstanding" data-when="' + attr(when) + '" data-value="' + attr(mil(drawn) + " · 100%") + '"'));
+    parts.push(ring(cx, cy, outer, 34, "transparent", ' class="donut-hit" data-name="Outstanding" data-when="' + attr(when) + '" data-value="' + attr(mil(drawn)) + '"'));
     if (ratio > 0) {
-      parts.push(arc(cx, cy, inner, ratio, 30, "transparent", ' class="donut-hit" data-name="ECL" data-when="' + attr(when) + '" data-value="' + attr(mil(provision) + " · " + share(provision, drawn) + " of outstanding") + '"'));
+      parts.push(arc(cx, cy, inner, ratio, 30, "transparent", ' class="donut-hit" data-name="ECL" data-when="' + attr(when) + '" data-value="' + attr(mil(provision)) + '"'));
     }
-    parts.push('<text x="' + cx + '" y="' + (cy - 34) + '" text-anchor="middle" fill="#6F6862" font-size="12" font-weight="700">OUTSTANDING</text>');
-    parts.push('<text x="' + cx + '" y="' + (cy - 8) + '" text-anchor="middle" fill="#2C2825" font-size="22" font-weight="700">' + mil(drawn) + '</text>');
-    parts.push('<text x="' + cx + '" y="' + (cy + 16) + '" text-anchor="middle" fill="#8C3E16" font-size="16" font-weight="700">100%</text>');
-    parts.push('<text x="' + cx + '" y="' + (cy + 40) + '" text-anchor="middle" fill="#B42318" font-size="13" font-weight="700">ECL ' + mil(provision) + '</text>');
-    parts.push('<text x="' + cx + '" y="' + (cy + 58) + '" text-anchor="middle" fill="#6F6862" font-size="12">' + share(provision, drawn) + ' inside</text>');
+    parts.push('<text x="' + cx + '" y="' + (cy - 22) + '" text-anchor="middle" fill="#6F6862" font-size="12" font-weight="700">OUTSTANDING</text>');
+    parts.push('<text x="' + cx + '" y="' + (cy + 6) + '" text-anchor="middle" fill="#2C2825" font-size="22" font-weight="700">' + mil(drawn) + '</text>');
+    parts.push('<text x="' + cx + '" y="' + (cy + 32) + '" text-anchor="middle" fill="#B42318" font-size="13" font-weight="700">ECL ' + mil(provision) + '</text>');
     parts.push('<text x="' + cx + '" y="328" text-anchor="middle" fill="#6F6862" font-size="13">' + attr(when) + '</text>');
     svg.innerHTML = parts.join("");
   }
@@ -538,7 +530,7 @@ def trend_chart() -> str:
     var when = data.full[months[months.length - 1]];
     var who = person ? person.name + ". " : "All borrowers. ";
     var picked = months.length === 1 ? "The donut is " + when + ". " : "The donut is " + when + ", the latest checked month. ";
-    note.textContent = who + "The lines follow every checked month. " + picked + "The ring is outstanding, shown as 100%, with ECL inside. Amounts are in HKD million.";
+    note.textContent = who + "The lines follow every checked month. " + picked + "Amounts are in HKD million.";
   }
   var borrowerSelect = document.getElementById("trend-borrower");
   try {
@@ -619,7 +611,7 @@ def trend_chart() -> str:
         <div class="label">Latest month</div>
         <div class="trend-layout">
           <div class="trend-plot">
-            <svg id="trend-svg" viewBox="0 0 440 340" role="img" aria-label="Outstanding donut with ECL inside"></svg>
+            <svg id="trend-svg" viewBox="0 0 440 340" role="img" aria-label="Outstanding and ECL donut"></svg>
             <div id="trend-tip" class="trend-tip" hidden></div>
           </div>
           <div class="legend legend-vertical" id="trend-legend"></div>
