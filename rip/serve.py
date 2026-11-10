@@ -696,7 +696,7 @@ def news_page(selected: list[str]) -> str:
         rows.append(
             f'<tr><td><label><input type="checkbox" name="selected" value="{escape(item["id"])}" {checked}> {escape(item["headline"])}</label>'
             f'<div style="color:var(--muted);font-size:.8rem">{escape(item["date"])} · {escape(item["source"])}</div></td>'
-            f'<td>{escape(item["industry"])}</td><td>{factors["score"]}</td><td>{flag}</td></tr>'
+            f'<td>{escape(item["industry"])}</td><td>{escape(item["severity"])}</td><td>{flag}</td></tr>'
             f'<tr><td colspan="4" style="color:var(--muted)">{escape(item["body"])} '
             f'Exposure {money(factors["exposure_hkd"])}. Coverage {factors["security_coverage"]}. '
             f'Guarantor {factors["guarantor_support"]}. Strength {factors["financial_strength"]}. '
@@ -728,7 +728,7 @@ def news_page(selected: list[str]) -> str:
     <div class="label">Step 1 of 3</div><h1>Adverse news</h1>
     <p class="lead">These headlines are the Apex negative-news file. Materiality uses exposure, security coverage, guarantor support, financial strength and open warnings. Select a news item to open the group review, then the industry review.</p>
     <form method="get" action="/news">
-      <table><thead><tr><th>Item</th><th>Industry</th><th>Score</th><th></th></tr></thead><tbody>{''.join(rows)}</tbody></table>
+      <table><thead><tr><th>Item</th><th>Industry</th><th>Severity</th><th></th></tr></thead><tbody>{''.join(rows)}</tbody></table>
       <p><button type="submit">Review selected news</button></p>
     </form>
     {follow}

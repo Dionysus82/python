@@ -877,6 +877,7 @@ def news_items(customers: list[dict]) -> list[dict]:
                     "headline": str(headline),
                     "source": source_name,
                     "date": when,
+                    "severity": str(severity).strip(),
                     "customer_id": customer_id,
                     "industry": industry,
                     "body": (
@@ -982,7 +983,7 @@ def letters(customers, focus, industries, drawn, collateral_split, news_feed):
         [
             f"{apex_news['date']}. {apex_news['headline']}.",
             apex_news["body"],
-            f"Materiality score {apex_news['factors']['score']}. Drawn {money_words(apex['drawn_hkd'])}. Collateral coverage {apex['coverage_ratio']}. Guarantor: {apex['guarantor']}. Interest cover on the demonstration statements is {apex['interest_coverage'][-1]:.1f} times.",
+            f"Severity {apex_news['severity']}. Drawn {money_words(apex['drawn_hkd'])}. Collateral coverage {apex['coverage_ratio']}. Guarantor: {apex['guarantor']}. Interest cover on the demonstration statements is {apex['interest_coverage'][-1]:.1f} times.",
             "The other items in the Apex negative-news file are on the adverse-news page.",
             "This note does not downgrade the name, call default, or exit the relationship.",
         ],
