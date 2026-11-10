@@ -429,16 +429,9 @@ def trend_chart() -> str:
   function checked(selector) {
     return Array.prototype.filter.call(document.querySelectorAll(selector), function (box) { return box.checked; });
   }
-  function fmt(unit, value) {
-    if (unit === "hkd") {
-      var abs = Math.abs(value);
-      if (abs >= 1e9) return "HKD " + (value / 1e9).toFixed(2) + "bn";
-      if (abs >= 1e6) return "HKD " + (value / 1e6).toFixed(1) + "m";
-      return "HKD " + Math.round(value).toLocaleString("en-HK");
-    }
-    if (unit === "pct") return (value * 100).toFixed(2) + "%";
-    if (unit === "ratio") return Number(value).toFixed(2);
-    return String(Math.round(value));
+  function mil(value) {
+    var text = (Number(value) / 1e6).toLocaleString("en-HK", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    return text + " mil";
   }
   function refreshMonthLabel() {
     var host = document.getElementById("trend-series-months");
@@ -467,28 +460,18 @@ def trend_chart() -> str:
       note.textContent = "Check at least one series and one month.";
       return;
     }
-    var W = 760, H = 280, left = 78, right = 16, top = 18, bottom = 36;
+    var W = 760, H = 280, left = 96, right = 16, top = 18, bottom = 36;
     var plotW = W - left - right, plotH = H - top - bottom;
-    var units = {};
-    series.forEach(function (item) { units[item.unit] = true; });
-    var peaks = series.map(function (item) {
-      return Math.max.apply(null, months.map(function (index) { return item.values[index]; }));
-    });
-    var positive = peaks.filter(function (value) { return value > 0; });
-    var wide = positive.length > 1 && Math.max.apply(null, positive) / Math.min.apply(null, positive) > 20;
-    var indexMode = Object.keys(units).length > 1 || wide;
     var prepared = series.map(function (item, order) {
       var slice = months.map(function (index) { return item.values[index]; });
-      var peak = Math.max.apply(null, slice.concat([0]));
-      var plot = indexMode ? slice.map(function (value) { return peak ? value / peak * 100 : 0; }) : slice;
-      return { item: item, slice: slice, plot: plot, color: colors[order % colors.length], last: slice[slice.length - 1] };
+      return { item: item, slice: slice, plot: slice, color: colors[order % colors.length] };
     });
     var flat = [];
     prepared.forEach(function (line) { flat = flat.concat(line.plot); });
     var min = Math.min.apply(null, flat);
     var max = Math.max.apply(null, flat);
     if (min === max) { min = min - 1; max = max + 1; }
-    if (!indexMode && min > 0) min = min - (max - min) * 0.08;
+    if (min > 0) min = min - (max - min) * 0.08;
     if (min < 0 && Math.min.apply(null, flat) >= 0) min = 0;
     max = max + (max - min) * 0.08;
     function xAt(position) {
@@ -501,8 +484,7 @@ def trend_chart() -> str:
       var value = min + (max - min) * tick / 3;
       var y = yAt(value);
       parts.push('<line x1="' + left + '" y1="' + y + '" x2="' + (W - right) + '" y2="' + y + '" stroke="#E4DDD6"/>');
-      var axis = indexMode ? Math.round(value) : fmt(series[0].unit, value);
-      parts.push('<text x="' + (left - 8) + '" y="' + (y + 4) + '" text-anchor="end" fill="#6F6862" font-size="11">' + axis + '</text>');
+      parts.push('<text x="' + (left - 8) + '" y="' + (y + 4) + '" text-anchor="end" fill="#6F6862" font-size="11">' + mil(value) + '</text>');
     }
     months.forEach(function (index, position) {
       parts.push('<text x="' + xAt(position) + '" y="' + (H - 10) + '" text-anchor="middle" fill="#6F6862" font-size="11">' + data.labels[index] + '</text>');
@@ -511,35 +493,19 @@ def trend_chart() -> str:
       var points = line.plot.map(function (value, position) { return xAt(position) + "," + yAt(value); }).join(" ");
       parts.push('<polyline fill="none" stroke="' + line.color + '" stroke-width="2.5" points="' + points + '"/>');
       line.plot.forEach(function (value, position) {
-        var actual = fmt(line.item.unit, line.slice[position]);
-        parts.push('<circle cx="' + xAt(position) + '" cy="' + yAt(value) + '" r="3.6" fill="' + line.color + '"><title>' + line.item.name + " " + data.full[months[position]] + " " + actual + '</title></circle>');
+        var cx = xAt(position);
+        var cy = yAt(value);
+        var amount = mil(line.slice[position]);
+        parts.push('<circle class="trend-dot" cx="' + cx + '" cy="' + cy + '" r="11" fill="transparent" data-name="' + line.item.name + '" data-when="' + data.full[months[position]] + '" data-value="' + amount + '"></circle>');
+        parts.push('<circle cx="' + cx + '" cy="' + cy + '" r="3.6" fill="' + line.color + '" pointer-events="none"></circle>');
       });
     });
     svg.innerHTML = parts.join("");
-    function unitName(unit) {
-      if (unit === "hkd") return "HKD";
-      if (unit === "count") return "Count";
-      if (unit === "pct") return "Percent";
-      return "Ratio";
-    }
-    function magnitude(unit, value) {
-      if (unit === "hkd") {
-        var abs = Math.abs(value);
-        if (abs >= 1e9) return (value / 1e9).toFixed(2) + "bn";
-        if (abs >= 1e6) return (value / 1e6).toFixed(1) + "m";
-        return Math.round(value).toLocaleString("en-HK");
-      }
-      if (unit === "pct") return (value * 100).toFixed(2);
-      if (unit === "ratio") return Number(value).toFixed(2);
-      return String(Math.round(value));
-    }
     legend.innerHTML = prepared.map(function (line) {
-      return '<div class="legend-item"><i style="background:' + line.color + '"></i><div><strong>' + line.item.name + '</strong><span class="unit">' + unitName(line.item.unit) + '</span><span class="value">' + magnitude(line.item.unit, line.last) + '</span></div></div>';
+      return '<div class="legend-item"><i style="background:' + line.color + '"></i><div><strong>' + line.item.name + '</strong><span class="unit">HKD mil</span></div></div>';
     }).join("");
     var who = person ? person.name + ". " : "";
-    note.textContent = who + (indexMode
-      ? "These series are on different scales, so each line is drawn against its own peak in the checked months. 100 is that peak. The legend is the actual figure at the last checked month."
-      : "The axis is the actual amount. The legend is the figure at the last checked month.");
+    note.textContent = who + "Amounts are in HKD million. Point at a dot to read that month.";
   }
   var borrowerSelect = document.getElementById("trend-borrower");
   try {
@@ -563,6 +529,29 @@ def trend_chart() -> str:
     try { sessionStorage.setItem("rip-trend-months", JSON.stringify(on)); } catch (error) {}
   });
   document.getElementById("trend-filter").addEventListener("change", draw);
+  var tip = document.getElementById("trend-tip");
+  function placeTip(dot) {
+    var name = document.createElement("strong");
+    name.textContent = dot.getAttribute("data-name");
+    var when = document.createElement("span");
+    when.textContent = dot.getAttribute("data-when");
+    var value = document.createElement("b");
+    value.textContent = dot.getAttribute("data-value");
+    tip.replaceChildren(name, when, value);
+    tip.hidden = false;
+    var plot = svg.parentElement.getBoundingClientRect();
+    var box = svg.getBoundingClientRect();
+    var scaleX = box.width / 760;
+    var scaleY = box.height / 280;
+    tip.style.left = (box.left - plot.left + Number(dot.getAttribute("cx")) * scaleX) + "px";
+    tip.style.top = (box.top - plot.top + Number(dot.getAttribute("cy")) * scaleY) + "px";
+  }
+  svg.addEventListener("mouseover", function (event) {
+    var dot = event.target.closest(".trend-dot");
+    if (!dot) return;
+    placeTip(dot);
+  });
+  svg.addEventListener("mouseleave", function () { tip.hidden = true; });
   draw();
 })();
 </script>
@@ -579,7 +568,10 @@ def trend_chart() -> str:
         </div>
       </div>
       <div class="trend-layout">
-        <svg id="trend-svg" viewBox="0 0 760 280" role="img" aria-label="Portfolio trend"></svg>
+        <div class="trend-plot">
+          <svg id="trend-svg" viewBox="0 0 760 280" role="img" aria-label="Portfolio trend"></svg>
+          <div id="trend-tip" class="trend-tip" hidden></div>
+        </div>
         <div class="legend legend-vertical" id="trend-legend"></div>
       </div>
       <p class="lead" id="trend-note"></p>
@@ -749,12 +741,18 @@ form.hkex-search input[type=number] {{ width:7.5rem; }}
 .date-panel button.ghost {{ background:#F7F4F0; color:var(--ink); border:1px solid var(--line); }}
 .trend-chart, #trend-svg {{ width:100%; height:auto; display:block; }}
 .trend-layout {{ display:grid; grid-template-columns:minmax(0,1fr) 250px; gap:8px 18px; align-items:center; }}
+.trend-plot {{ position:relative; min-width:0; }}
+.trend-tip {{ position:absolute; z-index:6; transform:translate(-50%, calc(-100% - 10px)); background:#2C2825; color:#fff; border-radius:8px; padding:8px 10px; font-size:.78rem; line-height:1.35; pointer-events:none; white-space:nowrap; box-shadow:0 8px 20px rgba(44,40,37,.22); }}
+.trend-tip[hidden] {{ display:none; }}
+.trend-tip strong, .trend-tip span, .trend-tip b {{ display:block; }}
+.trend-tip span {{ color:#E7E0D8; font-weight:400; }}
+.trend-tip b {{ margin-top:2px; }}
 .legend {{ display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:8px; font-size:.84rem; }}
 .legend-vertical {{ flex-direction:column; flex-wrap:nowrap; gap:14px; margin:0; align-items:stretch; }}
 .legend-item {{ display:grid; grid-template-columns:14px minmax(0,1fr); gap:8px; align-items:start; }}
 .legend i, .legend-item i {{ display:block; width:12px; height:12px; border-radius:99px; margin-top:4px; }}
 .legend-item strong {{ display:block; line-height:1.3; }}
-.legend-item .unit {{ display:block; margin-top:2px; color:var(--muted); font-size:.72rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }}
+.legend-item .unit {{ display:block; margin-top:2px; color:var(--muted); font-size:.72rem; font-weight:700; letter-spacing:.04em; }}
 .legend-item .value {{ display:block; margin-top:2px; font-weight:700; }}
 #trend-filter {{ display:flex; flex-wrap:wrap; align-items:center; margin-bottom:8px; }}
 #trend-filter .label {{ width:100%; }}
