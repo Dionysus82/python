@@ -686,7 +686,8 @@ nav button.nav-parent.active, .nav-sub.open > button.nav-parent {{ background:rg
 .nav-sub.open .nav-menu {{ display:block; }}
 .nav-menu a {{ font-size:.86rem; padding:7px 10px; }}
 .sent-mail {{ padding:14px 0; border-top:1px solid var(--line); }}
-.sent-mail:first-child {{ border-top:0; padding-top:0; }}
+.sent-mail:first-child, #unsent-list .sent-mail:first-of-type, #mail-list .sent-mail:first-of-type {{ border-top:0; padding-top:0; }}
+#unsent-list > h2, #mail-list > h2 {{ font-size:1.2rem; margin:0 0 8px; }}
 .sent-mail h2 {{ font-size:1.05rem; margin:4px 0 8px; }}
 .sent-mail p {{ margin:2px 0; }}
 .letter {{ white-space:pre-wrap; background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; margin-top:10px; font:14px/1.45 ui-monospace,monospace; }}
@@ -2208,11 +2209,31 @@ def drafts_page() -> str:
     for item in held:
         counts[item["severity"]] = counts.get(item["severity"], 0) + 1
     held_line = ", ".join(f"{counts[level]} {level.lower()}" for level in ("HIGH", "MEDIUM", "LOW") if counts.get(level))
+    unsent = []
+    for draft in BOOK["drafts"]:
+        person = next((row for row in BOOK["customers"] if row["customer_id"] == draft.get("customer_id")), None)
+        borrower = person["legal_name"] if person else ""
+        name = (person or {}).get("rm") or ""
+        if name and name not in rms:
+            rms.append(name)
+        if borrower and borrower not in borrowers:
+            borrowers.append(borrower)
+        who = escape(name) if name else "—"
+        named = escape(borrower) if borrower else "Not linked"
+        unsent.append(
+            f'<article class="sent-mail" data-rm="{escape(name)}" data-borrower="{escape(borrower)}">'
+            f'<div class="label">Not sent</div>'
+            f'<h2><a href="/email?id={escape(draft["id"])}">{escape(draft["subject"])}</a></h2>'
+            f'<p>{escape(draft["kind"])}</p>'
+            f'<p>RM: {who}</p>'
+            f'<p>Borrower: {named}</p>'
+            f'<div class="letter">{escape(draft["body"])}</div></article>'
+        )
     rm_options = "".join(f"<option>{escape(name)}</option>" for name in sorted(rms))
     borrower_options = "".join(f"<option>{escape(name)}</option>" for name in sorted(borrowers))
     return f"""
     <div class="label">Outbox</div><h1>Email portal</h1>
-    <p class="lead">Critical news is sent automatically to the relationship manager. Filter the sent messages by RM or borrower. The record is the message, the time it went, and the address it went to. Addresses are demonstration mailboxes. High, medium and low items are not sent.</p>
+    <p class="lead">Critical news is sent automatically to the relationship manager. Drafts that have not been sent are listed under Unsent Draft. Filter either list by RM or borrower. Addresses are demonstration mailboxes.</p>
     <div class="news-tools mail-tools">
       <div class="news-filters">
         <label><span class="label">RM</span><br>
@@ -2223,25 +2244,38 @@ def drafts_page() -> str:
         </label>
       </div>
     </div>
-    <div class="card" id="mail-list">{''.join(cards) or '<p>No critical item is on the file.</p>'}
+    <div class="card" id="unsent-list">
+      <h2>Unsent Draft</h2>
+      {''.join(unsent) or '<p>No draft is waiting.</p>'}
+      <p id="unsent-empty" hidden>No unsent draft matches this RM and borrower.</p>
+    </div>
+    <div class="card" id="mail-list" style="margin-top:12px">
+      <h2>Sent</h2>
+      {''.join(cards) or '<p>No critical item is on the file.</p>'}
       <p id="mail-empty" hidden>No sent message matches this RM and borrower.</p>
     </div>
-    <p class="lead">{escape(held_line)} were kept on the adverse-news page and were not sent.</p>
+    <p class="lead">{escape(held_line)} remain on the adverse-news page and are not in either list.</p>
     <script>
     (function () {{
       var rm = document.getElementById("mail-rm");
       var borrower = document.getElementById("mail-borrower");
-      var cards = [...document.querySelectorAll("#mail-list .sent-mail")];
-      var empty = document.getElementById("mail-empty");
-      function apply() {{
-        var shown = 0;
-        cards.forEach(function (card) {{
-          var ok = (!rm.value || card.dataset.rm === rm.value) && (!borrower.value || card.dataset.borrower === borrower.value);
-          card.hidden = !ok;
-          if (ok) shown += 1;
-        }});
-        empty.hidden = shown > 0 || !cards.length;
+      function bind(rootId, emptyId) {{
+        var root = document.getElementById(rootId);
+        var cards = [...root.querySelectorAll(".sent-mail")];
+        var empty = document.getElementById(emptyId);
+        return function () {{
+          var shown = 0;
+          cards.forEach(function (card) {{
+            var ok = (!rm.value || card.dataset.rm === rm.value) && (!borrower.value || card.dataset.borrower === borrower.value);
+            card.hidden = !ok;
+            if (ok) shown += 1;
+          }});
+          empty.hidden = shown > 0 || !cards.length;
+        }};
       }}
+      var applyUnsent = bind("unsent-list", "unsent-empty");
+      var applySent = bind("mail-list", "mail-empty");
+      function apply() {{ applyUnsent(); applySent(); }}
       rm.addEventListener("change", apply);
       borrower.addEventListener("change", apply);
     }})();
