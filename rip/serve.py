@@ -75,6 +75,7 @@ SEEDED_PROPOSALS = [
     }
 ]
 THRESHOLD = BOOK["threshold_hkd"]
+REPAY_NOTICE_DAYS = 92
 
 DEMO_USER = "cro.shum"
 DEMO_PASSWORD = "Harbour-Demo-2026"
@@ -1039,6 +1040,12 @@ def news_facts(pairs: list[tuple[str, str]]) -> str:
     return f"<dl>{rows}</dl>"
 
 
+def sent_news_link(item: dict) -> str:
+    if item["severity"] == "LOW":
+        return ""
+    return f'<a href="/drafts#sent-{escape(item["id"])}">Open the message sent to the relationship manager</a>'
+
+
 def news_detail(item: dict) -> str:
     article, fields = news_fields(item["body"])
     factors = item["factors"]
@@ -1068,13 +1075,13 @@ def news_detail(item: dict) -> str:
             ("Days past due", escape(str(person["dpd"]))),
             *book_rows,
         ]
-        mail_link = f'<a href="/drafts#sent-{escape(item["id"])}">Open the message sent to the relationship manager</a>' if item["severity"] == "CRITICAL" else ""
         links = (
-            f'{mail_link}'
+            f'{sent_news_link(item)}'
             f'<a href="/industry?name={escape(person["industry"])}">Continue to the {escape(person["industry"])} industry review</a>'
         )
     else:
         links = (
+            f'{sent_news_link(item)}'
             f'<a href="/industry?name={escape(item["industry"])}">Continue to the {escape(item["industry"])} review</a>'
             f'<a href="/email?id=MAIL-IND-WHOLESALE">Open the industry email draft</a>'
         )
@@ -1592,8 +1599,8 @@ def repayment_page(window: int, threshold: int = THRESHOLD) -> str:
     lines = []
     for item in rows:
         draft = (
-            f'<a href="/email?id={escape(item["repay_draft_id"])}">Draft</a>'
-            if item.get("repay_draft_id")
+            f'<a href="/drafts#sent-repay-{escape(item["customer_id"])}">Sent to {escape(item["rm"])}</a>'
+            if item["next_due_hkd"] >= THRESHOLD and isinstance(item["next_due_days"], int) and item["next_due_days"] <= REPAY_NOTICE_DAYS
             else "—"
         )
         kind = "Refinancing" if item["refinancing"] else "Instalment"
@@ -2175,20 +2182,64 @@ def relationship_mailbox(item: dict) -> tuple[str, str]:
     return name, f"{local}@hkbea.example"
 
 
-def sent_letter(item: dict) -> str:
-    name, address = relationship_mailbox(item)
+def news_borrower(item: dict) -> dict | None:
+    cid = item.get("customer_id") or news_desk.suggest_customer(item, BOOK["customers"])
+    if not cid:
+        blob = " ".join(str(item.get(key) or "") for key in ("headline", "entities", "body"))
+        if "Apex Infrastructure" in blob:
+            cid = "BOR-AIIC"
+        elif "Apex Property" in blob:
+            cid = "BOR-APL"
+        elif "Apex" in blob:
+            cid = "BOR-AGHL"
+    return customer(cid) if cid else None
+
+
+def sent_letter(item: dict, person: dict | None) -> str:
+    name, address = relationship_mailbox(person or item)
     article, _fields = news_fields(item["body"])
-    borrower = next((row for row in BOOK["customers"] if row["customer_id"] == item.get("customer_id")), None)
-    linked = f"\nLinked borrower: {borrower['legal_name']}." if borrower else "\nNo borrower on the book is named in this item."
+    linked = f"\nLinked borrower: {person['legal_name']}." if person else "\nNo borrower on the book is named in this item."
     return (
         f"To: {name} <{address}>\n"
         f"Sent: {item['date']}, 08:20 HKT\n"
         f"Subject: {item['headline']}\n\n"
-        f"This message was sent automatically because the severity is CRITICAL.\n\n"
+        f"This message was sent automatically to the relationship manager. Severity: {item['severity']}.\n\n"
         f"{article.strip()}\n"
         f"{linked}\n"
         f"Relationship manager: {name}."
     )
+
+
+def repayment_letter(person: dict) -> str:
+    name, address = relationship_mailbox(person)
+    return (
+        f"To: {name} <{address}>\n"
+        f"Sent: {view().label()}, 08:20 HKT\n"
+        f"Subject: Large repayment — {person['legal_name']}\n\n"
+        f"This repayment notice was sent automatically to the relationship manager.\n\n"
+        f"{person['legal_name']} has principal of {money(person['next_due_hkd'])} due on {person['next_due_date']}, "
+        f"{person['next_due_days']} days after {view().label()}.\n\n"
+        f"The amount is on {person['next_contract']}, method {str(person['next_method']).replace('_', ' ').title()}. "
+        f"It is above the HKD 5,000,000 monitoring threshold.\n"
+        f"Group drawn is {money(person['drawn_hkd'])}. LTV is {person['ltv']}.\n"
+        f"Relationship manager: {name}."
+    )
+
+
+def repayment_notices() -> list[dict]:
+    people = [
+        person for person in (customer(item["customer_id"]) for item in BOOK["customers"])
+        if person and person.get("on_position")
+    ]
+    rows = [
+        item for item in people
+        if isinstance(item.get("next_due_hkd"), (int, float))
+        and item["next_due_hkd"] >= THRESHOLD
+        and isinstance(item.get("next_due_days"), int)
+        and item["next_due_days"] <= REPAY_NOTICE_DAYS
+    ]
+    rows.sort(key=lambda item: (item["next_due_days"], -item["next_due_hkd"]))
+    return rows
 
 
 def mail_snippet(text: str) -> str:
@@ -2205,35 +2256,64 @@ def mail_snippet(text: str) -> str:
     return ""
 
 
+def mail_card(entry_id: str, name: str, borrower: str, subject: str, when: str, route: str, letter: str) -> str:
+    return (
+        f'<details class="sent-mail" id="{escape(entry_id)}" data-rm="{escape(name)}" data-borrower="{escape(borrower)}">'
+        f'<summary><span class="mail-who"><span class="mail-caret" aria-hidden="true"></span>{escape(name)}</span>'
+        f'<span class="mail-line"><strong>{escape(subject)}</strong> <span class="mail-snip">— {escape(mail_snippet(letter))}</span></span>'
+        f'<span class="mail-when">{escape(when)}</span></summary>'
+        f'<p class="mail-route">{route}</p>'
+        f'<div class="letter">{escape(letter)}</div></details>'
+    )
+
+
 def drafts_page() -> str:
-    critical = [item for item in BOOK["news"] if item["severity"] == "CRITICAL"]
-    held = [item for item in BOOK["news"] if item["severity"] != "CRITICAL"]
     cards = []
     rms: list[str] = []
     borrowers: list[str] = []
-    for item in critical:
-        name, address = relationship_mailbox(item)
-        person = next((row for row in BOOK["customers"] if row["customer_id"] == item.get("customer_id")), None)
-        borrower = person["legal_name"] if person else "Not linked"
-        if name not in rms:
+
+    def remember(name: str, borrower: str) -> None:
+        if name and name not in rms:
             rms.append(name)
-        if borrower not in borrowers:
+        if borrower and borrower not in borrowers:
             borrowers.append(borrower)
-        letter = sent_letter(item)
-        cards.append(
-            f'<details class="sent-mail" id="sent-{escape(item["id"])}" data-rm="{escape(name)}" data-borrower="{escape(borrower)}">'
-            f'<summary><span class="mail-who"><span class="mail-caret" aria-hidden="true"></span>{escape(name)}</span>'
-            f'<span class="mail-line"><strong>{escape(item["headline"])}</strong> <span class="mail-snip">— {escape(mail_snippet(letter))}</span></span>'
-            f'<span class="mail-when">{escape(item["date"])}</span></summary>'
-            f'<p class="mail-route">To: {escape(name)} &lt;{escape(address)}&gt; · Borrower: {escape(borrower)} · Sent {escape(item["date"])}, 08:20 HKT</p>'
-            f'<div class="letter">{escape(letter)}</div></details>'
-        )
-    counts = {}
-    for item in held:
-        counts[item["severity"]] = counts.get(item["severity"], 0) + 1
-    held_line = ", ".join(f"{counts[level]} {level.lower()}" for level in ("HIGH", "MEDIUM", "LOW") if counts.get(level))
+
+    for item in BOOK["news"]:
+        if item["severity"] == "LOW":
+            continue
+        person = news_borrower(item)
+        name, address = relationship_mailbox(person or item)
+        borrower = person["legal_name"] if person else "Not linked"
+        remember(name, borrower if person else "")
+        letter = sent_letter(item, person)
+        cards.append(mail_card(
+            f"sent-{item['id']}",
+            name,
+            borrower,
+            item["headline"],
+            item["date"],
+            f'To: {escape(name)} &lt;{escape(address)}&gt; · Borrower: {escape(borrower)} · {escape(item["severity"])} · Sent {escape(item["date"])}, 08:20 HKT',
+            letter,
+        ))
+    for person in repayment_notices():
+        name, address = relationship_mailbox(person)
+        remember(name, person["legal_name"])
+        letter = repayment_letter(person)
+        cards.append(mail_card(
+            f"sent-repay-{person['customer_id']}",
+            name,
+            person["legal_name"],
+            f"Large repayment — {person['legal_name']}",
+            view().label(),
+            f'To: {escape(name)} &lt;{escape(address)}&gt; · Borrower: {escape(person["legal_name"])} · Repayment · Sent {escape(view().label())}, 08:20 HKT',
+            letter,
+        ))
+    low_count = sum(1 for item in BOOK["news"] if item["severity"] == "LOW")
+    held_line = f"{low_count} low priority news items are not sent."
     unsent = []
     for draft in BOOK["drafts"]:
+        if draft["id"] == "MAIL-REPAY-LANTERN":
+            continue
         person = next((row for row in BOOK["customers"] if row["customer_id"] == draft.get("customer_id")), None)
         borrower = person["legal_name"] if person else ""
         name = (person or {}).get("rm") or ""
@@ -2255,7 +2335,7 @@ def drafts_page() -> str:
     borrower_options = "".join(f"<option>{escape(name)}</option>" for name in sorted(borrowers))
     return f"""
     <div class="label">Outbox</div><h1>Email portal</h1>
-    <p class="lead">Critical news is sent automatically to the relationship manager. Drafts that have not been sent are listed under Unsent Draft. Filter either list by RM or borrower. Addresses are demonstration mailboxes.</p>
+    <p class="lead">News other than low priority is sent to the relationship manager. So is each repayment of at least HKD 5,000,000 due within 92 days. Low priority news is not sent. Filter either list by RM or borrower. Addresses are demonstration mailboxes.</p>
     <div class="news-tools mail-tools">
       <div class="news-filters">
         <label><span class="label">RM</span><br>
@@ -2268,7 +2348,7 @@ def drafts_page() -> str:
     </div>
     <div class="card mail-inbox" id="mail-list">
       <h2>Sent</h2>
-      {''.join(cards) or '<p>No critical item is on the file.</p>'}
+      {''.join(cards) or '<p>No message has been sent for this position.</p>'}
       <p id="mail-empty" hidden>No sent message matches this RM and borrower.</p>
     </div>
     <div class="card mail-inbox" id="unsent-list" style="margin-top:12px">
@@ -2276,7 +2356,7 @@ def drafts_page() -> str:
       {''.join(unsent) or '<p>No draft is waiting.</p>'}
       <p id="unsent-empty" hidden>No unsent draft matches this RM and borrower.</p>
     </div>
-    <p class="lead">{escape(held_line)} remain on the adverse-news page and are not in either list.</p>
+    <p class="lead">{escape(held_line)}</p>
     <script>
     (function () {{
       var rm = document.getElementById("mail-rm");
