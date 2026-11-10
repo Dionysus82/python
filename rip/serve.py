@@ -686,7 +686,10 @@ nav button.nav-parent.active, .nav-sub.open > button.nav-parent {{ background:rg
 .nav-menu {{ display:none; margin:0 0 6px 14px; }}
 .nav-sub.open .nav-menu {{ display:block; }}
 .nav-menu a {{ font-size:.86rem; padding:7px 10px; }}
-#unsent-list > h2, #mail-list > h2 {{ font-size:1.2rem; margin:0 0 4px; }}
+#unsent-list > h2 {{ font-size:1.2rem; margin:0 0 8px; }}
+.mail-head h2 {{ font-size:1.2rem; margin:0; }}
+.mail-head {{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin:0 0 8px; }}
+.mail-head button {{ font-size:.84rem; }}
 .mail-inbox details {{ border-top:1px solid var(--line); }}
 .mail-inbox details:first-of-type {{ border-top:0; }}
 .mail-inbox summary {{ display:grid; grid-template-columns:minmax(128px,190px) minmax(0,1fr) auto; gap:14px; align-items:center; padding:11px 6px; cursor:pointer; list-style:none; }}
@@ -874,7 +877,7 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
       <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="rail">Hide menu</button>
     </div>
     <div class="banner">{escape(BOOK["banner"])}</div>
-    {"" if active in {"news", "reports-external", "assistant"} else date_bar()}
+    {"" if active in {"news", "reports-external", "assistant", "drafts"} else date_bar()}
     {body}
   </main>
 </div>
@@ -2256,9 +2259,9 @@ def mail_snippet(text: str) -> str:
     return ""
 
 
-def mail_card(entry_id: str, name: str, borrower: str, subject: str, when: str, route: str, letter: str) -> str:
+def mail_card(entry_id: str, name: str, borrower: str, subject: str, when: str, route: str, letter: str, sent_at: int = 0) -> str:
     return (
-        f'<details class="sent-mail" id="{escape(entry_id)}" data-rm="{escape(name)}" data-borrower="{escape(borrower)}">'
+        f'<details class="sent-mail" id="{escape(entry_id)}" data-rm="{escape(name)}" data-borrower="{escape(borrower)}" data-sent="{sent_at}">'
         f'<summary><span class="mail-who"><span class="mail-caret" aria-hidden="true"></span>{escape(name)}</span>'
         f'<span class="mail-line"><strong>{escape(subject)}</strong> <span class="mail-snip">— {escape(mail_snippet(letter))}</span></span>'
         f'<span class="mail-when">{escape(when)}</span></summary>'
@@ -2294,6 +2297,7 @@ def drafts_page() -> str:
             item["date"],
             f'To: {escape(name)} &lt;{escape(address)}&gt; · Borrower: {escape(borrower)} · {escape(item["severity"])} · Sent {escape(item["date"])}, 08:20 HKT',
             letter,
+            news_stamp(item["date"]),
         ))
     for person in repayment_notices():
         name, address = relationship_mailbox(person)
@@ -2307,6 +2311,7 @@ def drafts_page() -> str:
             view().label(),
             f'To: {escape(name)} &lt;{escape(address)}&gt; · Borrower: {escape(person["legal_name"])} · Repayment · Sent {escape(view().label())}, 08:20 HKT',
             letter,
+            news_stamp(view().label()),
         ))
     low_count = sum(1 for item in BOOK["news"] if item["severity"] == "LOW")
     held_line = f"{low_count} low priority news items are not sent."
@@ -2347,7 +2352,10 @@ def drafts_page() -> str:
       </div>
     </div>
     <div class="card mail-inbox" id="mail-list">
-      <h2>Sent</h2>
+      <div class="mail-head">
+        <h2>Sent</h2>
+        <button type="button" class="ghost" id="mail-sort">Send time, newest first</button>
+      </div>
       {''.join(cards) or '<p>No message has been sent for this position.</p>'}
       <p id="mail-empty" hidden>No sent message matches this RM and borrower.</p>
     </div>
@@ -2380,6 +2388,25 @@ def drafts_page() -> str:
       function apply() {{ applyUnsent(); applySent(); }}
       rm.addEventListener("change", apply);
       borrower.addEventListener("change", apply);
+      var list = document.getElementById("mail-list");
+      var sortBtn = document.getElementById("mail-sort");
+      var newest = true;
+      function sortSent() {{
+        var rows = [...list.querySelectorAll(".sent-mail")];
+        rows.sort(function (a, b) {{
+          var diff = Number(a.dataset.sent) - Number(b.dataset.sent);
+          if (diff) return newest ? -diff : diff;
+          return a.id < b.id ? -1 : 1;
+        }});
+        var empty = document.getElementById("mail-empty");
+        rows.forEach(function (row) {{ list.insertBefore(row, empty); }});
+        sortBtn.textContent = newest ? "Send time, newest first" : "Send time, oldest first";
+      }}
+      sortSent();
+      sortBtn.addEventListener("click", function () {{
+        newest = !newest;
+        sortSent();
+      }});
       var opened = document.getElementById((location.hash || "").slice(1));
       if (opened && opened.tagName === "DETAILS") {{
         opened.open = true;
@@ -2637,7 +2664,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         scope = date_scope(parsed.path + (("?" + parsed.query) if parsed.query else ""))
         requested = query.get("d") or dates_from_cookie(self.headers.get("Cookie"), scope)
-        if key == "assistant":
+        if key in {"assistant", "drafts", "email"}:
             requested = list(BOOK["dates"])
         bind_view(requested, parsed.path + (("?" + parsed.query) if parsed.query else ""))
         if key in {"proposal-file", "report-file"}:
