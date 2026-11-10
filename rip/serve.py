@@ -178,17 +178,56 @@ def bind_view(dates: list[str], next_path: str) -> BookView:
     return chosen
 
 
-def dates_from_cookie(header: str | None) -> list[str]:
+def date_scope(path: str) -> str:
+    parsed = urlparse(path if path.startswith("/") else "/" + path)
+    key = parsed.path.strip("/") or "dashboard"
+    if key == "email":
+        return "drafts"
+    if key == "reports" and (parse_qs(parsed.query).get("source") or [""])[0] == "external":
+        return "reports-external"
+    return key
+
+
+def date_scopes(header: str | None) -> dict[str, list[str]]:
     jar = SimpleCookie()
     jar.load(header or "")
     morsel = jar.get("rip-dates")
-    if morsel is None or not morsel.value:
-        return list(BOOK["dates"])
-    return [item for item in morsel.value.split(",") if item in BOOK["dates"]]
+    raw = morsel.value if morsel is not None else ""
+    known = set(BOOK["dates"])
+    if not raw:
+        return {}
+    if ":" not in raw:
+        legacy = [item for item in raw.split(",") if item in known]
+        return {"*": legacy} if legacy else {}
+    stored: dict[str, list[str]] = {}
+    for part in raw.split("|"):
+        name, sep, dates = part.partition(":")
+        if not sep or not name:
+            continue
+        chosen = [item for item in dates.split(",") if item in known]
+        if chosen:
+            stored[name] = chosen
+    return stored
 
 
-def date_cookie(dates: list[str]) -> str:
-    value = ",".join(dates)
+def dates_from_cookie(header: str | None, scope: str) -> list[str]:
+    stored = date_scopes(header)
+    if scope in stored:
+        return stored[scope]
+    if "*" in stored:
+        return stored["*"]
+    return list(BOOK["dates"])
+
+
+def date_cookie(header: str | None, scope: str, dates: list[str]) -> str:
+    stored = date_scopes(header)
+    legacy = stored.pop("*", None)
+    if legacy:
+        for name in ("dashboard", "industry", "financial", "repayment", "reports", "assistant", "drafts", "customer"):
+            stored.setdefault(name, list(legacy))
+    chosen = [item for item in BOOK["dates"] if item in dates] or [BOOK["dates"][-1]]
+    stored[scope] = chosen
+    value = "|".join(f"{name}:{','.join(stored[name])}" for name in stored)
     return f"rip-dates={value}; HttpOnly; SameSite=Lax; Path=/; Max-Age=31536000"
 
 
@@ -280,7 +319,7 @@ def date_bar(where: str = "top") -> str:
       </button>
       <div class="date-panel" id="date-panel">
         {''.join(boxes)}
-        <p class="hint">Position {escape(chosen.label())}. The trend uses the {count} checked date{"s" if count != 1 else ""}.</p>
+        <p class="hint">This page only. Position {escape(chosen.label())}. The trend uses the {count} checked date{"s" if count != 1 else ""}.</p>
         <div class="date-actions">
           <button type="submit" name="preset" value="apply">Apply dates</button>
           <button type="submit" class="ghost" name="preset" value="all">All dates</button>
@@ -315,6 +354,7 @@ def chart_month_menu() -> str:
         <strong>{escape(summary)}</strong>
       </button>
       <div class="date-panel" id="trend-month-panel">
+        <p class="hint">Portfolio only. Other pages keep their own dates.</p>
         {''.join(boxes)}
       </div>
     </form>"""
@@ -681,7 +721,7 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
 <div class="shell" id="shell">
   <nav id="rail">
     <div class="mark">BEA -<br><span>Risk Intelligence</span></div>
-    <p>Portfolio numbers follow the last checked month. Other pages keep the date choice in a menu.</p>
+    <p>Each page keeps its own reporting dates.</p>
     {''.join(links)}
     <a class="logout" href="/logout">Sign out</a>
   </nav>
@@ -2330,7 +2370,8 @@ class Handler(BaseHTTPRequestHandler):
         if not signed_in:
             self._redirect("/login")
             return
-        requested = query.get("d") or dates_from_cookie(self.headers.get("Cookie"))
+        scope = date_scope(parsed.path + (("?" + parsed.query) if parsed.query else ""))
+        requested = query.get("d") or dates_from_cookie(self.headers.get("Cookie"), scope)
         bind_view(requested, parsed.path + (("?" + parsed.query) if parsed.query else ""))
         if key in {"proposal-file", "report-file"}:
             requested_id = (query.get("id") or [""])[0]
@@ -2443,7 +2484,7 @@ class Handler(BaseHTTPRequestHandler):
             nxt = (form.get("next") or ["/dashboard"])[0]
             if not nxt.startswith("/") or nxt.startswith("//"):
                 nxt = "/dashboard"
-            self._redirect(nxt, date_cookie(chosen))
+            self._redirect(nxt, date_cookie(self.headers.get("Cookie"), date_scope(nxt), chosen))
             return
         if action != "login":
             self.send_error(404)
