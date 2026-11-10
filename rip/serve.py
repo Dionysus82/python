@@ -1,4 +1,4 @@
-"""Same-origin demonstration of the business-case screens. No separate API client."""
+"""Same-origin demonstration of the business-case screens."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import hashlib
 import hmac
 import json
 import re
+import sys
 from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
 from html import escape
@@ -15,6 +16,9 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).resolve().parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+import agent_slot
 BOOK = json.loads((ROOT / "book.json").read_text(encoding="utf-8"))
 REPORT_FILES = ROOT / "report_files"
 OBLIGORS = json.loads((REPORT_FILES / "obligors.json").read_text(encoding="utf-8"))
@@ -1274,7 +1278,13 @@ def reports_page(kind: str, detail: str, cid: str, generated: str = "") -> str:
 
 def assistant_page(question: str, cid: str) -> str:
     row = customer(cid) or customer(default_customer_id())
-    answer, cites = answer_for(row, question)
+    external = agent_slot.ask(row, question, view().dates, view().label())
+    if external is None:
+        answer, cites = answer_for(row, question)
+        answer_label = "Local demonstration"
+    else:
+        answer, cites = external
+        answer_label = "Gemini agent"
     options = "".join(
         f'<option value="{escape(item["customer_id"])}" {"selected" if item["customer_id"]==row["customer_id"] else ""}>{escape(item["legal_name"])}</option>'
         for item in BOOK["customers"] if item["full_file"]
@@ -1295,14 +1305,15 @@ def assistant_page(question: str, cid: str) -> str:
     )
     return f"""
     <div class="label">Knowledge assistant</div><h1>Ask the file</h1>
-    <p class="lead">This first version answers four questions. Sources are the credit paper, the credit review, the financial statements and the repayment schedule. News, approval minutes and internal mail are not searched yet.</p>
+    <p class="lead">This first version answers four questions from the local file. News, approval minutes and internal mail are not searched yet.</p>
+    <div class="card"><div class="label">Agent slot</div><p>{escape(agent_slot.status())} The later connection is the Gemini agent built in Google Enterprise, reached through Antigravity. Set RIP_AGENT_URL on this server when that endpoint exists. RIP_AGENT_KEY stays in the server environment.</p></div>
     <form class="inline" method="get" action="/assistant">
       <label>Customer<br><select name="customer">{options}</select></label>
       <label>Question<br><input name="q" value="{escape(question)}" style="width:420px"></label>
       <button type="submit">Ask</button>
     </form>
     <p>{chips}</p>
-    <div class="card"><p>{answer}</p>{cite_html}</div>"""
+    <div class="card"><div class="label">{escape(answer_label)}</div><p>{escape(answer)}</p>{cite_html}</div>"""
 
 
 def answer_for(row: dict, question: str) -> tuple[str, list[dict]]:
