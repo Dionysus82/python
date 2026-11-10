@@ -319,7 +319,7 @@ def date_bar(where: str = "top") -> str:
       </button>
       <div class="date-panel" id="date-panel">
         {''.join(boxes)}
-        <p class="hint">This page only. Position {escape(chosen.label())}. Dashboard numbers use these dates. The donut keeps its own month.</p>
+        <p class="hint">This page only. Position {escape(chosen.label())}. Dashboard numbers use these dates. The trend keeps its own months.</p>
         <div class="date-actions">
           <button type="submit" name="preset" value="apply">Apply dates</button>
           <button type="submit" class="ghost" name="preset" value="all">All dates</button>
@@ -344,7 +344,7 @@ def trend_month_menu() -> str:
         <strong>All {len(history)} months</strong>
       </button>
       <div class="date-panel" id="trend-series-panel">
-        <p class="hint">The donut uses the latest checked month. Dashboard numbers keep their own dates.</p>
+        <p class="hint">The lines use every checked month. The donut uses the latest. Dashboard numbers keep their own dates.</p>
         {''.join(boxes)}
       </div>
     </div>"""
@@ -392,10 +392,14 @@ def trend_chart() -> str:
 <script>
 (function () {
   var data = window.TREND_DATA;
+  var lineSvg = document.getElementById("trend-line");
   var svg = document.getElementById("trend-svg");
   var note = document.getElementById("trend-note");
+  var lineLegend = document.getElementById("trend-line-legend");
   var legend = document.getElementById("trend-legend");
+  var lineTip = document.getElementById("trend-line-tip");
   var tip = document.getElementById("trend-tip");
+  var lineColors = { outstanding: "#E36F1E", ecl: "#B42318" };
   function checked(selector) {
     return Array.prototype.filter.call(document.querySelectorAll(selector), function (box) { return box.checked; });
   }
@@ -435,19 +439,63 @@ def trend_chart() -> str:
     var large = sweep > Math.PI ? 1 : 0;
     return '<path fill="none" stroke="' + color + '" stroke-width="' + width + '" d="M ' + cx + ' ' + (cy - r) + ' A ' + r + ' ' + r + ' 0 ' + large + ' 1 ' + x2 + ' ' + y2 + '"' + extra + '></path>';
   }
-  function draw() {
-    tip.hidden = true;
-    refreshMonthLabel();
-    var borrowerId = document.getElementById("trend-borrower").value;
-    var person = borrowerId ? data.borrowers.filter(function (item) { return item.id === borrowerId; })[0] : null;
-    var outstanding = person ? person.outstanding : data.outstanding;
-    var ecl = person ? person.ecl : data.ecl;
-    var months = checked("[data-trend-month]").map(function (box) { return Number(box.getAttribute("data-trend-month")); });
-    legend.innerHTML = '<div class="legend-item"><i style="background:#E36F1E"></i><div><strong>Outstanding</strong><span class="unit">HKD mil · 100%</span></div></div>'
-      + '<div class="legend-item"><i style="background:#B42318"></i><div><strong>ECL</strong><span class="unit">HKD mil · inside outstanding</span></div></div>';
+  function legendItem(color, name, unit) {
+    return '<div class="legend-item"><i style="background:' + color + '"></i><div><strong>' + name + '</strong><span class="unit">' + unit + '</span></div></div>';
+  }
+  function drawLine(months, outstanding, ecl) {
+    var series = [
+      { name: "Outstanding", color: lineColors.outstanding, values: outstanding },
+      { name: "ECL", color: lineColors.ecl, values: ecl }
+    ];
+    if (!months.length) {
+      lineSvg.innerHTML = "";
+      lineLegend.innerHTML = "";
+      return;
+    }
+    var W = 760, H = 280, left = 96, right = 16, top = 18, bottom = 36;
+    var plotW = W - left - right, plotH = H - top - bottom;
+    var flat = [];
+    series.forEach(function (line) {
+      months.forEach(function (index) { flat.push(Number(line.values[index]) || 0); });
+    });
+    var min = Math.min.apply(null, flat);
+    var max = Math.max.apply(null, flat);
+    var rawMin = min;
+    if (min === max) { min = min - 1; max = max + 1; }
+    if (min > 0) min = min - (max - min) * 0.08;
+    if (min < 0 && rawMin >= 0) min = 0;
+    max = max + (max - min) * 0.08;
+    function xAt(position) {
+      if (months.length === 1) return left + plotW / 2;
+      return left + plotW * position / (months.length - 1);
+    }
+    function yAt(value) { return top + plotH * (1 - (value - min) / (max - min)); }
+    var parts = [];
+    for (var tick = 0; tick < 4; tick += 1) {
+      var value = min + (max - min) * tick / 3;
+      var y = yAt(value);
+      parts.push('<line x1="' + left + '" y1="' + y + '" x2="' + (W - right) + '" y2="' + y + '" stroke="#E4DDD6"/>');
+      parts.push('<text x="' + (left - 8) + '" y="' + (y + 4) + '" text-anchor="end" fill="#6F6862" font-size="11">' + mil(value) + '</text>');
+    }
+    months.forEach(function (index, position) {
+      parts.push('<text x="' + xAt(position) + '" y="' + (H - 10) + '" text-anchor="middle" fill="#6F6862" font-size="11">' + data.labels[index] + '</text>');
+    });
+    series.forEach(function (line) {
+      var plot = months.map(function (index) { return Number(line.values[index]) || 0; });
+      parts.push('<polyline fill="none" stroke="' + line.color + '" stroke-width="2.5" points="' + plot.map(function (value, position) { return xAt(position) + "," + yAt(value); }).join(" ") + '"/>');
+      plot.forEach(function (value, position) {
+        var index = months[position];
+        parts.push('<circle class="trend-dot" cx="' + xAt(position) + '" cy="' + yAt(value) + '" r="11" fill="transparent" data-name="' + line.name + '" data-when="' + attr(data.full[index]) + '" data-value="' + attr(mil(value)) + '"></circle>');
+        parts.push('<circle cx="' + xAt(position) + '" cy="' + yAt(value) + '" r="3.6" fill="' + line.color + '" pointer-events="none"></circle>');
+      });
+    });
+    lineSvg.innerHTML = parts.join("");
+    lineLegend.innerHTML = series.map(function (line) { return legendItem(line.color, line.name, "HKD mil"); }).join("");
+  }
+  function drawDonut(months, outstanding, ecl) {
+    legend.innerHTML = legendItem(lineColors.outstanding, "Outstanding", "HKD mil · 100%") + legendItem(lineColors.ecl, "ECL", "HKD mil · inside outstanding");
     if (!months.length) {
       svg.innerHTML = "";
-      note.textContent = "Check at least one month.";
       return;
     }
     var index = months[months.length - 1];
@@ -457,9 +505,9 @@ def trend_chart() -> str:
     var cx = 220, cy = 156, outer = 118, inner = 84;
     var when = data.full[index];
     var parts = [];
-    parts.push(ring(cx, cy, outer, 26, "#E36F1E", ""));
+    parts.push(ring(cx, cy, outer, 26, lineColors.outstanding, ""));
     parts.push(ring(cx, cy, inner, 22, "#E7E0D8", ""));
-    if (ratio > 0) parts.push(arc(cx, cy, inner, ratio, 22, "#B42318", ""));
+    if (ratio > 0) parts.push(arc(cx, cy, inner, ratio, 22, lineColors.ecl, ""));
     parts.push(ring(cx, cy, outer, 34, "transparent", ' class="donut-hit" data-name="Outstanding" data-when="' + attr(when) + '" data-value="' + attr(mil(drawn) + " · 100%") + '"'));
     if (ratio > 0) {
       parts.push(arc(cx, cy, inner, ratio, 30, "transparent", ' class="donut-hit" data-name="ECL" data-when="' + attr(when) + '" data-value="' + attr(mil(provision) + " · " + share(provision, drawn) + " of outstanding") + '"'));
@@ -471,9 +519,26 @@ def trend_chart() -> str:
     parts.push('<text x="' + cx + '" y="' + (cy + 58) + '" text-anchor="middle" fill="#6F6862" font-size="12">' + share(provision, drawn) + ' inside</text>');
     parts.push('<text x="' + cx + '" y="328" text-anchor="middle" fill="#6F6862" font-size="13">' + attr(when) + '</text>');
     svg.innerHTML = parts.join("");
+  }
+  function draw() {
+    lineTip.hidden = true;
+    tip.hidden = true;
+    refreshMonthLabel();
+    var borrowerId = document.getElementById("trend-borrower").value;
+    var person = borrowerId ? data.borrowers.filter(function (item) { return item.id === borrowerId; })[0] : null;
+    var outstanding = person ? person.outstanding : data.outstanding;
+    var ecl = person ? person.ecl : data.ecl;
+    var months = checked("[data-trend-month]").map(function (box) { return Number(box.getAttribute("data-trend-month")); });
+    drawLine(months, outstanding, ecl);
+    drawDonut(months, outstanding, ecl);
+    if (!months.length) {
+      note.textContent = "Check at least one month.";
+      return;
+    }
+    var when = data.full[months[months.length - 1]];
     var who = person ? person.name + ". " : "All borrowers. ";
-    var picked = months.length === 1 ? when + ". " : when + ", the latest checked month. ";
-    note.textContent = who + picked + "The ring is outstanding, shown as 100%. ECL sits inside that ring. Amounts are in HKD million.";
+    var picked = months.length === 1 ? "The donut is " + when + ". " : "The donut is " + when + ", the latest checked month. ";
+    note.textContent = who + "The lines follow every checked month. " + picked + "The ring is outstanding, shown as 100%, with ECL inside. Amounts are in HKD million.";
   }
   var borrowerSelect = document.getElementById("trend-borrower");
   try {
@@ -497,17 +562,30 @@ def trend_chart() -> str:
     try { sessionStorage.setItem("rip-trend-months", JSON.stringify(on)); } catch (error) {}
   });
   document.getElementById("trend-filter").addEventListener("change", draw);
-  svg.addEventListener("mousemove", function (event) {
-    var hit = event.target.closest(".donut-hit");
-    if (!hit) { tip.hidden = true; return; }
+  function fillTip(host, hit) {
     var name = document.createElement("strong");
     name.textContent = hit.getAttribute("data-name");
     var when = document.createElement("span");
     when.textContent = hit.getAttribute("data-when");
     var value = document.createElement("b");
     value.textContent = hit.getAttribute("data-value");
-    tip.replaceChildren(name, when, value);
-    tip.hidden = false;
+    host.replaceChildren(name, when, value);
+    host.hidden = false;
+  }
+  lineSvg.addEventListener("mouseover", function (event) {
+    var dot = event.target.closest(".trend-dot");
+    if (!dot) return;
+    fillTip(lineTip, dot);
+    var plot = lineSvg.parentElement.getBoundingClientRect();
+    var box = lineSvg.getBoundingClientRect();
+    lineTip.style.left = (box.left - plot.left + Number(dot.getAttribute("cx")) * box.width / 760) + "px";
+    lineTip.style.top = (box.top - plot.top + Number(dot.getAttribute("cy")) * box.height / 280) + "px";
+  });
+  lineSvg.addEventListener("mouseleave", function () { lineTip.hidden = true; });
+  svg.addEventListener("mousemove", function (event) {
+    var hit = event.target.closest(".donut-hit");
+    if (!hit) { tip.hidden = true; return; }
+    fillTip(tip, hit);
     var plot = svg.parentElement.getBoundingClientRect();
     tip.style.left = (event.clientX - plot.left) + "px";
     tip.style.top = (event.clientY - plot.top) + "px";
@@ -527,12 +605,25 @@ def trend_chart() -> str:
           <label class="trend-borrower">Borrower <select id="trend-borrower"><option value="">All borrowers</option>{borrower_options}</select></label>
         </div>
       </div>
-      <div class="trend-layout">
-        <div class="trend-plot">
-          <svg id="trend-svg" viewBox="0 0 440 340" role="img" aria-label="Outstanding donut with ECL inside"></svg>
-          <div id="trend-tip" class="trend-tip" hidden></div>
+      <div class="trend-section">
+        <div class="label">Trend chart</div>
+        <div class="trend-layout trend-line-layout">
+          <div class="trend-plot">
+            <svg id="trend-line" viewBox="0 0 760 280" role="img" aria-label="Outstanding and ECL trend"></svg>
+            <div id="trend-line-tip" class="trend-tip" hidden></div>
+          </div>
+          <div class="legend legend-vertical" id="trend-line-legend"></div>
         </div>
-        <div class="legend legend-vertical" id="trend-legend"></div>
+      </div>
+      <div class="trend-section">
+        <div class="label">Latest month</div>
+        <div class="trend-layout">
+          <div class="trend-plot">
+            <svg id="trend-svg" viewBox="0 0 440 340" role="img" aria-label="Outstanding donut with ECL inside"></svg>
+            <div id="trend-tip" class="trend-tip" hidden></div>
+          </div>
+          <div class="legend legend-vertical" id="trend-legend"></div>
+        </div>
       </div>
       <p class="lead" id="trend-note"></p>
     </div>
@@ -701,8 +792,10 @@ form.hkex-search input[type=number] {{ width:7.5rem; }}
 .date-panel button.ghost {{ background:#F7F4F0; color:var(--ink); border:1px solid var(--line); }}
 .trend-chart, #trend-svg {{ width:100%; height:auto; display:block; }}
 .trend-layout {{ display:grid; grid-template-columns:minmax(280px, 460px) 260px; gap:8px 28px; align-items:center; justify-content:start; }}
+.trend-line-layout {{ grid-template-columns:minmax(0,1fr) 220px; margin:4px 0 8px; }}
+.trend-section {{ margin-top:16px; }}
 .trend-plot {{ position:relative; min-width:0; }}
-.donut-hit {{ cursor:pointer; }}
+.donut-hit, .trend-dot {{ cursor:pointer; }}
 .trend-tip {{ position:absolute; z-index:6; transform:translate(-50%, calc(-100% - 10px)); background:#2C2825; color:#fff; border-radius:8px; padding:8px 10px; font-size:.78rem; line-height:1.35; pointer-events:none; white-space:nowrap; box-shadow:0 8px 20px rgba(44,40,37,.22); }}
 .trend-tip[hidden] {{ display:none; }}
 .trend-tip strong, .trend-tip span, .trend-tip b {{ display:block; }}
