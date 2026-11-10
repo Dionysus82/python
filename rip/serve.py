@@ -370,21 +370,41 @@ def trend_table(metrics: list[tuple[str, object]]) -> str:
     return f'<div class="scroll"><table class="trend"><thead><tr><th></th>{head}</tr></thead><tbody>{"".join(rows)}</tbody></table></div>'
 
 
-def month_repayment_over_million(iso: str) -> float:
+def repayment_amount(point: dict | None) -> float:
     """Principal due within 31 days when that principal is at least HKD 1 million."""
+    if not point:
+        return 0.0
+    amount = float(point.get("next_due_hkd") or 0)
+    try:
+        days = int(point.get("next_due_days"))
+    except (TypeError, ValueError):
+        return 0.0
+    if amount >= 1_000_000 and 0 <= days <= 31:
+        return amount
+    return 0.0
+
+
+def month_repayment_over_million(iso: str) -> float:
     total = 0.0
     for raw in BOOK["customers"]:
         point = next((item for item in raw.get("history") or [] if item.get("date") == iso), None)
-        if not point:
-            continue
-        amount = float(point.get("next_due_hkd") or 0)
-        try:
-            days = int(point.get("next_due_days"))
-        except (TypeError, ValueError):
-            continue
-        if amount >= 1_000_000 and 0 <= days <= 31:
-            total += amount
+        total += repayment_amount(point)
     return round(total, 2)
+
+
+def borrower_trends() -> list[dict]:
+    dates = [item["date"] for item in BOOK["portfolio_history"]]
+    rows = []
+    for raw in sorted(BOOK["customers"], key=lambda item: item["legal_name"].lower()):
+        by_date = {item["date"]: item for item in raw.get("history") or []}
+        rows.append({
+            "id": raw["customer_id"],
+            "name": raw["legal_name"],
+            "outstanding": [round(float((by_date.get(iso) or {}).get("drawn_hkd") or 0), 2) for iso in dates],
+            "ecl": [round(float((by_date.get(iso) or {}).get("ecl_hkd") or 0), 2) for iso in dates],
+            "repay": [round(repayment_amount(by_date.get(iso)), 2) for iso in dates],
+        })
+    return rows
 
 
 def trend_chart() -> str:
@@ -398,7 +418,12 @@ def trend_chart() -> str:
             {"id": "ecl", "name": "ECL", "unit": "hkd", "on": True, "values": [item["ecl_hkd"] for item in history]},
             {"id": "repay", "name": "Repayment over 1 million within the month", "unit": "hkd", "on": True, "values": [month_repayment_over_million(item["date"]) for item in history]},
         ],
+        "borrowers": borrower_trends(),
     }
+    borrower_options = "".join(
+        f'<option value="{escape(item["id"])}">{escape(item["name"])}</option>'
+        for item in payload["borrowers"]
+    )
     series_boxes = "".join(
         f'<label><input type="checkbox" data-series="{escape(item["id"])}" {"checked" if item["on"] else ""}>{escape(item["name"])}</label>'
         for item in payload["series"]
@@ -438,8 +463,12 @@ def trend_chart() -> str:
   }
   function draw() {
     refreshMonthLabel();
+    var borrowerId = document.getElementById("trend-borrower").value;
+    var person = borrowerId ? data.borrowers.filter(function (item) { return item.id === borrowerId; })[0] : null;
     var series = checked("[data-series]").map(function (box) {
-      return data.series.filter(function (item) { return item.id === box.getAttribute("data-series"); })[0];
+      var item = data.series.filter(function (row) { return row.id === box.getAttribute("data-series"); })[0];
+      if (!person) return item;
+      return { id: item.id, name: item.name, unit: item.unit, values: person[item.id] };
     });
     var months = checked("[data-month]").map(function (box) { return Number(box.getAttribute("data-month")); });
     if (!series.length || !months.length) {
@@ -517,10 +546,19 @@ def trend_chart() -> str:
     legend.innerHTML = prepared.map(function (line) {
       return '<div class="legend-item"><i style="background:' + line.color + '"></i><div><strong>' + line.item.name + '</strong><span class="unit">' + unitName(line.item.unit) + '</span><span class="value">' + magnitude(line.item.unit, line.last) + '</span></div></div>';
     }).join("");
-    note.textContent = indexMode
+    var who = person ? person.name + ". " : "";
+    note.textContent = who + (indexMode
       ? "These series are on different scales, so each line is drawn against its own peak in the checked months. 100 is that peak. The legend is the actual figure at the last checked month."
-      : "The axis is the actual amount. The legend is the figure at the last checked month.";
+      : "The axis is the actual amount. The legend is the figure at the last checked month.");
   }
+  var borrowerSelect = document.getElementById("trend-borrower");
+  try {
+    var savedBorrower = sessionStorage.getItem("rip-trend-borrower") || "";
+    if (savedBorrower && data.borrowers.some(function (item) { return item.id === savedBorrower; })) borrowerSelect.value = savedBorrower;
+  } catch (error) {}
+  borrowerSelect.addEventListener("change", function () {
+    try { sessionStorage.setItem("rip-trend-borrower", borrowerSelect.value); } catch (error) {}
+  });
   document.getElementById("trend-filter").addEventListener("change", draw);
   var monthMenu = document.getElementById("trend-months");
   if (monthMenu) monthMenu.addEventListener("change", function () {
@@ -537,6 +575,7 @@ def trend_chart() -> str:
       <div class="dates" id="trend-filter">
         <div class="label">Trend series</div>
         {series_boxes}
+        <label class="trend-borrower">Borrower <select id="trend-borrower"><option value="">All borrowers</option>{borrower_options}</select></label>
       </div>
       <div class="trend-layout">
         <svg id="trend-svg" viewBox="0 0 760 280" role="img" aria-label="Portfolio trend"></svg>
@@ -720,6 +759,8 @@ form.hkex-search input[type=number] {{ width:7.5rem; }}
 #trend-filter .label {{ width:100%; }}
 #trend-filter label {{ display:flex; gap:6px; align-items:center; margin:4px 14px 4px 0; font-weight:600; }}
 #trend-filter input {{ width:auto; margin:0; }}
+#trend-filter label.trend-borrower {{ margin-left:auto; }}
+#trend-filter label.trend-borrower select {{ min-width:220px; max-width:320px; font-weight:600; }}
 @media (max-width:900px) {{
   .trend-layout {{ grid-template-columns:1fr; }}
 }}
