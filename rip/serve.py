@@ -329,35 +329,25 @@ def date_bar(where: str = "top") -> str:
     </form>"""
 
 
-def chart_month_menu() -> str:
-    chosen = view()
+def trend_month_menu() -> str:
     history = BOOK["portfolio_history"]
+    chosen = view()
     boxes = []
     for index, item in enumerate(history):
-        checked = "checked" if item["date"] in chosen.dates else ""
-        label = chosen.label(item["date"])
         boxes.append(
-            f'<label><input type="checkbox" name="d" value="{item["date"]}" data-month="{index}" {checked}>{escape(label)}</label>'
+            f'<label><input type="checkbox" data-trend-month="{index}" checked>{escape(chosen.label(item["date"]))}</label>'
         )
-    count = len(chosen.dates)
-    if count == len(history):
-        summary = f"All {count} months"
-    elif count == 1:
-        summary = chosen.label()
-    else:
-        summary = f"{count} months"
     return f"""
-    <form class="date-menu corner" id="trend-months" method="post" action="/dates">
-      <input type="hidden" name="next" value="/dashboard">
-      <button type="button" class="date-toggle" aria-expanded="false" aria-controls="trend-month-panel">
-        <span class="label">Chart months</span>
-        <strong>{escape(summary)}</strong>
+    <div class="date-menu" id="trend-series-months">
+      <button type="button" class="date-toggle" aria-expanded="false" aria-controls="trend-series-panel">
+        <span class="label">Trend months</span>
+        <strong>All {len(history)} months</strong>
       </button>
-      <div class="date-panel" id="trend-month-panel">
-        <p class="hint">Portfolio only. Other pages keep their own dates.</p>
+      <div class="date-panel" id="trend-series-panel">
+        <p class="hint">Trend series only. The dashboard numbers keep their own dates.</p>
         {''.join(boxes)}
       </div>
-    </form>"""
+    </div>"""
 
 
 def trend_table(metrics: list[tuple[str, object]]) -> str:
@@ -451,9 +441,9 @@ def trend_chart() -> str:
     return String(Math.round(value));
   }
   function refreshMonthLabel() {
-    var host = document.getElementById("trend-months");
+    var host = document.getElementById("trend-series-months");
     if (!host) return;
-    var boxes = host.querySelectorAll("[data-month]");
+    var boxes = host.querySelectorAll("[data-trend-month]");
     var on = Array.prototype.filter.call(boxes, function (box) { return box.checked; });
     var strong = host.querySelector("strong");
     if (!on.length) strong.textContent = "No months";
@@ -470,7 +460,7 @@ def trend_chart() -> str:
       if (!person) return item;
       return { id: item.id, name: item.name, unit: item.unit, values: person[item.id] };
     });
-    var months = checked("[data-month]").map(function (box) { return Number(box.getAttribute("data-month")); });
+    var months = checked("[data-trend-month]").map(function (box) { return Number(box.getAttribute("data-trend-month")); });
     if (!series.length || !months.length) {
       svg.innerHTML = "";
       legend.innerHTML = "";
@@ -559,12 +549,20 @@ def trend_chart() -> str:
   borrowerSelect.addEventListener("change", function () {
     try { sessionStorage.setItem("rip-trend-borrower", borrowerSelect.value); } catch (error) {}
   });
-  document.getElementById("trend-filter").addEventListener("change", draw);
-  var monthMenu = document.getElementById("trend-months");
-  if (monthMenu) monthMenu.addEventListener("change", function () {
-    draw();
-    monthMenu.submit();
+  var trendMonths = document.getElementById("trend-series-months");
+  try {
+    var savedMonths = JSON.parse(sessionStorage.getItem("rip-trend-months") || "null");
+    if (Array.isArray(savedMonths)) {
+      trendMonths.querySelectorAll("[data-trend-month]").forEach(function (box) {
+        box.checked = savedMonths.indexOf(Number(box.getAttribute("data-trend-month"))) >= 0;
+      });
+    }
+  } catch (error) {}
+  trendMonths.addEventListener("change", function () {
+    var on = checked("[data-trend-month]").map(function (box) { return Number(box.getAttribute("data-trend-month")); });
+    try { sessionStorage.setItem("rip-trend-months", JSON.stringify(on)); } catch (error) {}
   });
+  document.getElementById("trend-filter").addEventListener("change", draw);
   draw();
 })();
 </script>
@@ -575,7 +573,10 @@ def trend_chart() -> str:
       <div class="dates" id="trend-filter">
         <div class="label">Trend series</div>
         {series_boxes}
-        <label class="trend-borrower">Borrower <select id="trend-borrower"><option value="">All borrowers</option>{borrower_options}</select></label>
+        <div class="trend-controls">
+          {trend_month_menu()}
+          <label class="trend-borrower">Borrower <select id="trend-borrower"><option value="">All borrowers</option>{borrower_options}</select></label>
+        </div>
       </div>
       <div class="trend-layout">
         <svg id="trend-svg" viewBox="0 0 760 280" role="img" aria-label="Portfolio trend"></svg>
@@ -759,7 +760,9 @@ form.hkex-search input[type=number] {{ width:7.5rem; }}
 #trend-filter .label {{ width:100%; }}
 #trend-filter label {{ display:flex; gap:6px; align-items:center; margin:4px 14px 4px 0; font-weight:600; }}
 #trend-filter input {{ width:auto; margin:0; }}
-#trend-filter label.trend-borrower {{ margin-left:auto; }}
+.trend-controls {{ display:flex; gap:12px; align-items:end; margin-left:auto; flex-wrap:wrap; }}
+#trend-series-months {{ margin:0; }}
+#trend-filter label.trend-borrower {{ margin-left:0; }}
 #trend-filter label.trend-borrower select {{ min-width:220px; max-width:320px; font-weight:600; }}
 @media (max-width:900px) {{
   .trend-layout {{ grid-template-columns:1fr; }}
@@ -813,10 +816,9 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
   <main>
     <div class="topbar">
       <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="rail">Hide menu</button>
-      {chart_month_menu() if active == "dashboard" else ""}
     </div>
     <div class="banner">{escape(BOOK["banner"])}</div>
-    {"" if active in {"dashboard", "news", "reports-external"} else date_bar()}
+    {"" if active in {"news", "reports-external"} else date_bar()}
     {body}
   </main>
 </div>
@@ -845,20 +847,29 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
       reportButton.setAttribute("aria-expanded", open ? "true" : "false");
     }});
   }}
-  var menu = document.querySelector(".date-menu");
-  if (menu) {{
+  document.querySelectorAll(".date-menu").forEach(function (menu) {{
     var dateToggle = menu.querySelector(".date-toggle");
-    dateToggle.addEventListener("click", function () {{
+    if (!dateToggle) return;
+    dateToggle.addEventListener("click", function (event) {{
+      event.stopPropagation();
       var open = menu.classList.toggle("open");
       dateToggle.setAttribute("aria-expanded", open ? "true" : "false");
+      document.querySelectorAll(".date-menu").forEach(function (other) {{
+        if (other === menu) return;
+        other.classList.remove("open");
+        var button = other.querySelector(".date-toggle");
+        if (button) button.setAttribute("aria-expanded", "false");
+      }});
     }});
-    document.addEventListener("click", function (event) {{
-      if (!menu.contains(event.target)) {{
-        menu.classList.remove("open");
-        dateToggle.setAttribute("aria-expanded", "false");
-      }}
+  }});
+  document.addEventListener("click", function (event) {{
+    document.querySelectorAll(".date-menu").forEach(function (menu) {{
+      if (menu.contains(event.target)) return;
+      menu.classList.remove("open");
+      var button = menu.querySelector(".date-toggle");
+      if (button) button.setAttribute("aria-expanded", "false");
     }});
-  }}
+  }});
 }})();
 </script>
 </body>
@@ -914,7 +925,7 @@ def dashboard() -> str:
     )
     body = f"""
     <div class="label">Portfolio</div><h1>Management dashboard</h1>
-    <p class="lead">The number panels are {escape(position)}, the last checked month. The chart draws every checked month, and its legend is that same month. Financial statements, covenants and the news headlines are still demonstration figures.</p>
+    <p class="lead">The number panels follow the reporting dates for this dashboard, currently {escape(position)}. The trend series has its own months and borrower. Financial statements, covenants and the news headlines are still demonstration figures.</p>
     {metrics([
         ("Customers", str(port["customers"]), False),
         ("Drawn exposure", money(port["drawn_hkd"]), False),
