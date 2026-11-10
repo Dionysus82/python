@@ -319,7 +319,7 @@ def date_bar(where: str = "top") -> str:
       </button>
       <div class="date-panel" id="date-panel">
         {''.join(boxes)}
-        <p class="hint">This page only. Position {escape(chosen.label())}. The trend uses the {count} checked date{"s" if count != 1 else ""}.</p>
+        <p class="hint">This page only. Position {escape(chosen.label())}. Dashboard numbers use these dates. The donut keeps its own month.</p>
         <div class="date-actions">
           <button type="submit" name="preset" value="apply">Apply dates</button>
           <button type="submit" class="ghost" name="preset" value="all">All dates</button>
@@ -344,7 +344,7 @@ def trend_month_menu() -> str:
         <strong>All {len(history)} months</strong>
       </button>
       <div class="date-panel" id="trend-series-panel">
-        <p class="hint">Trend series only. The dashboard numbers keep their own dates.</p>
+        <p class="hint">The donut uses the latest checked month. Dashboard numbers keep their own dates.</p>
         {''.join(boxes)}
       </div>
     </div>"""
@@ -360,28 +360,6 @@ def trend_table(metrics: list[tuple[str, object]]) -> str:
     return f'<div class="scroll"><table class="trend"><thead><tr><th></th>{head}</tr></thead><tbody>{"".join(rows)}</tbody></table></div>'
 
 
-def repayment_amount(point: dict | None) -> float:
-    """Principal due within 31 days when that principal is at least HKD 1 million."""
-    if not point:
-        return 0.0
-    amount = float(point.get("next_due_hkd") or 0)
-    try:
-        days = int(point.get("next_due_days"))
-    except (TypeError, ValueError):
-        return 0.0
-    if amount >= 1_000_000 and 0 <= days <= 31:
-        return amount
-    return 0.0
-
-
-def month_repayment_over_million(iso: str) -> float:
-    total = 0.0
-    for raw in BOOK["customers"]:
-        point = next((item for item in raw.get("history") or [] if item.get("date") == iso), None)
-        total += repayment_amount(point)
-    return round(total, 2)
-
-
 def borrower_trends() -> list[dict]:
     dates = [item["date"] for item in BOOK["portfolio_history"]]
     rows = []
@@ -392,7 +370,6 @@ def borrower_trends() -> list[dict]:
             "name": raw["legal_name"],
             "outstanding": [round(float((by_date.get(iso) or {}).get("drawn_hkd") or 0), 2) for iso in dates],
             "ecl": [round(float((by_date.get(iso) or {}).get("ecl_hkd") or 0), 2) for iso in dates],
-            "repay": [round(repayment_amount(by_date.get(iso)), 2) for iso in dates],
         })
     return rows
 
@@ -403,20 +380,13 @@ def trend_chart() -> str:
     payload = {
         "labels": [datetime.strptime(item["date"], "%Y-%m-%d").strftime("%b %y") for item in history],
         "full": [chosen.label(item["date"]) for item in history],
-        "series": [
-            {"id": "outstanding", "name": "Outstanding", "unit": "hkd", "on": True, "values": [item["drawn_hkd"] for item in history]},
-            {"id": "ecl", "name": "ECL", "unit": "hkd", "on": True, "values": [item["ecl_hkd"] for item in history]},
-            {"id": "repay", "name": "Repayment over 1 million within the month", "unit": "hkd", "on": True, "values": [month_repayment_over_million(item["date"]) for item in history]},
-        ],
+        "outstanding": [item["drawn_hkd"] for item in history],
+        "ecl": [item["ecl_hkd"] for item in history],
         "borrowers": borrower_trends(),
     }
     borrower_options = "".join(
         f'<option value="{escape(item["id"])}">{escape(item["name"])}</option>'
         for item in payload["borrowers"]
-    )
-    series_boxes = "".join(
-        f'<label><input type="checkbox" data-series="{escape(item["id"])}" {"checked" if item["on"] else ""}>{escape(item["name"])}</label>'
-        for item in payload["series"]
     )
     script = r"""
 <script>
@@ -425,13 +395,22 @@ def trend_chart() -> str:
   var svg = document.getElementById("trend-svg");
   var note = document.getElementById("trend-note");
   var legend = document.getElementById("trend-legend");
-  var colors = ["#E36F1E", "#B42318", "#8C3E16", "#2457A6", "#1F6B4A", "#6F6862", "#C45112", "#3A342F", "#8A6A2F"];
+  var tip = document.getElementById("trend-tip");
   function checked(selector) {
     return Array.prototype.filter.call(document.querySelectorAll(selector), function (box) { return box.checked; });
   }
   function mil(value) {
     var text = (Number(value) / 1e6).toLocaleString("en-HK", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     return text + " mil";
+  }
+  function share(part, whole) {
+    if (!(whole > 0)) return "—";
+    var value = part / whole * 100;
+    var digits = value > 0 && value < 0.1 ? 2 : 1;
+    return value.toLocaleString("en-HK", { minimumFractionDigits: digits, maximumFractionDigits: digits }) + "%";
+  }
+  function attr(value) {
+    return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
   }
   function refreshMonthLabel() {
     var host = document.getElementById("trend-series-months");
@@ -444,68 +423,57 @@ def trend_chart() -> str:
     else if (on.length === 1) strong.textContent = on[0].parentNode.textContent.trim();
     else strong.textContent = on.length + " months";
   }
+  function ring(cx, cy, r, width, color, extra) {
+    return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="' + width + '"' + extra + '></circle>';
+  }
+  function arc(cx, cy, r, fraction, width, color, extra) {
+    var sweep = Math.min(Math.max(fraction, 0), 1) * Math.PI * 2;
+    if (sweep <= 0) return "";
+    if (sweep >= Math.PI * 2 - 0.0001) return ring(cx, cy, r, width, color, extra);
+    var x2 = cx + r * Math.sin(sweep);
+    var y2 = cy - r * Math.cos(sweep);
+    var large = sweep > Math.PI ? 1 : 0;
+    return '<path fill="none" stroke="' + color + '" stroke-width="' + width + '" d="M ' + cx + ' ' + (cy - r) + ' A ' + r + ' ' + r + ' 0 ' + large + ' 1 ' + x2 + ' ' + y2 + '"' + extra + '></path>';
+  }
   function draw() {
+    tip.hidden = true;
     refreshMonthLabel();
     var borrowerId = document.getElementById("trend-borrower").value;
     var person = borrowerId ? data.borrowers.filter(function (item) { return item.id === borrowerId; })[0] : null;
-    var series = checked("[data-series]").map(function (box) {
-      var item = data.series.filter(function (row) { return row.id === box.getAttribute("data-series"); })[0];
-      if (!person) return item;
-      return { id: item.id, name: item.name, unit: item.unit, values: person[item.id] };
-    });
+    var outstanding = person ? person.outstanding : data.outstanding;
+    var ecl = person ? person.ecl : data.ecl;
     var months = checked("[data-trend-month]").map(function (box) { return Number(box.getAttribute("data-trend-month")); });
-    if (!series.length || !months.length) {
+    legend.innerHTML = '<div class="legend-item"><i style="background:#E36F1E"></i><div><strong>Outstanding</strong><span class="unit">HKD mil · 100%</span></div></div>'
+      + '<div class="legend-item"><i style="background:#B42318"></i><div><strong>ECL</strong><span class="unit">HKD mil · inside outstanding</span></div></div>';
+    if (!months.length) {
       svg.innerHTML = "";
-      legend.innerHTML = "";
-      note.textContent = "Check at least one series and one month.";
+      note.textContent = "Check at least one month.";
       return;
     }
-    var W = 760, H = 280, left = 96, right = 16, top = 18, bottom = 36;
-    var plotW = W - left - right, plotH = H - top - bottom;
-    var prepared = series.map(function (item, order) {
-      var slice = months.map(function (index) { return item.values[index]; });
-      return { item: item, slice: slice, plot: slice, color: colors[order % colors.length] };
-    });
-    var flat = [];
-    prepared.forEach(function (line) { flat = flat.concat(line.plot); });
-    var min = Math.min.apply(null, flat);
-    var max = Math.max.apply(null, flat);
-    if (min === max) { min = min - 1; max = max + 1; }
-    if (min > 0) min = min - (max - min) * 0.08;
-    if (min < 0 && Math.min.apply(null, flat) >= 0) min = 0;
-    max = max + (max - min) * 0.08;
-    function xAt(position) {
-      if (months.length === 1) return left + plotW / 2;
-      return left + plotW * position / (months.length - 1);
-    }
-    function yAt(value) { return top + plotH * (1 - (value - min) / (max - min)); }
+    var index = months[months.length - 1];
+    var drawn = Number(outstanding[index]) || 0;
+    var provision = Number(ecl[index]) || 0;
+    var ratio = drawn > 0 ? provision / drawn : 0;
+    var cx = 220, cy = 156, outer = 118, inner = 84;
+    var when = data.full[index];
     var parts = [];
-    for (var tick = 0; tick < 4; tick += 1) {
-      var value = min + (max - min) * tick / 3;
-      var y = yAt(value);
-      parts.push('<line x1="' + left + '" y1="' + y + '" x2="' + (W - right) + '" y2="' + y + '" stroke="#E4DDD6"/>');
-      parts.push('<text x="' + (left - 8) + '" y="' + (y + 4) + '" text-anchor="end" fill="#6F6862" font-size="11">' + mil(value) + '</text>');
+    parts.push(ring(cx, cy, outer, 26, "#E36F1E", ""));
+    parts.push(ring(cx, cy, inner, 22, "#E7E0D8", ""));
+    if (ratio > 0) parts.push(arc(cx, cy, inner, ratio, 22, "#B42318", ""));
+    parts.push(ring(cx, cy, outer, 34, "transparent", ' class="donut-hit" data-name="Outstanding" data-when="' + attr(when) + '" data-value="' + attr(mil(drawn) + " · 100%") + '"'));
+    if (ratio > 0) {
+      parts.push(arc(cx, cy, inner, ratio, 30, "transparent", ' class="donut-hit" data-name="ECL" data-when="' + attr(when) + '" data-value="' + attr(mil(provision) + " · " + share(provision, drawn) + " of outstanding") + '"'));
     }
-    months.forEach(function (index, position) {
-      parts.push('<text x="' + xAt(position) + '" y="' + (H - 10) + '" text-anchor="middle" fill="#6F6862" font-size="11">' + data.labels[index] + '</text>');
-    });
-    prepared.forEach(function (line) {
-      var points = line.plot.map(function (value, position) { return xAt(position) + "," + yAt(value); }).join(" ");
-      parts.push('<polyline fill="none" stroke="' + line.color + '" stroke-width="2.5" points="' + points + '"/>');
-      line.plot.forEach(function (value, position) {
-        var cx = xAt(position);
-        var cy = yAt(value);
-        var amount = mil(line.slice[position]);
-        parts.push('<circle class="trend-dot" cx="' + cx + '" cy="' + cy + '" r="11" fill="transparent" data-name="' + line.item.name + '" data-when="' + data.full[months[position]] + '" data-value="' + amount + '"></circle>');
-        parts.push('<circle cx="' + cx + '" cy="' + cy + '" r="3.6" fill="' + line.color + '" pointer-events="none"></circle>');
-      });
-    });
+    parts.push('<text x="' + cx + '" y="' + (cy - 34) + '" text-anchor="middle" fill="#6F6862" font-size="12" font-weight="700">OUTSTANDING</text>');
+    parts.push('<text x="' + cx + '" y="' + (cy - 8) + '" text-anchor="middle" fill="#2C2825" font-size="22" font-weight="700">' + mil(drawn) + '</text>');
+    parts.push('<text x="' + cx + '" y="' + (cy + 16) + '" text-anchor="middle" fill="#8C3E16" font-size="16" font-weight="700">100%</text>');
+    parts.push('<text x="' + cx + '" y="' + (cy + 40) + '" text-anchor="middle" fill="#B42318" font-size="13" font-weight="700">ECL ' + mil(provision) + '</text>');
+    parts.push('<text x="' + cx + '" y="' + (cy + 58) + '" text-anchor="middle" fill="#6F6862" font-size="12">' + share(provision, drawn) + ' inside</text>');
+    parts.push('<text x="' + cx + '" y="328" text-anchor="middle" fill="#6F6862" font-size="13">' + attr(when) + '</text>');
     svg.innerHTML = parts.join("");
-    legend.innerHTML = prepared.map(function (line) {
-      return '<div class="legend-item"><i style="background:' + line.color + '"></i><div><strong>' + line.item.name + '</strong><span class="unit">HKD mil</span></div></div>';
-    }).join("");
-    var who = person ? person.name + ". " : "";
-    note.textContent = who + "Amounts are in HKD million. Point at a dot to read that month.";
+    var who = person ? person.name + ". " : "All borrowers. ";
+    var picked = months.length === 1 ? when + ". " : when + ", the latest checked month. ";
+    note.textContent = who + picked + "The ring is outstanding, shown as 100%. ECL sits inside that ring. Amounts are in HKD million.";
   }
   var borrowerSelect = document.getElementById("trend-borrower");
   try {
@@ -529,27 +497,20 @@ def trend_chart() -> str:
     try { sessionStorage.setItem("rip-trend-months", JSON.stringify(on)); } catch (error) {}
   });
   document.getElementById("trend-filter").addEventListener("change", draw);
-  var tip = document.getElementById("trend-tip");
-  function placeTip(dot) {
+  svg.addEventListener("mousemove", function (event) {
+    var hit = event.target.closest(".donut-hit");
+    if (!hit) { tip.hidden = true; return; }
     var name = document.createElement("strong");
-    name.textContent = dot.getAttribute("data-name");
+    name.textContent = hit.getAttribute("data-name");
     var when = document.createElement("span");
-    when.textContent = dot.getAttribute("data-when");
+    when.textContent = hit.getAttribute("data-when");
     var value = document.createElement("b");
-    value.textContent = dot.getAttribute("data-value");
+    value.textContent = hit.getAttribute("data-value");
     tip.replaceChildren(name, when, value);
     tip.hidden = false;
     var plot = svg.parentElement.getBoundingClientRect();
-    var box = svg.getBoundingClientRect();
-    var scaleX = box.width / 760;
-    var scaleY = box.height / 280;
-    tip.style.left = (box.left - plot.left + Number(dot.getAttribute("cx")) * scaleX) + "px";
-    tip.style.top = (box.top - plot.top + Number(dot.getAttribute("cy")) * scaleY) + "px";
-  }
-  svg.addEventListener("mouseover", function (event) {
-    var dot = event.target.closest(".trend-dot");
-    if (!dot) return;
-    placeTip(dot);
+    tip.style.left = (event.clientX - plot.left) + "px";
+    tip.style.top = (event.clientY - plot.top) + "px";
   });
   svg.addEventListener("mouseleave", function () { tip.hidden = true; });
   draw();
@@ -561,7 +522,6 @@ def trend_chart() -> str:
       <div class="label">Trend</div>
       <div class="dates" id="trend-filter">
         <div class="label">Trend series</div>
-        {series_boxes}
         <div class="trend-controls">
           {trend_month_menu()}
           <label class="trend-borrower">Borrower <select id="trend-borrower"><option value="">All borrowers</option>{borrower_options}</select></label>
@@ -569,7 +529,7 @@ def trend_chart() -> str:
       </div>
       <div class="trend-layout">
         <div class="trend-plot">
-          <svg id="trend-svg" viewBox="0 0 760 280" role="img" aria-label="Portfolio trend"></svg>
+          <svg id="trend-svg" viewBox="0 0 440 340" role="img" aria-label="Outstanding donut with ECL inside"></svg>
           <div id="trend-tip" class="trend-tip" hidden></div>
         </div>
         <div class="legend legend-vertical" id="trend-legend"></div>
@@ -740,8 +700,9 @@ form.hkex-search input[type=number] {{ width:7.5rem; }}
 .date-actions {{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }}
 .date-panel button.ghost {{ background:#F7F4F0; color:var(--ink); border:1px solid var(--line); }}
 .trend-chart, #trend-svg {{ width:100%; height:auto; display:block; }}
-.trend-layout {{ display:grid; grid-template-columns:minmax(0,1fr) 250px; gap:8px 18px; align-items:center; }}
+.trend-layout {{ display:grid; grid-template-columns:minmax(280px, 460px) 260px; gap:8px 28px; align-items:center; justify-content:start; }}
 .trend-plot {{ position:relative; min-width:0; }}
+.donut-hit {{ cursor:pointer; }}
 .trend-tip {{ position:absolute; z-index:6; transform:translate(-50%, calc(-100% - 10px)); background:#2C2825; color:#fff; border-radius:8px; padding:8px 10px; font-size:.78rem; line-height:1.35; pointer-events:none; white-space:nowrap; box-shadow:0 8px 20px rgba(44,40,37,.22); }}
 .trend-tip[hidden] {{ display:none; }}
 .trend-tip strong, .trend-tip span, .trend-tip b {{ display:block; }}
