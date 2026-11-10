@@ -1547,14 +1547,9 @@ def repayment_page(window: int, threshold: int = THRESHOLD) -> str:
             f'<td>{escape(item["next_due_source"])}</td><td>{kind}</td><td>{draft}</td></tr>'
         )
     body = "".join(lines) or f'<tr><td colspan="6">No obligation above {escape(money(threshold))} falls in this window.</td></tr>'
-    ageing = "".join(
-        f'<tr><td><a href="/customer?id={escape(item["customer_id"])}">{escape(item["legal_name"])}</a></td><td>{item["dpd"]}</td><td>{escape(item["dpd_component"])}</td><td>{money(item["drawn_hkd"])}</td></tr>'
-        for item in sorted(people, key=lambda row: row["dpd"], reverse=True)
-        if item["dpd"] > 0
-    )
     return f"""
     <div class="label">Repayment</div><h1>Obligations above {escape(money(threshold))}</h1>
-    <p class="lead">Position {escape(view().label())}. Due dates and amounts are the next principal on that date's cash flow schedule. The threshold starts at HKD 5,000,000 and can be changed. The window is {window} days. Days past due follow the same position, and the trend shows how both move across the checked dates.</p>
+    <p class="lead">Position {escape(view().label())}. Due dates and amounts are the next principal on that date's cash flow schedule. The threshold starts at HKD 5,000,000 and can be changed. The window is {window} days.</p>
     <form class="inline" method="get" action="/repayment">
       <label>Threshold (HKD)<br><input type="number" name="threshold" min="0" step="1000000" value="{threshold}"></label>
       <label>Window (days)<br><input type="number" name="window" min="7" max="365" value="{window}"></label>
@@ -1562,17 +1557,7 @@ def repayment_page(window: int, threshold: int = THRESHOLD) -> str:
       <a class="btn ghost" href="/repayment?window=31&threshold={threshold}">One month</a>
       <a class="btn ghost" href="/repayment?window=92&threshold={threshold}">One quarter</a>
     </form>
-    <div class="card" style="margin-top:12px"><table><thead><tr><th>Customer</th><th>Amount</th><th>Due</th><th>Source</th><th>Type</th><th></th></tr></thead><tbody>{body}</tbody></table></div>
-    <div class="card" style="margin-top:12px"><div class="label">Approaching 30, 60, 90 and 180 days</div>
-      <table><thead><tr><th>Customer</th><th>DPD</th><th>Component</th><th>Drawn</th></tr></thead><tbody>{ageing}</tbody></table>
-      <p><a href="/email?id=MAIL-DPD-LANTERN">Open the days-past-due draft</a></p>
-    </div>
-    <div class="card" style="margin-top:12px"><div class="label">Days past due across the checked dates</div>
-      {trend_table([(item["legal_name"], lambda iso, cid=item["customer_id"]: str(customer(cid)["series"][view().dates.index(iso)]["dpd"])) for item in people if any(point["dpd"] > 0 for point in item["series"])])}
-    </div>
-    <div class="card" style="margin-top:12px"><div class="label">Next principal across the checked dates</div>
-      {trend_table([(item["legal_name"], lambda iso, cid=item["customer_id"]: money(customer(cid)["series"][view().dates.index(iso)]["next_due_hkd"]) + " on " + customer(cid)["series"][view().dates.index(iso)]["next_due_date"]) for item in people])}
-    </div>"""
+    <div class="card" style="margin-top:12px"><table><thead><tr><th>Customer</th><th>Amount</th><th>Due</th><th>Source</th><th>Type</th><th></th></tr></thead><tbody>{body}</tbody></table></div>"""
 
 
 def financial_page(cid: str, scenario: str) -> str:
