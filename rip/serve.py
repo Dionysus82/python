@@ -41,7 +41,6 @@ SEEDED_PROPOSALS = [
         "output_name": "Apex_Group_Credit_Monitoring_Report_31Oct2026.docx",
     }
 ]
-NOTIFY = BOOK["notify_to"]
 THRESHOLD = BOOK["threshold_hkd"]
 
 DEMO_USER = "cro.shum"
@@ -518,6 +517,8 @@ tr.click:hover td, tr.news-item[data-open="1"] td {{ background:#FBF7F2; }}
 button, .btn {{ font:inherit; background:var(--orange); color:#fff; border:0; border-radius:8px; padding:8px 12px; font-weight:700; cursor:pointer; }}
 .btn.ghost {{ background:#F7F4F0; color:var(--ink); border:1px solid var(--line); }}
 textarea {{ width:100%; min-height:420px; font:14px/1.45 ui-monospace,monospace; border:1px solid var(--line); border-radius:10px; padding:12px; background:#fff; color:var(--ink); }}
+label.draft-to {{ display:block; max-width:420px; margin:12px 0; font-size:.78rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }}
+label.draft-to input {{ display:block; width:100%; margin-top:6px; font:inherit; font-weight:600; letter-spacing:0; text-transform:none; color:var(--ink); padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; }}
 .cite {{ font-size:.82rem; color:var(--muted); border-left:3px solid var(--orange); padding-left:10px; margin:8px 0; }}
 form.inline {{ display:flex; gap:8px; flex-wrap:wrap; align-items:end; }}
 .news-tools {{ display:flex; gap:12px; flex-wrap:wrap; align-items:end; justify-content:space-between; margin:8px 0 12px; }}
@@ -1623,18 +1624,23 @@ def answer_for(row: dict, question: str) -> tuple[str, list[dict]]:
     )
 
 
+def recipient_address(raw: str | None) -> str:
+    """One address for the draft. Newlines cannot open another header."""
+    return "".join(str(raw or "").split())[:254]
+
+
 def drafts_page() -> str:
     rows = "".join(
-        f'<tr><td><a href="/email?id={escape(item["id"])}">{escape(item["subject"])}</a></td><td>{escape(item["kind"])}</td><td>{escape(NOTIFY)}</td></tr>'
+        f'<tr><td><a href="/email?id={escape(item["id"])}">{escape(item["subject"])}</a></td><td>{escape(item["kind"])}</td><td>Enter on the letter</td></tr>'
         for item in BOOK["drafts"]
     )
     return f"""
     <div class="label">Outbox</div><h1>Email drafts</h1>
-    <p class="lead">Each letter is complete and written from the analysis. They are not sent from this site. Open one, copy it or download the .eml file, and send it yourself to {escape(NOTIFY)}.</p>
+    <p class="lead">Each letter is complete and written from the analysis. They are not sent from this site. Open one, type the recipient, then copy the letter or download the .eml file.</p>
     <div class="card"><table><thead><tr><th>Subject</th><th>Kind</th><th>To</th></tr></thead><tbody>{rows}</tbody></table></div>"""
 
 
-def live_letter(draft: dict) -> str:
+def live_letter(draft: dict, recipient: str = "") -> str:
     port = view().portfolio()
     people = [person for person in (customer(item["customer_id"]) for item in BOOK["customers"]) if person and person.get("on_position", True)]
     checked = ", ".join(view().label(date) for date in view().dates)
@@ -1645,7 +1651,7 @@ def live_letter(draft: dict) -> str:
     ) or "none"
     banner = BOOK["banner"]
     intro = (
-        f"To: {NOTIFY}\nSubject: {draft['subject']}\n\n{banner}\n\nDear colleague,\n\n"
+        f"To: {recipient_address(recipient)}\nSubject: {draft['subject']}\n\n{banner}\n\nDear colleague,\n\n"
         f"Position {view().label()}. Checked dates: {checked}. "
         f"Drawn {money(port['drawn_hkd'])}. ECL {money(port['ecl_hkd'])}. "
         "This draft follows the checked dates. It is not a credit decision.\n\n"
@@ -1686,11 +1692,32 @@ def live_letter(draft: dict) -> str:
 
 def email_page(draft_id: str) -> str:
     draft = next((item for item in BOOK["drafts"] if item["id"] == draft_id), BOOK["drafts"][0])
+    letter = live_letter(draft)
+    draft_key = json.dumps(draft["id"])
     return f"""
     <div class="label">{escape(draft["kind"])}</div><h1>{escape(draft["subject"])}</h1>
-    <p class="lead">To {escape(NOTIFY)}. The letter uses the checked reporting dates. Download it and send it from your own mailbox.</p>
-    <p><a class="btn" href="/email.eml?id={escape(draft["id"])}">Download .eml</a></p>
-    <textarea readonly>{escape(live_letter(draft))}</textarea>"""
+    <p class="lead">Type the recipient. The letter uses the checked reporting dates. Download it and send it from your own mailbox. Nothing is sent from this site.</p>
+    <label class="draft-to">Recipient
+      <input id="draft-to" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="name@example.com">
+    </label>
+    <p><a class="btn" id="draft-download" href="/email.eml?id={escape(draft["id"])}">Download .eml</a></p>
+    <textarea id="draft-letter" readonly>{escape(letter)}</textarea>
+    <script>
+    (function () {{
+      var input = document.getElementById("draft-to");
+      var letter = document.getElementById("draft-letter");
+      var link = document.getElementById("draft-download");
+      var draftId = {draft_key};
+      function paint() {{
+        var address = input.value.replace(/\\s+/g, "").slice(0, 254);
+        var lines = letter.value.split("\\n");
+        lines[0] = "To: " + address;
+        letter.value = lines.join("\\n");
+        link.href = "/email.eml?id=" + encodeURIComponent(draftId) + (address ? "&to=" + encodeURIComponent(address) : "");
+      }}
+      input.addEventListener("input", paint);
+    }})();
+    </script>"""
 
 
 def customer_page(cid: str) -> str:
@@ -1885,7 +1912,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         if key == "email.eml":
             draft = next((item for item in BOOK["drafts"] if item["id"] == (query.get("id") or [""])[0]), BOOK["drafts"][0])
-            payload = live_letter(draft).encode("utf-8")
+            payload = live_letter(draft, (query.get("to") or [""])[0]).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "message/rfc822")
             self.send_header("Content-Disposition", f'attachment; filename="{draft["id"]}.eml"')
