@@ -22,7 +22,20 @@ import agent_slot
 import build_obligor_reports
 import news_desk
 BOOK = json.loads((ROOT / "book.json").read_text(encoding="utf-8"))
+BOOK["news"] = news_desk.load_workbook_news(BOOK["customers"], ROOT / "property_data" / "apex_negative_news_v3.xlsx")
 news_desk.apply_severity(BOOK["news"])
+HKEX_FILINGS = [
+    {
+        "id": "3768-annual",
+        "issuer": "Apex Water Solutions Ltd. (3768.HK)",
+        "document": "Annual report 2025",
+    },
+    {
+        "id": "3768-interim",
+        "issuer": "Apex Water Solutions Ltd. (3768.HK)",
+        "document": "Interim report 2026",
+    },
+]
 REPORT_FILES = ROOT / "report_files"
 OBLIGORS = json.loads((REPORT_FILES / "obligors.json").read_text(encoding="utf-8"))
 UPLOADS = REPORT_FILES / "uploads"
@@ -452,12 +465,26 @@ def page(title: str, active: str, body: str) -> bytes:
         ("industry", "Industry review"),
         ("financial", "Financial and covenants"),
         ("repayment", "Repayment"),
+        ("news", "Adverse news"),
         ("reports", "Report"),
         ("assistant", "Agent portal"),
         ("drafts", "Email portal"),
     ]
     links = []
     for key, label in nav:
+        if key == "reports":
+            opened = " open" if active == "reports" else ""
+            current = " active" if active == "reports" else ""
+            filings = "".join(
+                f'<a href="/reports?filing={escape(item["id"])}">{escape(item["issuer"])} — {escape(item["document"])}</a>'
+                for item in HKEX_FILINGS
+            )
+            links.append(
+                f'<div class="nav-sub{opened}">'
+                f'<button type="button" class="nav-parent{current}" aria-expanded="{"true" if active == "reports" else "false"}">Report</button>'
+                f'<div class="nav-menu"><a href="/reports">Output report</a>{filings}</div></div>'
+            )
+            continue
         cls = "active" if key == active else ""
         links.append(f'<a class="{cls}" href="/{key}">{escape(label)}</a>')
     shown = dict(nav).get(title, title.replace("_", " ").title())
@@ -487,6 +514,16 @@ nav .mark span {{ color:var(--orange); }}
 nav p {{ color:#C8BEB4; font-size:.78rem; line-height:1.4; }}
 nav a {{ display:block; color:#E7E0D8; padding:9px 10px; border-left:3px solid transparent; border-radius:8px; margin:2px 0; }}
 nav a.active {{ background:rgba(227,111,30,.18); color:#fff; border-left-color:var(--orange); }}
+nav button.nav-parent {{ display:block; width:100%; text-align:left; background:transparent; color:#E7E0D8; border:0; border-left:3px solid transparent; border-radius:8px; margin:2px 0; padding:9px 10px; font-weight:600; cursor:pointer; }}
+nav button.nav-parent.active, .nav-sub.open > button.nav-parent {{ background:rgba(227,111,30,.18); color:#fff; border-left-color:var(--orange); }}
+.nav-menu {{ display:none; margin:0 0 6px 14px; }}
+.nav-sub.open .nav-menu {{ display:block; }}
+.nav-menu a {{ font-size:.86rem; padding:7px 10px; }}
+.sent-mail {{ padding:14px 0; border-top:1px solid var(--line); }}
+.sent-mail:first-child {{ border-top:0; padding-top:0; }}
+.sent-mail h2 {{ font-size:1.05rem; margin:4px 0 8px; }}
+.sent-mail p {{ margin:2px 0; }}
+.letter {{ white-space:pre-wrap; background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; margin-top:10px; font:14px/1.45 ui-monospace,monospace; }}
 nav a.logout {{ margin-top:18px; color:#C8BEB4; }}
 .nav-toggle {{ background:var(--rail); margin-bottom:12px; }}
 .backdrop {{ display:none; }}
@@ -635,6 +672,14 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
     if (!narrow) localStorage.setItem("rip-nav", collapsed ? "1" : "0");
   }});
   document.getElementById("backdrop").addEventListener("click", function () {{ apply(true); }});
+  var reportMenu = document.querySelector(".nav-sub");
+  if (reportMenu) {{
+    var reportButton = reportMenu.querySelector(".nav-parent");
+    reportButton.addEventListener("click", function () {{
+      var open = reportMenu.classList.toggle("open");
+      reportButton.setAttribute("aria-expanded", open ? "true" : "false");
+    }});
+  }}
   var menu = document.querySelector(".date-menu");
   if (menu) {{
     var dateToggle = menu.querySelector(".date-toggle");
@@ -792,8 +837,9 @@ def news_detail(item: dict) -> str:
             ("Days past due", escape(str(person["dpd"]))),
             *book_rows,
         ]
+        mail_link = f'<a href="/drafts#sent-{escape(item["id"])}">Open the message sent to the relationship manager</a>' if item["severity"] == "CRITICAL" else ""
         links = (
-            f'<a href="/email?id=MAIL-NEWS-APEX">Open the adverse-news email draft</a>'
+            f'{mail_link}'
             f'<a href="/industry?name={escape(person["industry"])}">Continue to the {escape(person["industry"])} industry review</a>'
         )
     else:
@@ -1004,6 +1050,34 @@ def handle_news_form(form: dict[str, list[str]]) -> str:
     return "added"
 
 
+def news_action_form(item: dict) -> str:
+    state = news_desk.load_state()
+    record = state["actions"].get(item["id"]) if isinstance(state["actions"].get(item["id"]), dict) else {}
+    customer_id = (record or {}).get("customer_id") or item.get("customer_id") or ""
+    raw = next((row for row in BOOK["customers"] if row["customer_id"] == customer_id), None)
+    text = (record or {}).get("text") or news_desk.draft_action(item, raw)
+    confirmed = (record or {}).get("confirmed_text") or ""
+    confirmed_customer = (record or {}).get("confirmed_customer_id") or ""
+    if confirmed and confirmed == text and confirmed_customer == customer_id:
+        status = f"In the {obligor_name(confirmed_customer)} report."
+    elif confirmed:
+        status = "Saved here. The report still has the previous wording until you confirm."
+    else:
+        status = "Draft. Not in a report yet."
+    return (
+        '<div class="action-block">'
+        f'<div class="label">Action</div>'
+        f'<form method="post" action="/news-actions">'
+        f'<input type="hidden" name="news_id" value="{escape(item["id"])}">'
+        f'<label>Borrower<br><select name="customer_{escape(item["id"])}">{borrower_options(customer_id)}</select></label>'
+        f'<label>Action<br><textarea class="action" name="text_{escape(item["id"])}">{escape(text)}</textarea></label>'
+        f'<p class="lead">{escape(status)}</p>'
+        '<p class="date-actions"><button type="submit" class="ghost" name="intent" value="save">Save edits</button>'
+        '<button type="submit" name="intent" value="confirm">Confirm and add to the report</button></p>'
+        '</form></div>'
+    )
+
+
 def news_page(note: str = "") -> str:
     rows = []
     for order, item in enumerate(BOOK["news"]):
@@ -1015,21 +1089,21 @@ def news_page(note: str = "") -> str:
         )
         rows.append(
             f'<tr class="news-item click" data-order="{order}" data-severity="{escape(item["severity"])}" data-time="{news_stamp(item["date"])}">'
-            f'<td class="pick"><input form="news-pick" type="checkbox" name="ids" value="{escape(item["id"])}" aria-label="Select headline"></td>'
             f'<td>{escape(item["headline"])}'
             f'<div style="color:var(--muted);font-size:.8rem">{escape(item["date"])} · {escape(item["source"])}</div></td>'
             f'<td>{escape(item["industry"])}</td>'
             f'<td><select class="sev" data-id="{escape(item["id"])}" data-saved="{escape(item["severity"])}" aria-label="Severity">{levels}</select> <span class="sev-note" hidden>Saved</span></td>'
             f'<td>{flag}</td></tr>'
-            f'<tr class="news-detail" hidden><td colspan="5">{news_detail(item)}</td></tr>'
+            f'<tr class="news-detail" hidden><td colspan="4">{news_detail(item)}{news_action_form(item)}</td></tr>'
         )
+    message = ACTION_NOTES.get(note, "")
+    message_html = f"<p><strong>{escape(message)}</strong></p>" if message else ""
     return f"""
-    <div class="label">Step 1 of 3</div><h1>Adverse news</h1>
-    <p class="lead">These headlines are the Apex negative-news file. Click a headline to open its detail here. Click the severity to change it, and the change is saved. Select one or more headlines to draft an action for the borrower report. Materiality uses exposure, security coverage, guarantor support, financial strength and open warnings.</p>
-    <form id="news-pick" method="post" action="/news-actions"></form>
+    <div class="label">Adverse news</div><h1>Adverse news</h1>
+    <p class="lead">These items are the uploaded adverse-news file. Click a headline to open the article and its action. The action is already written. Severity changes save immediately. A Gemini agent will later search for industry news; that panel stays empty until the agent is connected.</p>
+    {message_html}
     <div>
       <div class="news-tools">
-        <button type="submit" form="news-pick" name="intent" value="generate" id="news-generate">Generate actions</button>
         <div class="news-filters">
         <label><span class="label">Severity</span><br>
           <select id="severity-filter">
@@ -1051,11 +1125,15 @@ def news_page(note: str = "") -> str:
         </label>
         </div>
       </div>
-      <div class="scroll"><table><thead><tr><th class="pick"></th><th>Item</th><th>Industry</th><th>Severity</th><th></th></tr></thead><tbody id="news-body">{''.join(rows)}
-        <tr id="news-empty" hidden><td colspan="5">No news at this severity.</td></tr>
+      <div class="scroll"><table><thead><tr><th>Item</th><th>Industry</th><th>Severity</th><th></th></tr></thead><tbody id="news-body">{''.join(rows)}
+        <tr id="news-empty" hidden><td colspan="4">No news at this severity.</td></tr>
       </tbody></table></div>
     </div>
-    {action_desk(note)}
+    <div class="card" style="margin-top:12px">
+      <div class="label">Industry news</div>
+      <h2>Gemini agent</h2>
+      <p>No industry search is connected yet. When the Gemini agent is attached, it will look for industry news and list the items it finds in this panel.</p>
+    </div>
     <script>
     (function () {{
       var rank = {{"CRITICAL": 4, "HIGH": 3, "MEDIUM": 2, "LOW": 1}};
@@ -1063,7 +1141,6 @@ def news_page(note: str = "") -> str:
       var sort = document.getElementById("news-sort");
       var body = document.getElementById("news-body");
       var empty = document.getElementById("news-empty");
-      var generate = document.getElementById("news-generate");
       function pairs() {{
         return [...body.querySelectorAll("tr.news-item")].map(function (row) {{
           return {{row: row, detail: row.nextElementSibling}};
@@ -1092,9 +1169,6 @@ def news_page(note: str = "") -> str:
         empty.hidden = shown > 0;
         body.appendChild(empty);
       }}
-      function refreshGenerate() {{
-        generate.disabled = ![...body.querySelectorAll('input[name="ids"]')].some(function (box) {{ return box.checked; }});
-      }}
       body.addEventListener("click", function (event) {{
         if (event.target.closest("select, input, button, a, textarea, label")) return;
         var row = event.target.closest("tr.news-item");
@@ -1107,10 +1181,7 @@ def news_page(note: str = "") -> str:
       }});
       body.addEventListener("change", function (event) {{
         var select = event.target.closest("select.sev");
-        if (!select) {{
-          if (event.target.name === "ids") refreshGenerate();
-          return;
-        }}
+        if (!select) return;
         var row = select.closest("tr.news-item");
         var previous = select.dataset.saved || row.dataset.severity;
         var chosen = select.value;
@@ -1140,7 +1211,6 @@ def news_page(note: str = "") -> str:
       }});
       filter.addEventListener("change", apply);
       sort.addEventListener("change", apply);
-      refreshGenerate();
     }})();
     </script>
     <div class="card" style="margin-top:12px"><div class="label">ECL of the names named in the feed</div>
@@ -1389,7 +1459,7 @@ def parse_multipart(content_type: str, body: bytes) -> dict[str, dict]:
     return fields
 
 
-def reports_page(kind: str, detail: str, cid: str, generated: str = "") -> str:
+def reports_page(kind: str, detail: str, cid: str, generated: str = "", filing: str = "") -> str:
     row = customer(cid) or customer(default_customer_id())
     port = view().portfolio()
     if kind == "customer":
@@ -1436,9 +1506,19 @@ def reports_page(kind: str, detail: str, cid: str, generated: str = "") -> str:
         }
         for item in OBLIGORS
     ])
+    chosen = next((item for item in HKEX_FILINGS if item["id"] == filing), None)
+    filing_card = ""
+    if chosen:
+        filing_card = (
+            f'<div class="card" style="margin-bottom:12px"><div class="label">HKEX filing</div>'
+            f'<h2>{escape(chosen["issuer"])}</h2>'
+            f'<p>{escape(chosen["document"])}. The Gemini agent will retrieve this from HKEX. It is not in the platform yet. '
+            f'When the file arrives, it is an input to the output report on this page.</p></div>'
+        )
     return f"""
-    <div class="label">Reports</div><h1>Reports</h1>
-    <p class="lead">Search for a borrower. The closest names appear as you type. Choose one, generate the paper, then download the proposal or the monitoring report.</p>
+    {filing_card}
+    <div class="label">Reports</div><h1>Report</h1>
+    <p class="lead">Search for a borrower. The closest names appear as you type. Choose one, generate the paper, then download the proposal or the monitoring report. HKEX filings opened from the Report menu are a later input to that output report.</p>
     <div class="card">
       <div class="label">Borrower</div>
       <div class="suggest">
@@ -1731,24 +1811,54 @@ def draft_mail(draft: dict) -> dict:
     return {"subject": draft["subject"], "body": text}
 
 
+def relationship_mailbox(item: dict) -> tuple[str, str]:
+    person = next((row for row in BOOK["customers"] if row["customer_id"] == item.get("customer_id")), None)
+    name = ((person or {}).get("rm") or "").strip()
+    if not name or "facilit" in name.lower():
+        return "Credit desk", "credit.desk@hkbea.example"
+    local = ".".join(part.lower() for part in name.split())
+    return name, f"{local}@hkbea.example"
+
+
+def sent_letter(item: dict) -> str:
+    name, address = relationship_mailbox(item)
+    article, _fields = news_fields(item["body"])
+    borrower = next((row for row in BOOK["customers"] if row["customer_id"] == item.get("customer_id")), None)
+    linked = f"\nLinked borrower: {borrower['legal_name']}." if borrower else "\nNo borrower on the book is named in this item."
+    return (
+        f"To: {name} <{address}>\n"
+        f"Sent: {item['date']}, 08:20 HKT\n"
+        f"Subject: {item['headline']}\n\n"
+        f"This message was sent automatically because the severity is CRITICAL.\n\n"
+        f"{article.strip()}\n"
+        f"{linked}\n"
+        f"Relationship manager: {name}."
+    )
+
+
 def drafts_page() -> str:
-    news_rows = []
-    payload = {}
-    for item in BOOK["news"]:
-        payload[item["id"]] = news_mail(item)
-        news_rows.append(mail_row(item["id"], item["headline"], f'{item["date"]} · {item["source"]} · {item["severity"]}'))
-    other_rows = []
-    for draft in BOOK["drafts"]:
-        if draft["id"] == "MAIL-NEWS-APEX":
-            continue
-        payload[draft["id"]] = draft_mail(draft)
-        other_rows.append(mail_row(draft["id"], draft["subject"], draft["kind"]))
+    critical = [item for item in BOOK["news"] if item["severity"] == "CRITICAL"]
+    held = [item for item in BOOK["news"] if item["severity"] != "CRITICAL"]
+    cards = []
+    for item in critical:
+        name, address = relationship_mailbox(item)
+        cards.append(
+            f'<article class="sent-mail" id="sent-{escape(item["id"])}">'
+            f'<div class="label">Sent automatically</div>'
+            f'<h2>{escape(item["headline"])}</h2>'
+            f'<p>To: {escape(name)} &lt;{escape(address)}&gt;</p>'
+            f'<p>Sent: {escape(item["date"])}, 08:20 HKT</p>'
+            f'<div class="letter">{escape(sent_letter(item))}</div></article>'
+        )
+    counts = {}
+    for item in held:
+        counts[item["severity"]] = counts.get(item["severity"], 0) + 1
+    held_line = ", ".join(f"{counts[level]} {level.lower()}" for level in ("HIGH", "MEDIUM", "LOW") if counts.get(level))
     return f"""
-    <div class="label">Outbox</div><h1>Email drafts</h1>
-    <p class="lead">Each subject has its own recipient. Send opens your mail program with that subject and address. This site does not deliver the message.</p>
-    <div class="card"><div class="label">Adverse news</div><div class="mail-list">{''.join(news_rows)}</div></div>
-    <div class="card" style="margin-top:12px"><div class="label">Other drafts</div><div class="mail-list">{''.join(other_rows)}</div></div>
-    {mail_script(payload)}"""
+    <div class="label">Outbox</div><h1>Email portal</h1>
+    <p class="lead">Critical news is sent automatically to the relationship manager. The record below is the message, the time it went, and the address it went to. Addresses are demonstration mailboxes. High, medium and low items are not sent.</p>
+    <div class="card">{''.join(cards) or '<p>No critical item is on the file.</p>'}</div>
+    <p class="lead">{escape(held_line)} were kept on the adverse-news page and were not sent.</p>"""
 
 
 def live_letter(draft: dict, recipient: str = "") -> str:
@@ -1971,7 +2081,7 @@ ROUTES = {
     "industry": lambda q: industry_page((q.get("name") or [default_industry()])[0]),
     "repayment": lambda q: repayment_page(int((q.get("window") or ["92"])[0] or 92)),
     "financial": lambda q: financial_page((q.get("customer") or [default_customer_id()])[0], (q.get("scenario") or ["revenue_decline"])[0]),
-    "reports": lambda q: reports_page((q.get("kind") or ["mir"])[0], (q.get("detail") or ["summary"])[0], (q.get("customer") or [default_customer_id()])[0], (q.get("generated") or [""])[0]),
+    "reports": lambda q: reports_page((q.get("kind") or ["mir"])[0], (q.get("detail") or ["summary"])[0], (q.get("customer") or [default_customer_id()])[0], (q.get("generated") or [""])[0], (q.get("filing") or [""])[0]),
     "assistant": lambda q: assistant_page((q.get("q") or ["What are the key risks for this customer?"])[0], (q.get("customer") or [default_customer_id()])[0]),
     "drafts": lambda q: drafts_page(),
     "email": lambda q: email_page((q.get("id") or ["MAIL-NEWS-APEX"])[0]),

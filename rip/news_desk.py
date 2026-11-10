@@ -9,7 +9,10 @@ from __future__ import annotations
 
 import json
 import threading
+import zipfile
+from datetime import datetime
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
 ROOT = Path(__file__).resolve().parent
 STATE = ROOT / "news_state.json"
@@ -144,6 +147,84 @@ def news_signal(body: str) -> tuple[str, str]:
     kind, _, after = rest.partition(". Signal: ")
     signal, _, _ = after.partition(". Severity: ")
     return (kind.strip() or "News"), (signal.strip() or "Adverse development")
+
+
+def load_workbook_news(customers: list[dict], path: Path) -> list[dict]:
+    """The adverse-news file is the only news source. Extra book rows are not kept."""
+    ns = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
+    with zipfile.ZipFile(path) as book:
+        shared: list[str] = []
+        root = ET.fromstring(book.read("xl/sharedStrings.xml"))
+        for item in root.findall("m:si", ns):
+            shared.append("".join(node.text or "" for node in item.iter(f"{{{ns['m']}}}t")))
+        sheet = ET.fromstring(book.read("xl/worksheets/sheet1.xml"))
+    rows: list[list[str]] = []
+    for row in sheet.findall("m:sheetData/m:row", ns):
+        values: list[str] = []
+        for cell in row.findall("m:c", ns):
+            node = cell.find("m:v", ns)
+            if node is None or node.text is None:
+                values.append("")
+            elif cell.attrib.get("t") == "s":
+                values.append(shared[int(node.text)])
+            else:
+                values.append(node.text)
+        rows.append(values)
+    header = rows[0]
+    index = {name: position for position, name in enumerate(header)}
+    news: list[dict] = []
+    for values in rows[1:]:
+        def cell(name: str) -> str:
+            position = index[name]
+            return values[position].strip() if position < len(values) else ""
+
+        number = cell("news number")
+        headline = cell("headline")
+        source_field = cell("source")
+        publisher, _, when = source_field.rpartition(" - ")
+        if not when:
+            publisher, when = source_field, ""
+        try:
+            dated = datetime.strptime(when, "%d %b %Y").strftime("%-d %b %Y")
+        except ValueError:
+            dated = when
+        severity = cell("severity").upper()
+        if severity not in SEVERITIES:
+            severity = "MEDIUM"
+        details = cell("details")
+        kind = cell("news type") or "News"
+        signal = cell("signal type") or "Adverse development"
+        entities = cell("entity involved")
+        body = f"{details} News type: {kind}. Signal: {signal}. Severity: {severity}. Entities: {entities}."
+        item = {
+            "id": f"NEWS-FILE-{int(number):02d}",
+            "headline": headline,
+            "source": publisher,
+            "date": dated,
+            "severity": severity,
+            "customer_id": "",
+            "industry": "Not linked on the book",
+            "body": body,
+            "entities": entities,
+            "news_type": kind,
+            "signal": signal,
+        }
+        item["customer_id"] = suggest_customer(item, customers)
+        person = next((row for row in customers if row["customer_id"] == item["customer_id"]), None)
+        point = (person or {}).get("history", [{}])[-1] if person else {}
+        if person:
+            item["industry"] = person.get("industry") or item["industry"]
+        item["factors"] = {
+            "exposure_hkd": point.get("drawn_hkd") or 0,
+            "security_coverage": point.get("coverage_ratio") if person else "not on the book",
+            "guarantor_support": (person or {}).get("guarantor") or "not on the book",
+            "financial_strength": f"grade {point.get('rating')}" if person else "not on the book",
+            "warning_signals": len((person or {}).get("warnings") or []) if person else "not on the book",
+            "score": {"CRITICAL": 90, "HIGH": 70, "MEDIUM": 45, "LOW": 20}[severity],
+            "material": severity in {"CRITICAL", "HIGH"},
+        }
+        news.append(item)
+    return news
 
 
 def draft_action(item: dict, borrower: dict | None) -> str:
