@@ -2653,6 +2653,9 @@ class Handler(BaseHTTPRequestHandler):
         if key == "logout":
             self._redirect("/login", "rip=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0")
             return
+        if key == "bea-rip-antigravity.zip":
+            self._handoff_zip()
+            return
         if key == "login":
             if signed_in:
                 self._redirect("/dashboard")
@@ -2809,6 +2812,19 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(raw)))
         self.end_headers()
         self.wfile.write(raw)
+
+    def _handoff_zip(self) -> None:
+        path = ROOT / "bea-rip-antigravity.zip"
+        if not path.is_file():
+            self.send_error(404)
+            return
+        payload = path.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/zip")
+        self.send_header("Content-Disposition", 'attachment; filename="bea-rip-antigravity.zip"')
+        self.send_header("Content-Length", str(len(payload)))
+        self.end_headers()
+        self.wfile.write(payload)
 
     def _html(self, payload: bytes, status: int = 200) -> None:
         self.send_response(status)
