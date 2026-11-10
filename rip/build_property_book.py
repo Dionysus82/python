@@ -793,7 +793,8 @@ def materiality(customer: dict, direct_hit: bool) -> dict:
 
 NEWS_FILE = Path(__file__).resolve().parent / "property_data" / "apex_negative_news_v3.xlsx"
 MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-SEVERITY_SCORE = {"CRITICAL": 95, "HIGH": 80, "MEDIUM": 60, "中": 60, "LOW": 35, "低": 35}
+SEVERITY_SCORE = {"CRITICAL": 95, "HIGH": 80, "MEDIUM": 60, "LOW": 35}
+SEVERITY_EN = {"中": "MEDIUM", "低": "LOW", "高": "HIGH", "严重": "CRITICAL", "嚴重": "CRITICAL"}
 PROPERTY_SECTORS = {"香港商業地產市場", "香港零售物業市場"}
 
 
@@ -842,6 +843,7 @@ def news_items(customers: list[dict]) -> list[dict]:
             if not row or row[0] is None:
                 continue
             number, headline, source, details, news_type, entities, signal, severity = row[:8]
+            severity = SEVERITY_EN.get(str(severity or "").strip(), str(severity or "").strip().upper())
             source_name, when = split_source(str(source or ""))
             named = [by_name[part.strip()] for part in str(entities or "").split(",") if part.strip() in by_name]
             customer = named[0] if named else None
