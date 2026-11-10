@@ -1378,11 +1378,24 @@ def industry_page(name: str) -> str:
     """
 
 
-def repayment_page(window: int) -> str:
+def repayment_threshold(raw: str | None) -> int:
+    text = str(raw or "").replace(",", "").strip()
+    if not text:
+        return THRESHOLD
+    try:
+        value = int(float(text))
+    except ValueError:
+        return THRESHOLD
+    if value < 0:
+        return THRESHOLD
+    return min(value, 100_000_000_000)
+
+
+def repayment_page(window: int, threshold: int = THRESHOLD) -> str:
     people = [person for person in (customer(item["customer_id"]) for item in BOOK["customers"]) if person and person.get("on_position", True)]
     rows = []
     for item in people:
-        if item["next_due_hkd"] < THRESHOLD or item["next_due_days"] > window:
+        if item["next_due_hkd"] < threshold or item["next_due_days"] > window:
             continue
         rows.append(item)
     rows.sort(key=lambda item: item["next_due_days"])
@@ -1400,20 +1413,21 @@ def repayment_page(window: int) -> str:
             f'<td>{money(item["next_due_hkd"])}</td><td>{item["next_due_days"]} days</td>'
             f'<td>{escape(item["next_due_source"])}</td><td>{kind}</td><td>{draft}</td></tr>'
         )
-    body = "".join(lines) or '<tr><td colspan="6">No obligation above HKD 5,000,000 falls in this window.</td></tr>'
+    body = "".join(lines) or f'<tr><td colspan="6">No obligation above {escape(money(threshold))} falls in this window.</td></tr>'
     ageing = "".join(
         f'<tr><td><a href="/customer?id={escape(item["customer_id"])}">{escape(item["legal_name"])}</a></td><td>{item["dpd"]}</td><td>{escape(item["dpd_component"])}</td><td>{money(item["drawn_hkd"])}</td></tr>'
         for item in sorted(people, key=lambda row: row["dpd"], reverse=True)
         if item["dpd"] > 0
     )
     return f"""
-    <div class="label">Repayment</div><h1>Obligations above HKD 5,000,000</h1>
-    <p class="lead">Position {escape(view().label())}. Due dates and amounts are the next principal on that date's cash flow schedule. The window is {window} days. Days past due follow the same position, and the trend shows how both move across the checked dates.</p>
+    <div class="label">Repayment</div><h1>Obligations above {escape(money(threshold))}</h1>
+    <p class="lead">Position {escape(view().label())}. Due dates and amounts are the next principal on that date's cash flow schedule. The threshold starts at HKD 5,000,000 and can be changed. The window is {window} days. Days past due follow the same position, and the trend shows how both move across the checked dates.</p>
     <form class="inline" method="get" action="/repayment">
+      <label>Threshold (HKD)<br><input type="number" name="threshold" min="0" step="1000000" value="{threshold}"></label>
       <label>Window (days)<br><input type="number" name="window" min="7" max="365" value="{window}"></label>
       <button type="submit">Apply</button>
-      <a class="btn ghost" href="/repayment?window=31">One month</a>
-      <a class="btn ghost" href="/repayment?window=92">One quarter</a>
+      <a class="btn ghost" href="/repayment?window=31&threshold={threshold}">One month</a>
+      <a class="btn ghost" href="/repayment?window=92&threshold={threshold}">One quarter</a>
     </form>
     <div class="card" style="margin-top:12px"><table><thead><tr><th>Customer</th><th>Amount</th><th>Due</th><th>Source</th><th>Type</th><th></th></tr></thead><tbody>{body}</tbody></table></div>
     <div class="card" style="margin-top:12px"><div class="label">Approaching 30, 60, 90 and 180 days</div>
@@ -2288,7 +2302,7 @@ ROUTES = {
     "dashboard": lambda q: dashboard(),
     "news": lambda q: news_page((q.get("note") or [""])[0]),
     "industry": lambda q: industry_page((q.get("name") or [default_industry()])[0]),
-    "repayment": lambda q: repayment_page(int((q.get("window") or ["92"])[0] or 92)),
+    "repayment": lambda q: repayment_page(int((q.get("window") or ["92"])[0] or 92), repayment_threshold((q.get("threshold") or [""])[0])),
     "financial": lambda q: financial_page((q.get("customer") or [default_customer_id()])[0], (q.get("scenario") or ["revenue_decline"])[0]),
     "reports": lambda q: reports_page((q.get("kind") or ["mir"])[0], (q.get("detail") or ["summary"])[0], (q.get("customer") or [default_customer_id()])[0], (q.get("generated") or [""])[0], (q.get("source") or [""])[0], (q.get("borrower") or [""])[0], (q.get("year") or [""])[0]),
     "assistant": lambda q: assistant_page((q.get("q") or ["What are the key risks for this customer?"])[0], (q.get("customer") or [default_customer_id()])[0]),
