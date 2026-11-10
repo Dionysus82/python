@@ -396,6 +396,10 @@ def build_report(customer: dict, point: dict, actions: list[dict] | None = None)
     return _papers().build_monitoring(customer, point, actions)
 
 
+def save_report(customer: dict, point: dict, actions: list[dict] | None, path: Path) -> None:
+    _papers().save_monitoring(customer, point, actions, path)
+
+
 def main() -> None:
     long_papers = _papers()
     book = json.loads(BOOK.read_text(encoding="utf-8"))
@@ -406,8 +410,8 @@ def main() -> None:
         folder = OUT / customer["customer_id"]
         folder.mkdir(parents=True, exist_ok=True)
         if customer["customer_id"] != long_papers.APEX_ID:
-            build_proposal(customer, point).save(folder / "proposal.docx")
-        build_report(customer, point).save(folder / "report.docx")
+            long_papers.save_proposal(customer, point, folder / "proposal.docx")
+        long_papers.save_monitoring(customer, point, [], folder / "report.docx")
         index.append({
             "id": customer["customer_id"],
             "name": customer["legal_name"],
