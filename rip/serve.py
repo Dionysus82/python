@@ -2643,6 +2643,15 @@ ROUTES = {
     "customer": lambda q: customer_page((q.get("id") or [""])[0]),
 }
 
+PUBLIC_FILES = {
+    "bea-rip-antigravity.zip": "application/zip",
+    "RIP-Executive-Presentation.pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "RIP-Revised-Capacity.pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "RIP-Management-Walkthrough.mp3": "audio/mpeg",
+    "RIP-Management-Walkthrough.srt": "application/x-subrip; charset=utf-8",
+    "RIP-Management-Walkthrough-scenes.zip": "application/zip",
+}
+
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802
@@ -2653,7 +2662,7 @@ class Handler(BaseHTTPRequestHandler):
         if key == "logout":
             self._redirect("/login", "rip=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0")
             return
-        if key in {"bea-rip-antigravity.zip", "RIP-Executive-Presentation.pptx", "RIP-Revised-Capacity.pptx"}:
+        if key in PUBLIC_FILES:
             self._public_file(key)
             return
         if key == "login":
@@ -2818,7 +2827,7 @@ class Handler(BaseHTTPRequestHandler):
         if not path.is_file():
             self.send_error(404)
             return
-        kind = "application/vnd.openxmlformats-officedocument.presentationml.presentation" if name.endswith(".pptx") else "application/zip"
+        kind = PUBLIC_FILES[name]
         payload = path.read_bytes()
         self.send_response(200)
         self.send_header("Content-Type", kind)
