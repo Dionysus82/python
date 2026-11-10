@@ -517,8 +517,18 @@ tr.click:hover td, tr.news-item[data-open="1"] td {{ background:#FBF7F2; }}
 button, .btn {{ font:inherit; background:var(--orange); color:#fff; border:0; border-radius:8px; padding:8px 12px; font-weight:700; cursor:pointer; }}
 .btn.ghost {{ background:#F7F4F0; color:var(--ink); border:1px solid var(--line); }}
 textarea {{ width:100%; min-height:420px; font:14px/1.45 ui-monospace,monospace; border:1px solid var(--line); border-radius:10px; padding:12px; background:#fff; color:var(--ink); }}
-label.draft-to {{ display:block; max-width:420px; margin:12px 0; font-size:.78rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }}
-label.draft-to input {{ display:block; width:100%; margin-top:6px; font:inherit; font-weight:600; letter-spacing:0; text-transform:none; color:var(--ink); padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; }}
+label.draft-to {{ display:flex; gap:8px; align-items:center; max-width:560px; margin:12px 0; font-size:.78rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }}
+label.draft-to input {{ flex:1; min-width:0; font:inherit; font-weight:600; letter-spacing:0; text-transform:none; color:var(--ink); padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; }}
+.mail-list {{ display:grid; gap:0; }}
+.mail-row {{ display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 12px; align-items:center; padding:12px 0; border-bottom:1px solid var(--line); }}
+.mail-row:first-child {{ padding-top:0; }}
+.mail-subject {{ min-width:0; }}
+.mail-subject strong {{ display:block; }}
+.mail-subject span {{ display:block; color:var(--muted); font-size:.8rem; margin-top:2px; }}
+.mail-send {{ display:flex; gap:8px; align-items:center; }}
+.mail-send input {{ width:min(280px, 42vw); font:inherit; font-weight:600; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); }}
+.mail-note {{ grid-column:1 / -1; margin:0; color:var(--red); font-size:.82rem; }}
+.mail-note[hidden] {{ display:none; }}
 .cite {{ font-size:.82rem; color:var(--muted); border-left:3px solid var(--orange); padding-left:10px; margin:8px 0; }}
 form.inline {{ display:flex; gap:8px; flex-wrap:wrap; align-items:end; }}
 .news-tools {{ display:flex; gap:12px; flex-wrap:wrap; align-items:end; justify-content:space-between; margin:8px 0 12px; }}
@@ -583,7 +593,8 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
   .shell.collapsed nav {{ transform:translateX(-105%); padding:22px 16px; width:min(280px,86vw); overflow:auto; }}
   .backdrop {{ position:fixed; inset:0; background:rgba(44,40,37,.35); z-index:25; }}
   .shell:not(.collapsed) .backdrop {{ display:block; }}
-  .metrics, .grid, .grid3, .news-read dl {{ grid-template-columns:1fr; }}
+  .metrics, .grid, .grid3, .news-read dl, .mail-row {{ grid-template-columns:1fr; }}
+  .mail-send input {{ flex:1; width:auto; min-width:0; }}
   main {{ padding:16px 16px 72px; }}
 }}
 </style>
@@ -1629,15 +1640,116 @@ def recipient_address(raw: str | None) -> str:
     return "".join(str(raw or "").split())[:254]
 
 
-def drafts_page() -> str:
-    rows = "".join(
-        f'<tr><td><a href="/email?id={escape(item["id"])}">{escape(item["subject"])}</a></td><td>{escape(item["kind"])}</td><td>Enter on the letter</td></tr>'
-        for item in BOOK["drafts"]
+def script_json(value) -> str:
+    return json.dumps(value, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+
+
+def mail_row(entry_id: str, subject: str, meta: str) -> str:
+    return (
+        f'<div class="mail-row" data-id="{escape(entry_id)}">'
+        f'<div class="mail-subject"><strong>{escape(subject)}</strong><span>{escape(meta)}</span></div>'
+        f'<div class="mail-send">'
+        f'<input type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="name@example.com" aria-label="Recipient for {escape(subject)}">'
+        f'<button type="button">Send</button>'
+        f'</div>'
+        f'<p class="mail-note" hidden></p>'
+        f'</div>'
     )
+
+
+def mail_script(payload: dict) -> str:
+    return f"""
+    <script>
+    (function () {{
+      var letters = {script_json(payload)};
+      var memory = {{}};
+      try {{ memory = JSON.parse(sessionStorage.getItem("rip-draft-to") || "{{}}"); }} catch (error) {{ memory = {{}}; }}
+      function clean(value) {{ return String(value || "").replace(/\\s+/g, "").slice(0, 254); }}
+      function usable(address) {{ return address.indexOf("@") > 0 && address.indexOf("@") < address.length - 1; }}
+      document.querySelectorAll(".mail-row").forEach(function (row) {{
+        var input = row.querySelector("input");
+        if (memory[row.dataset.id]) input.value = memory[row.dataset.id];
+        input.addEventListener("input", function () {{
+          memory[row.dataset.id] = clean(input.value);
+          sessionStorage.setItem("rip-draft-to", JSON.stringify(memory));
+        }});
+      }});
+      document.addEventListener("click", function (event) {{
+        var button = event.target.closest(".mail-send button");
+        if (!button) return;
+        var row = button.closest(".mail-row");
+        var input = row.querySelector("input");
+        var note = row.querySelector(".mail-note");
+        var address = clean(input.value);
+        var letter = letters[row.dataset.id];
+        if (!usable(address)) {{
+          note.hidden = false;
+          note.textContent = "Enter a recipient for this subject.";
+          input.focus();
+          return;
+        }}
+        note.hidden = true;
+        memory[row.dataset.id] = address;
+        sessionStorage.setItem("rip-draft-to", JSON.stringify(memory));
+        var url = "mailto:" + address
+          + "?subject=" + encodeURIComponent(letter.subject)
+          + "&body=" + encodeURIComponent(letter.body);
+        if (window.ripOpenMail) window.ripOpenMail(url);
+        else window.location.href = url;
+      }});
+    }})();
+    </script>"""
+
+
+def news_mail(item: dict) -> dict:
+    linked = ""
+    person = customer(item.get("customer_id") or "")
+    if person:
+        linked = (
+            f"\n\nLinked borrower {person['legal_name']}: drawn {money(person['drawn_hkd'])}, "
+            f"stage {person['stage']}, {person['dpd']} days past due."
+        )
+    text = " ".join(str(item.get("body") or "").split())
+    if len(text) > 700:
+        text = text[:697].rstrip() + "..."
+    subject = item["headline"]
+    body = (
+        f"{BOOK['banner']}\n\n"
+        f"{item['date']}. {subject}\n"
+        f"Source: {item['source']}. Severity: {item['severity']}.\n\n"
+        f"{text}{linked}\n\n"
+        "This draft is not a credit decision."
+    )
+    return {"subject": subject, "body": body}
+
+
+def draft_mail(draft: dict) -> dict:
+    text = live_letter(draft, "")
+    if text.startswith("To:"):
+        text = text.split("\n", 1)[1]
+    if text.startswith("Subject:"):
+        text = text.split("\n", 1)[1].lstrip("\n")
+    return {"subject": draft["subject"], "body": text}
+
+
+def drafts_page() -> str:
+    news_rows = []
+    payload = {}
+    for item in BOOK["news"]:
+        payload[item["id"]] = news_mail(item)
+        news_rows.append(mail_row(item["id"], item["headline"], f'{item["date"]} · {item["source"]} · {item["severity"]}'))
+    other_rows = []
+    for draft in BOOK["drafts"]:
+        if draft["id"] == "MAIL-NEWS-APEX":
+            continue
+        payload[draft["id"]] = draft_mail(draft)
+        other_rows.append(mail_row(draft["id"], draft["subject"], draft["kind"]))
     return f"""
     <div class="label">Outbox</div><h1>Email drafts</h1>
-    <p class="lead">Each letter is complete and written from the analysis. They are not sent from this site. Open one, type the recipient, then copy the letter or download the .eml file.</p>
-    <div class="card"><table><thead><tr><th>Subject</th><th>Kind</th><th>To</th></tr></thead><tbody>{rows}</tbody></table></div>"""
+    <p class="lead">Each subject has its own recipient. Send opens your mail program with that subject and address. This site does not deliver the message.</p>
+    <div class="card"><div class="label">Adverse news</div><div class="mail-list">{''.join(news_rows)}</div></div>
+    <div class="card" style="margin-top:12px"><div class="label">Other drafts</div><div class="mail-list">{''.join(other_rows)}</div></div>
+    {mail_script(payload)}"""
 
 
 def live_letter(draft: dict, recipient: str = "") -> str:
@@ -1692,28 +1804,38 @@ def live_letter(draft: dict, recipient: str = "") -> str:
 
 def email_page(draft_id: str) -> str:
     draft = next((item for item in BOOK["drafts"] if item["id"] == draft_id), BOOK["drafts"][0])
+    if draft["id"] == "MAIL-NEWS-APEX":
+        rows = []
+        payload = {}
+        for item in BOOK["news"]:
+            payload[item["id"]] = news_mail(item)
+            rows.append(mail_row(item["id"], item["headline"], f'{item["date"]} · {item["source"]} · {item["severity"]}'))
+        return f"""
+        <div class="label">Adverse news</div><h1>News drafts</h1>
+        <p class="lead">Each headline is its own subject. Type a recipient beside that subject and send it on its own. Send opens your mail program. This site does not deliver the message.</p>
+        <div class="card"><div class="mail-list">{''.join(rows)}</div></div>
+        {mail_script(payload)}"""
     letter = live_letter(draft)
-    draft_key = json.dumps(draft["id"])
+    payload = {draft["id"]: draft_mail(draft)}
     return f"""
     <div class="label">{escape(draft["kind"])}</div><h1>{escape(draft["subject"])}</h1>
-    <p class="lead">Type the recipient. The letter uses the checked reporting dates. Download it and send it from your own mailbox. Nothing is sent from this site.</p>
-    <label class="draft-to">Recipient
-      <input id="draft-to" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="name@example.com">
-    </label>
-    <p><a class="btn" id="draft-download" href="/email.eml?id={escape(draft["id"])}">Download .eml</a></p>
+    <p class="lead">This subject keeps its own recipient. Send opens your mail program. This site does not deliver the message.</p>
+    <div class="mail-list">{mail_row(draft["id"], draft["subject"], draft["kind"])}</div>
+    <p><a class="btn ghost" id="draft-download" href="/email.eml?id={escape(draft["id"])}">Download .eml</a></p>
     <textarea id="draft-letter" readonly>{escape(letter)}</textarea>
+    {mail_script(payload)}
     <script>
     (function () {{
-      var input = document.getElementById("draft-to");
+      var row = document.querySelector(".mail-row");
+      var input = row.querySelector("input");
       var letter = document.getElementById("draft-letter");
       var link = document.getElementById("draft-download");
-      var draftId = {draft_key};
       function paint() {{
         var address = input.value.replace(/\\s+/g, "").slice(0, 254);
         var lines = letter.value.split("\\n");
         lines[0] = "To: " + address;
         letter.value = lines.join("\\n");
-        link.href = "/email.eml?id=" + encodeURIComponent(draftId) + (address ? "&to=" + encodeURIComponent(address) : "");
+        link.href = "/email.eml?id=" + encodeURIComponent(row.dataset.id) + (address ? "&to=" + encodeURIComponent(address) : "");
       }}
       input.addEventListener("input", paint);
     }})();
