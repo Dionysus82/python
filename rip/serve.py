@@ -1612,7 +1612,7 @@ def repayment_page(window: int, threshold: int = THRESHOLD) -> str:
         )
     body = "".join(lines) or f'<tr><td colspan="6">No obligation above {escape(money(threshold))} falls in this window.</td></tr>'
     return f"""
-    <div class="label">Repayment</div><h1>Obligations above {escape(money(threshold))}</h1>
+    <div class="label">Repayment</div><h1>Repayment schedule</h1>
     <p class="lead">Position {escape(view().label())}. Due dates and amounts are the next principal on that date's cash flow schedule. The threshold starts at HKD 5,000,000 and can be changed. The window is {window} days.</p>
     <form class="inline" method="get" action="/repayment">
       <label>Threshold (HKD)<br><input type="number" name="threshold" min="0" step="1000000" value="{threshold}"></label>
