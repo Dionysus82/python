@@ -207,7 +207,7 @@ def warning_lines(customer: dict) -> list[str]:
     return lines[:6]
 
 
-def build_proposal(customer: dict, point: dict) -> Document:
+def short_proposal(customer: dict, point: dict) -> Document:
     doc = blank_doc()
     as_of = label_date(point["date"])
     kicker = doc.add_paragraph()
@@ -291,7 +291,7 @@ def build_proposal(customer: dict, point: dict) -> Document:
     return doc
 
 
-def build_report(customer: dict, point: dict, actions: list[dict] | None = None) -> Document:
+def short_report(customer: dict, point: dict, actions: list[dict] | None = None) -> Document:
     doc = blank_doc()
     as_of = label_date(point["date"])
     kicker = doc.add_paragraph()
@@ -380,7 +380,24 @@ def build_report(customer: dict, point: dict, actions: list[dict] | None = None)
     return doc
 
 
+def _papers():
+    import sys
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    import long_papers
+    return long_papers
+
+
+def build_proposal(customer: dict, point: dict) -> Document:
+    return _papers().build_proposal(customer, point)
+
+
+def build_report(customer: dict, point: dict, actions: list[dict] | None = None) -> Document:
+    return _papers().build_monitoring(customer, point, actions)
+
+
 def main() -> None:
+    long_papers = _papers()
     book = json.loads(BOOK.read_text(encoding="utf-8"))
     OUT.mkdir(parents=True, exist_ok=True)
     index = []
@@ -388,7 +405,8 @@ def main() -> None:
         point = customer["history"][-1]
         folder = OUT / customer["customer_id"]
         folder.mkdir(parents=True, exist_ok=True)
-        build_proposal(customer, point).save(folder / "proposal.docx")
+        if customer["customer_id"] != long_papers.APEX_ID:
+            build_proposal(customer, point).save(folder / "proposal.docx")
         build_report(customer, point).save(folder / "report.docx")
         index.append({
             "id": customer["customer_id"],

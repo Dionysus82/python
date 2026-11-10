@@ -801,7 +801,7 @@ def news_detail(item: dict) -> str:
 ACTION_NOTES = {
     "ready": "Actions for the selected headlines are below. Edit the wording, then confirm to add them to the borrower report.",
     "saved": "Edits are saved on this page. They stay out of the report until you confirm.",
-    "added": "The confirmed wording is now in the borrower monitoring report, under Adverse news actions.",
+    "added": "The confirmed wording is now under section 7, Other Market News, of the borrower monitoring report.",
     "choose": "Choose a borrower and keep the wording for each action before adding it to a report. The edits were saved.",
     "pick": "Select at least one headline, then generate actions.",
 }
@@ -843,8 +843,8 @@ def action_desk(note: str) -> str:
     link_html = f'<p class="news-links">{links}</p>' if links else ""
     intro = (
         "Select one or more headlines, then generate actions. Edit the wording here. "
-        "Confirm adds each action to that borrower's monitoring report, in section 4, Adverse news actions. "
-        "The annual-review proposal is left unchanged."
+        "Confirm adds each action under section 7, Other Market News, of that borrower's monitoring report. "
+        "The rest of that report stays in place. The annual-review proposal is left unchanged."
     )
     if not records:
         return f"""
