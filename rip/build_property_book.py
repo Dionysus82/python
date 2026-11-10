@@ -519,7 +519,7 @@ def main() -> None:
         "dates": dates,
         "portfolio_history": portfolio_history,
         "threshold_hkd": THRESHOLD,
-        "notify_to": "yiyangyao2@gmail.com",
+        "notify_to": "credit.desk@hkbea.example",
         "default_customer_id": anchor_customer,
         "default_industry": anchor_industry,
         "ecl_sources": wholesale_sources,
@@ -549,16 +549,15 @@ VIRTUAL = {
         "ecl_rate": 0.035,
         "prior_factor": 0.72,
         "guarantor": "Apex Group parent comfort letter, unsecured",
-        "revenue_hkd": [4_820_000_000, 4_260_000_000, 3_640_000_000],
-        "margin_pct": [21.4, 18.6, 15.2],
-        "liquidity_ratio": [1.38, 1.22, 1.08],
-        "leverage": [4.6, 5.3, 6.2],
-        "interest_coverage": [2.6, 2.1, 1.7],
+        "revenue_hkd": [1_180_000_000, 1_140_000_000, 1_140_000_000],
+        "margin_pct": [67.8, 67.5, 67.5],
+        "liquidity_ratio": [1.35, 1.32, 1.30],
+        "leverage": [1.86, 1.85, 1.85],
+        "interest_coverage": [2.3, 2.2, 2.2],
         "coverage_assumption": 2.5,
         "coverage_threshold": 2.0,
         "warnings": [
-            "Demonstration statements: interest cover is 1.7 times, below the 2.0 times covenant. Statements are not in the portfolio file.",
-            "Placeholder news: office leasing on the Kowloon towers is behind the budget used at approval.",
+            "Annual-review statements at FY2025: interest cover 2.2 times against a 2.0 times covenant, net gearing 1.85 times. No covenant breach on those statements.",
         ],
     },
     "BOR-APL": {
@@ -747,14 +746,22 @@ def apply_virtual(customers: list[dict]) -> None:
         )
         customer["documents"]["financials"] = {
             "title": f"Demonstration statements — {customer['legal_name']}",
-            "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
+            "locator": (
+                "Apex Group annual review at 31 October 2025, section C3."
+                if customer["customer_id"] == "BOR-AGHL"
+                else "Placeholder financials for the covenant screen. Not in the uploaded extracts."
+            ),
             "passage": (
                 f"2024 to 2026 revenue {money_words(profile['revenue_hkd'][0])}, "
                 f"{money_words(profile['revenue_hkd'][1])}, {money_words(profile['revenue_hkd'][2])}. "
                 f"Interest cover {profile['interest_coverage'][0]:.1f} times, "
                 f"{profile['interest_coverage'][1]:.1f} times, {cover:.1f} times. "
                 f"Covenant {profile['coverage_threshold']:.1f} times. "
-                "Replace these figures when statements are provided."
+                + (
+                    "These are the group figures in the 31 October 2025 annual review."
+                    if customer["customer_id"] == "BOR-AGHL"
+                    else "Replace these figures when statements are provided."
+                )
             ),
         }
         customer["documents"]["review"]["passage"] += (
@@ -945,7 +952,7 @@ def letter(subject, kind, customer_id, paragraphs: list[str]) -> dict:
     )
     body = "\n".join(
         [
-            "To: yiyangyao2@gmail.com",
+            "To: credit.desk@hkbea.example",
             f"Subject: {subject}",
             "",
             banner,
@@ -1028,8 +1035,8 @@ def letters(customers, focus, industries, drawn, collateral_split, news_feed):
         ("MAIL-COV-APEX", "Covenant scenario"),
         apex["customer_id"],
         [
-            "Financial statements were not in the uploaded files. The figures below are a demonstration so the covenant screen can be used.",
-            f"Latest demonstration interest cover for {apex['legal_name']} is {apex['interest_coverage'][-1]:.1f} times. The covenant is {apex['coverage_threshold']:.1f} times, so the name is outside the covenant on this placeholder.",
+            "The group statements are those used in the 31 October 2025 annual review. They are not the portfolio-extract balances.",
+            f"Latest interest cover for {apex['legal_name']} is {apex['interest_coverage'][-1]:.1f} times. The covenant is {apex['coverage_threshold']:.1f} times, so the name is {'inside' if apex['interest_coverage'][-1] >= apex['coverage_threshold'] else 'outside'} the covenant on those statements.",
             f"A revenue decline of 15 percent moves cover to about {projected:.1f} times. Margin, funding cost and liquidity cases are on the financials screen.",
             f"What is from the extract: drawn {money_words(apex['drawn_hkd'])}, property market value {money_words(apex['collateral_hkd'])}, LTV {apex['ltv']:.2f}.",
         ],

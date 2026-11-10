@@ -22,7 +22,40 @@ import agent_slot
 import build_obligor_reports
 import news_desk
 BOOK = json.loads((ROOT / "book.json").read_text(encoding="utf-8"))
+BOOK["news"] = news_desk.load_workbook_news(BOOK["customers"], ROOT / "property_data" / "apex_negative_news_v3.xlsx")
 news_desk.apply_severity(BOOK["news"])
+HKEX_FILINGS = [
+    {
+        "id": "3768-annual",
+        "issuer": "Apex Water Solutions Ltd. (3768.HK)",
+        "document": "Annual report 2025",
+        "year": 2025,
+        "names": [
+            "Apex Water Solutions Ltd.",
+            "Apex Water Solutions",
+            "3768.HK",
+            "3768",
+            "Apex Global Holdings Limited",
+            "Apex Global Holdings",
+            "BOR-AGHL",
+        ],
+    },
+    {
+        "id": "3768-interim",
+        "issuer": "Apex Water Solutions Ltd. (3768.HK)",
+        "document": "Interim report 2026",
+        "year": 2026,
+        "names": [
+            "Apex Water Solutions Ltd.",
+            "Apex Water Solutions",
+            "3768.HK",
+            "3768",
+            "Apex Global Holdings Limited",
+            "Apex Global Holdings",
+            "BOR-AGHL",
+        ],
+    },
+]
 REPORT_FILES = ROOT / "report_files"
 OBLIGORS = json.loads((REPORT_FILES / "obligors.json").read_text(encoding="utf-8"))
 UPLOADS = REPORT_FILES / "uploads"
@@ -41,8 +74,8 @@ SEEDED_PROPOSALS = [
         "output_name": "Apex_Group_Credit_Monitoring_Report_31Oct2026.docx",
     }
 ]
-NOTIFY = BOOK["notify_to"]
 THRESHOLD = BOOK["threshold_hkd"]
+REPAY_NOTICE_DAYS = 92
 
 DEMO_USER = "cro.shum"
 DEMO_PASSWORD = "Harbour-Demo-2026"
@@ -146,17 +179,56 @@ def bind_view(dates: list[str], next_path: str) -> BookView:
     return chosen
 
 
-def dates_from_cookie(header: str | None) -> list[str]:
+def date_scope(path: str) -> str:
+    parsed = urlparse(path if path.startswith("/") else "/" + path)
+    key = parsed.path.strip("/") or "dashboard"
+    if key == "email":
+        return "drafts"
+    if key == "reports" and (parse_qs(parsed.query).get("source") or [""])[0] == "external":
+        return "reports-external"
+    return key
+
+
+def date_scopes(header: str | None) -> dict[str, list[str]]:
     jar = SimpleCookie()
     jar.load(header or "")
     morsel = jar.get("rip-dates")
-    if morsel is None or not morsel.value:
-        return list(BOOK["dates"])
-    return [item for item in morsel.value.split(",") if item in BOOK["dates"]]
+    raw = morsel.value if morsel is not None else ""
+    known = set(BOOK["dates"])
+    if not raw:
+        return {}
+    if ":" not in raw:
+        legacy = [item for item in raw.split(",") if item in known]
+        return {"*": legacy} if legacy else {}
+    stored: dict[str, list[str]] = {}
+    for part in raw.split("|"):
+        name, sep, dates = part.partition(":")
+        if not sep or not name:
+            continue
+        chosen = [item for item in dates.split(",") if item in known]
+        if chosen:
+            stored[name] = chosen
+    return stored
 
 
-def date_cookie(dates: list[str]) -> str:
-    value = ",".join(dates)
+def dates_from_cookie(header: str | None, scope: str) -> list[str]:
+    stored = date_scopes(header)
+    if scope in stored:
+        return stored[scope]
+    if "*" in stored:
+        return stored["*"]
+    return list(BOOK["dates"])
+
+
+def date_cookie(header: str | None, scope: str, dates: list[str]) -> str:
+    stored = date_scopes(header)
+    legacy = stored.pop("*", None)
+    if legacy:
+        for name in ("dashboard", "industry", "financial", "repayment", "reports", "assistant", "drafts", "customer"):
+            stored.setdefault(name, list(legacy))
+    chosen = [item for item in BOOK["dates"] if item in dates] or [BOOK["dates"][-1]]
+    stored[scope] = chosen
+    value = "|".join(f"{name}:{','.join(stored[name])}" for name in stored)
     return f"rip-dates={value}; HttpOnly; SameSite=Lax; Path=/; Max-Age=31536000"
 
 
@@ -248,7 +320,7 @@ def date_bar(where: str = "top") -> str:
       </button>
       <div class="date-panel" id="date-panel">
         {''.join(boxes)}
-        <p class="hint">Position {escape(chosen.label())}. The trend uses the {count} checked date{"s" if count != 1 else ""}.</p>
+        <p class="hint">This page only. Position {escape(chosen.label())}. Dashboard numbers use these dates. The trend keeps its own months.</p>
         <div class="date-actions">
           <button type="submit" name="preset" value="apply">Apply dates</button>
           <button type="submit" class="ghost" name="preset" value="all">All dates</button>
@@ -258,34 +330,25 @@ def date_bar(where: str = "top") -> str:
     </form>"""
 
 
-def chart_month_menu() -> str:
-    chosen = view()
+def trend_month_menu() -> str:
     history = BOOK["portfolio_history"]
+    chosen = view()
     boxes = []
     for index, item in enumerate(history):
-        checked = "checked" if item["date"] in chosen.dates else ""
-        label = chosen.label(item["date"])
         boxes.append(
-            f'<label><input type="checkbox" name="d" value="{item["date"]}" data-month="{index}" {checked}>{escape(label)}</label>'
+            f'<label><input type="checkbox" data-trend-month="{index}" checked>{escape(chosen.label(item["date"]))}</label>'
         )
-    count = len(chosen.dates)
-    if count == len(history):
-        summary = f"All {count} months"
-    elif count == 1:
-        summary = chosen.label()
-    else:
-        summary = f"{count} months"
     return f"""
-    <form class="date-menu corner" id="trend-months" method="post" action="/dates">
-      <input type="hidden" name="next" value="/dashboard">
-      <button type="button" class="date-toggle" aria-expanded="false" aria-controls="trend-month-panel">
-        <span class="label">Chart months</span>
-        <strong>{escape(summary)}</strong>
+    <div class="date-menu" id="trend-series-months">
+      <button type="button" class="date-toggle" aria-expanded="false" aria-controls="trend-series-panel">
+        <span class="label">Trend months</span>
+        <strong>All {len(history)} months</strong>
       </button>
-      <div class="date-panel" id="trend-month-panel">
+      <div class="date-panel" id="trend-series-panel">
+        <p class="hint">The lines use every checked month. The donut uses the latest. Dashboard numbers keep their own dates.</p>
         {''.join(boxes)}
       </div>
-    </form>"""
+    </div>"""
 
 
 def trend_table(metrics: list[tuple[str, object]]) -> str:
@@ -298,54 +361,60 @@ def trend_table(metrics: list[tuple[str, object]]) -> str:
     return f'<div class="scroll"><table class="trend"><thead><tr><th></th>{head}</tr></thead><tbody>{"".join(rows)}</tbody></table></div>'
 
 
+def borrower_trends() -> list[dict]:
+    dates = [item["date"] for item in BOOK["portfolio_history"]]
+    rows = []
+    for raw in sorted(BOOK["customers"], key=lambda item: item["legal_name"].lower()):
+        by_date = {item["date"]: item for item in raw.get("history") or []}
+        rows.append({
+            "id": raw["customer_id"],
+            "name": raw["legal_name"],
+            "outstanding": [round(float((by_date.get(iso) or {}).get("drawn_hkd") or 0), 2) for iso in dates],
+            "ecl": [round(float((by_date.get(iso) or {}).get("ecl_hkd") or 0), 2) for iso in dates],
+        })
+    return rows
+
+
 def trend_chart() -> str:
     history = BOOK["portfolio_history"]
     chosen = view()
     payload = {
         "labels": [datetime.strptime(item["date"], "%Y-%m-%d").strftime("%b %y") for item in history],
         "full": [chosen.label(item["date"]) for item in history],
-        "series": [
-            {"id": "ecl", "name": "ECL", "unit": "hkd", "on": True, "values": [item["ecl_hkd"] for item in history]},
-            {"id": "dpd60", "name": "Drawn 60 days or more past due", "unit": "hkd", "on": False, "values": [item["dpd60_drawn"] for item in history]},
-            {"id": "stage2", "name": "Drawn in stage 2", "unit": "hkd", "on": False, "values": [item["stage2_drawn"] for item in history]},
-            {"id": "drawn", "name": "Drawn exposure", "unit": "hkd", "on": False, "values": [item["drawn_hkd"] for item in history]},
-            {"id": "pastdue", "name": "Names past due", "unit": "count", "on": False, "values": [item["dpd_names"] for item in history]},
-            {"id": "stage2n", "name": "Stage 2 names", "unit": "count", "on": False, "values": [item["stage2_names"] for item in history]},
-            {"id": "cover", "name": "ECL coverage", "unit": "pct", "on": False, "values": [item["ecl_coverage"] for item in history]},
-            {"id": "ltv", "name": "Portfolio LTV", "unit": "ratio", "on": False, "values": [item["ltv"] for item in history]},
-            {"id": "large", "name": "Large repayments inside 90 days", "unit": "count", "on": False, "values": [len(item["large_due"]) for item in history]},
-        ],
+        "outstanding": [item["drawn_hkd"] for item in history],
+        "ecl": [item["ecl_hkd"] for item in history],
+        "borrowers": borrower_trends(),
     }
-    series_boxes = "".join(
-        f'<label><input type="checkbox" data-series="{escape(item["id"])}" {"checked" if item["on"] else ""}>{escape(item["name"])}</label>'
-        for item in payload["series"]
+    borrower_options = "".join(
+        f'<option value="{escape(item["id"])}">{escape(item["name"])}</option>'
+        for item in payload["borrowers"]
     )
     script = r"""
 <script>
 (function () {
   var data = window.TREND_DATA;
+  var lineSvg = document.getElementById("trend-line");
   var svg = document.getElementById("trend-svg");
   var note = document.getElementById("trend-note");
+  var lineLegend = document.getElementById("trend-line-legend");
   var legend = document.getElementById("trend-legend");
-  var colors = ["#E36F1E", "#B42318", "#8C3E16", "#2457A6", "#1F6B4A", "#6F6862", "#C45112", "#3A342F", "#8A6A2F"];
+  var lineTip = document.getElementById("trend-line-tip");
+  var tip = document.getElementById("trend-tip");
+  var lineColors = { outstanding: "#E36F1E", ecl: "#B42318" };
   function checked(selector) {
     return Array.prototype.filter.call(document.querySelectorAll(selector), function (box) { return box.checked; });
   }
-  function fmt(unit, value) {
-    if (unit === "hkd") {
-      var abs = Math.abs(value);
-      if (abs >= 1e9) return "HKD " + (value / 1e9).toFixed(2) + "bn";
-      if (abs >= 1e6) return "HKD " + (value / 1e6).toFixed(1) + "m";
-      return "HKD " + Math.round(value).toLocaleString("en-HK");
-    }
-    if (unit === "pct") return (value * 100).toFixed(2) + "%";
-    if (unit === "ratio") return Number(value).toFixed(2);
-    return String(Math.round(value));
+  function mil(value) {
+    var text = (Number(value) / 1e6).toLocaleString("en-HK", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    return text + " mil";
+  }
+  function attr(value) {
+    return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
   }
   function refreshMonthLabel() {
-    var host = document.getElementById("trend-months");
+    var host = document.getElementById("trend-series-months");
     if (!host) return;
-    var boxes = host.querySelectorAll("[data-month]");
+    var boxes = host.querySelectorAll("[data-trend-month]");
     var on = Array.prototype.filter.call(boxes, function (box) { return box.checked; });
     var strong = host.querySelector("strong");
     if (!on.length) strong.textContent = "No months";
@@ -353,41 +422,43 @@ def trend_chart() -> str:
     else if (on.length === 1) strong.textContent = on[0].parentNode.textContent.trim();
     else strong.textContent = on.length + " months";
   }
-  function draw() {
-    refreshMonthLabel();
-    var series = checked("[data-series]").map(function (box) {
-      return data.series.filter(function (item) { return item.id === box.getAttribute("data-series"); })[0];
-    });
-    var months = checked("[data-month]").map(function (box) { return Number(box.getAttribute("data-month")); });
-    if (!series.length || !months.length) {
-      svg.innerHTML = "";
-      legend.innerHTML = "";
-      note.textContent = "Check at least one series and one month.";
+  function ring(cx, cy, r, width, color, extra) {
+    return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="' + width + '"' + extra + '></circle>';
+  }
+  function arc(cx, cy, r, fraction, width, color, extra) {
+    var sweep = Math.min(Math.max(fraction, 0), 1) * Math.PI * 2;
+    if (sweep <= 0) return "";
+    if (sweep >= Math.PI * 2 - 0.0001) return ring(cx, cy, r, width, color, extra);
+    var x2 = cx + r * Math.sin(sweep);
+    var y2 = cy - r * Math.cos(sweep);
+    var large = sweep > Math.PI ? 1 : 0;
+    return '<path fill="none" stroke="' + color + '" stroke-width="' + width + '" d="M ' + cx + ' ' + (cy - r) + ' A ' + r + ' ' + r + ' 0 ' + large + ' 1 ' + x2 + ' ' + y2 + '"' + extra + '></path>';
+  }
+  function legendItem(color, name, unit) {
+    return '<div class="legend-item"><i style="background:' + color + '"></i><div><strong>' + name + '</strong><span class="unit">' + unit + '</span></div></div>';
+  }
+  function drawLine(months, outstanding, ecl) {
+    var series = [
+      { name: "Outstanding", color: lineColors.outstanding, values: outstanding },
+      { name: "ECL", color: lineColors.ecl, values: ecl }
+    ];
+    if (!months.length) {
+      lineSvg.innerHTML = "";
+      lineLegend.innerHTML = "";
       return;
     }
-    var W = 760, H = 280, left = 78, right = 16, top = 18, bottom = 36;
+    var W = 760, H = 280, left = 96, right = 16, top = 18, bottom = 36;
     var plotW = W - left - right, plotH = H - top - bottom;
-    var units = {};
-    series.forEach(function (item) { units[item.unit] = true; });
-    var peaks = series.map(function (item) {
-      return Math.max.apply(null, months.map(function (index) { return item.values[index]; }));
-    });
-    var positive = peaks.filter(function (value) { return value > 0; });
-    var wide = positive.length > 1 && Math.max.apply(null, positive) / Math.min.apply(null, positive) > 20;
-    var indexMode = Object.keys(units).length > 1 || wide;
-    var prepared = series.map(function (item, order) {
-      var slice = months.map(function (index) { return item.values[index]; });
-      var peak = Math.max.apply(null, slice.concat([0]));
-      var plot = indexMode ? slice.map(function (value) { return peak ? value / peak * 100 : 0; }) : slice;
-      return { item: item, slice: slice, plot: plot, color: colors[order % colors.length], last: slice[slice.length - 1] };
-    });
     var flat = [];
-    prepared.forEach(function (line) { flat = flat.concat(line.plot); });
+    series.forEach(function (line) {
+      months.forEach(function (index) { flat.push(Number(line.values[index]) || 0); });
+    });
     var min = Math.min.apply(null, flat);
     var max = Math.max.apply(null, flat);
+    var rawMin = min;
     if (min === max) { min = min - 1; max = max + 1; }
-    if (!indexMode && min > 0) min = min - (max - min) * 0.08;
-    if (min < 0 && Math.min.apply(null, flat) >= 0) min = 0;
+    if (min > 0) min = min - (max - min) * 0.08;
+    if (min < 0 && rawMin >= 0) min = 0;
     max = max + (max - min) * 0.08;
     function xAt(position) {
       if (months.length === 1) return left + plotW / 2;
@@ -399,34 +470,120 @@ def trend_chart() -> str:
       var value = min + (max - min) * tick / 3;
       var y = yAt(value);
       parts.push('<line x1="' + left + '" y1="' + y + '" x2="' + (W - right) + '" y2="' + y + '" stroke="#E4DDD6"/>');
-      var axis = indexMode ? Math.round(value) : fmt(series[0].unit, value);
-      parts.push('<text x="' + (left - 8) + '" y="' + (y + 4) + '" text-anchor="end" fill="#6F6862" font-size="11">' + axis + '</text>');
+      parts.push('<text x="' + (left - 8) + '" y="' + (y + 4) + '" text-anchor="end" fill="#6F6862" font-size="11">' + mil(value) + '</text>');
     }
     months.forEach(function (index, position) {
       parts.push('<text x="' + xAt(position) + '" y="' + (H - 10) + '" text-anchor="middle" fill="#6F6862" font-size="11">' + data.labels[index] + '</text>');
     });
-    prepared.forEach(function (line) {
-      var points = line.plot.map(function (value, position) { return xAt(position) + "," + yAt(value); }).join(" ");
-      parts.push('<polyline fill="none" stroke="' + line.color + '" stroke-width="2.5" points="' + points + '"/>');
-      line.plot.forEach(function (value, position) {
-        var actual = fmt(line.item.unit, line.slice[position]);
-        parts.push('<circle cx="' + xAt(position) + '" cy="' + yAt(value) + '" r="3.6" fill="' + line.color + '"><title>' + line.item.name + " " + data.full[months[position]] + " " + actual + '</title></circle>');
+    series.forEach(function (line) {
+      var plot = months.map(function (index) { return Number(line.values[index]) || 0; });
+      parts.push('<polyline fill="none" stroke="' + line.color + '" stroke-width="2.5" points="' + plot.map(function (value, position) { return xAt(position) + "," + yAt(value); }).join(" ") + '"/>');
+      plot.forEach(function (value, position) {
+        var index = months[position];
+        parts.push('<circle class="trend-dot" cx="' + xAt(position) + '" cy="' + yAt(value) + '" r="11" fill="transparent" data-name="' + line.name + '" data-when="' + attr(data.full[index]) + '" data-value="' + attr(mil(value)) + '"></circle>');
+        parts.push('<circle cx="' + xAt(position) + '" cy="' + yAt(value) + '" r="3.6" fill="' + line.color + '" pointer-events="none"></circle>');
       });
     });
-    svg.innerHTML = parts.join("");
-    legend.innerHTML = prepared.map(function (line) {
-      return '<span><i style="background:' + line.color + '"></i>' + line.item.name + " " + fmt(line.item.unit, line.last) + "</span>";
-    }).join("");
-    note.textContent = indexMode
-      ? "These series are on different scales, so each line is drawn against its own peak in the checked months. 100 is that peak. The legend is the actual figure at the last checked month."
-      : "The axis is the actual amount. The legend is the figure at the last checked month.";
+    lineSvg.innerHTML = parts.join("");
+    lineLegend.innerHTML = series.map(function (line) { return legendItem(line.color, line.name, "HKD mil"); }).join("");
   }
-  document.getElementById("trend-filter").addEventListener("change", draw);
-  var monthMenu = document.getElementById("trend-months");
-  if (monthMenu) monthMenu.addEventListener("change", function () {
-    draw();
-    monthMenu.submit();
+  function drawDonut(months, outstanding, ecl) {
+    legend.innerHTML = legendItem(lineColors.outstanding, "Outstanding", "HKD mil") + legendItem(lineColors.ecl, "ECL", "HKD mil");
+    if (!months.length) {
+      svg.innerHTML = "";
+      return;
+    }
+    var index = months[months.length - 1];
+    var drawn = Number(outstanding[index]) || 0;
+    var provision = Number(ecl[index]) || 0;
+    var ratio = drawn > 0 ? provision / drawn : 0;
+    var cx = 220, cy = 156, outer = 118, inner = 84;
+    var when = data.full[index];
+    var parts = [];
+    parts.push(ring(cx, cy, outer, 26, lineColors.outstanding, ""));
+    parts.push(ring(cx, cy, inner, 22, "#E7E0D8", ""));
+    if (ratio > 0) parts.push(arc(cx, cy, inner, ratio, 22, lineColors.ecl, ""));
+    parts.push(ring(cx, cy, outer, 34, "transparent", ' class="donut-hit" data-name="Outstanding" data-when="' + attr(when) + '" data-value="' + attr(mil(drawn)) + '"'));
+    if (ratio > 0) {
+      parts.push(arc(cx, cy, inner, ratio, 30, "transparent", ' class="donut-hit" data-name="ECL" data-when="' + attr(when) + '" data-value="' + attr(mil(provision)) + '"'));
+    }
+    parts.push('<text x="' + cx + '" y="' + (cy - 22) + '" text-anchor="middle" fill="#6F6862" font-size="12" font-weight="700">OUTSTANDING</text>');
+    parts.push('<text x="' + cx + '" y="' + (cy + 6) + '" text-anchor="middle" fill="#2C2825" font-size="22" font-weight="700">' + mil(drawn) + '</text>');
+    parts.push('<text x="' + cx + '" y="' + (cy + 32) + '" text-anchor="middle" fill="#B42318" font-size="13" font-weight="700">ECL ' + mil(provision) + '</text>');
+    parts.push('<text x="' + cx + '" y="328" text-anchor="middle" fill="#6F6862" font-size="13">' + attr(when) + '</text>');
+    svg.innerHTML = parts.join("");
+  }
+  function draw() {
+    lineTip.hidden = true;
+    tip.hidden = true;
+    refreshMonthLabel();
+    var borrowerId = document.getElementById("trend-borrower").value;
+    var person = borrowerId ? data.borrowers.filter(function (item) { return item.id === borrowerId; })[0] : null;
+    var outstanding = person ? person.outstanding : data.outstanding;
+    var ecl = person ? person.ecl : data.ecl;
+    var months = checked("[data-trend-month]").map(function (box) { return Number(box.getAttribute("data-trend-month")); });
+    drawLine(months, outstanding, ecl);
+    drawDonut(months, outstanding, ecl);
+    if (!months.length) {
+      note.textContent = "Check at least one month.";
+      return;
+    }
+    var when = data.full[months[months.length - 1]];
+    var who = person ? person.name + ". " : "All borrowers. ";
+    var picked = months.length === 1 ? "The donut is " + when + ". " : "The donut is " + when + ", the latest checked month. ";
+    note.textContent = who + "The lines follow every checked month. " + picked + "Amounts are in HKD million.";
+  }
+  var borrowerSelect = document.getElementById("trend-borrower");
+  try {
+    var savedBorrower = sessionStorage.getItem("rip-trend-borrower") || "";
+    if (savedBorrower && data.borrowers.some(function (item) { return item.id === savedBorrower; })) borrowerSelect.value = savedBorrower;
+  } catch (error) {}
+  borrowerSelect.addEventListener("change", function () {
+    try { sessionStorage.setItem("rip-trend-borrower", borrowerSelect.value); } catch (error) {}
   });
+  var trendMonths = document.getElementById("trend-series-months");
+  try {
+    var savedMonths = JSON.parse(sessionStorage.getItem("rip-trend-months") || "null");
+    if (Array.isArray(savedMonths)) {
+      trendMonths.querySelectorAll("[data-trend-month]").forEach(function (box) {
+        box.checked = savedMonths.indexOf(Number(box.getAttribute("data-trend-month"))) >= 0;
+      });
+    }
+  } catch (error) {}
+  trendMonths.addEventListener("change", function () {
+    var on = checked("[data-trend-month]").map(function (box) { return Number(box.getAttribute("data-trend-month")); });
+    try { sessionStorage.setItem("rip-trend-months", JSON.stringify(on)); } catch (error) {}
+  });
+  document.getElementById("trend-filter").addEventListener("change", draw);
+  function fillTip(host, hit) {
+    var name = document.createElement("strong");
+    name.textContent = hit.getAttribute("data-name");
+    var when = document.createElement("span");
+    when.textContent = hit.getAttribute("data-when");
+    var value = document.createElement("b");
+    value.textContent = hit.getAttribute("data-value");
+    host.replaceChildren(name, when, value);
+    host.hidden = false;
+  }
+  lineSvg.addEventListener("mouseover", function (event) {
+    var dot = event.target.closest(".trend-dot");
+    if (!dot) return;
+    fillTip(lineTip, dot);
+    var plot = lineSvg.parentElement.getBoundingClientRect();
+    var box = lineSvg.getBoundingClientRect();
+    lineTip.style.left = (box.left - plot.left + Number(dot.getAttribute("cx")) * box.width / 760) + "px";
+    lineTip.style.top = (box.top - plot.top + Number(dot.getAttribute("cy")) * box.height / 280) + "px";
+  });
+  lineSvg.addEventListener("mouseleave", function () { lineTip.hidden = true; });
+  svg.addEventListener("mousemove", function (event) {
+    var hit = event.target.closest(".donut-hit");
+    if (!hit) { tip.hidden = true; return; }
+    fillTip(tip, hit);
+    var plot = svg.parentElement.getBoundingClientRect();
+    tip.style.left = (event.clientX - plot.left) + "px";
+    tip.style.top = (event.clientY - plot.top) + "px";
+  });
+  svg.addEventListener("mouseleave", function () { tip.hidden = true; });
   draw();
 })();
 </script>
@@ -435,11 +592,32 @@ def trend_chart() -> str:
     <div class="card" style="margin-top:12px">
       <div class="label">Trend</div>
       <div class="dates" id="trend-filter">
-        <div class="label">Series</div>
-        {series_boxes}
+        <div class="label">Trend series</div>
+        <div class="trend-controls">
+          {trend_month_menu()}
+          <label class="trend-borrower">Borrower <select id="trend-borrower"><option value="">All borrowers</option>{borrower_options}</select></label>
+        </div>
       </div>
-      <svg id="trend-svg" viewBox="0 0 760 280" role="img" aria-label="Portfolio trend"></svg>
-      <div class="legend" id="trend-legend"></div>
+      <div class="trend-section">
+        <div class="label">Trend chart</div>
+        <div class="trend-layout trend-line-layout">
+          <div class="trend-plot">
+            <svg id="trend-line" viewBox="0 0 760 280" role="img" aria-label="Outstanding and ECL trend"></svg>
+            <div id="trend-line-tip" class="trend-tip" hidden></div>
+          </div>
+          <div class="legend legend-vertical" id="trend-line-legend"></div>
+        </div>
+      </div>
+      <div class="trend-section">
+        <div class="label">Latest month</div>
+        <div class="trend-layout">
+          <div class="trend-plot">
+            <svg id="trend-svg" viewBox="0 0 440 340" role="img" aria-label="Outstanding and ECL donut"></svg>
+            <div id="trend-tip" class="trend-tip" hidden></div>
+          </div>
+          <div class="legend legend-vertical" id="trend-legend"></div>
+        </div>
+      </div>
       <p class="lead" id="trend-note"></p>
     </div>
     <script>window.TREND_DATA = {json.dumps(payload)};</script>
@@ -450,16 +628,30 @@ def trend_chart() -> str:
 def page(title: str, active: str, body: str) -> bytes:
     nav = [
         ("dashboard", "Portfolio"),
-        ("news", "Adverse news"),
         ("industry", "Industry review"),
-        ("repayment", "Repayments"),
-        ("financial", "Financials and covenants"),
-        ("reports", "Reports"),
-        ("assistant", "Knowledge assistant"),
-        ("drafts", "Email drafts"),
+        ("financial", "Financial and covenants"),
+        ("repayment", "Repayment"),
+        ("news", "Adverse news"),
+        ("reports", "Report"),
+        ("assistant", "Agent portal"),
+        ("drafts", "Email portal"),
     ]
     links = []
     for key, label in nav:
+        if key == "reports":
+            opened = " open" if active in {"reports", "reports-external"} else ""
+            current = " active" if active in {"reports", "reports-external"} else ""
+            internal = "active" if active == "reports" else ""
+            external = "active" if active == "reports-external" else ""
+            links.append(
+                f'<div class="nav-sub{opened}">'
+                f'<button type="button" class="nav-parent{current}" aria-expanded="{"true" if opened else "false"}">Report</button>'
+                f'<div class="nav-menu">'
+                f'<a class="{internal}" href="/reports">Internal report</a>'
+                f'<a class="{external}" href="/reports?source=external">External report</a>'
+                f'</div></div>'
+            )
+            continue
         cls = "active" if key == active else ""
         links.append(f'<a class="{cls}" href="/{key}">{escape(label)}</a>')
     shown = dict(nav).get(title, title.replace("_", " ").title())
@@ -489,6 +681,30 @@ nav .mark span {{ color:var(--orange); }}
 nav p {{ color:#C8BEB4; font-size:.78rem; line-height:1.4; }}
 nav a {{ display:block; color:#E7E0D8; padding:9px 10px; border-left:3px solid transparent; border-radius:8px; margin:2px 0; }}
 nav a.active {{ background:rgba(227,111,30,.18); color:#fff; border-left-color:var(--orange); }}
+nav button.nav-parent {{ display:block; width:100%; text-align:left; background:transparent; color:#E7E0D8; border:0; border-left:3px solid transparent; border-radius:8px; margin:2px 0; padding:9px 10px; font-weight:600; cursor:pointer; }}
+nav button.nav-parent.active, .nav-sub.open > button.nav-parent {{ background:rgba(227,111,30,.18); color:#fff; border-left-color:var(--orange); }}
+.nav-menu {{ display:none; margin:0 0 6px 14px; }}
+.nav-sub.open .nav-menu {{ display:block; }}
+.nav-menu a {{ font-size:.86rem; padding:7px 10px; }}
+#unsent-list > h2 {{ font-size:1.2rem; margin:0 0 8px; }}
+.mail-head h2 {{ font-size:1.2rem; margin:0; }}
+.mail-head {{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin:0 0 8px; }}
+.mail-head button {{ font-size:.84rem; }}
+.mail-inbox details {{ border-top:1px solid var(--line); }}
+.mail-inbox details:first-of-type {{ border-top:0; }}
+.mail-inbox summary {{ display:grid; grid-template-columns:minmax(128px,190px) minmax(0,1fr) auto; gap:14px; align-items:center; padding:11px 6px; cursor:pointer; list-style:none; }}
+.mail-inbox summary::-webkit-details-marker {{ display:none; }}
+.mail-inbox summary::marker {{ content:""; }}
+.mail-inbox summary:hover, .mail-inbox details[open] summary {{ background:#F7F1EB; border-radius:8px; }}
+.mail-caret {{ display:inline-block; width:0; height:0; margin-right:8px; border-top:4px solid transparent; border-bottom:4px solid transparent; border-left:5px solid var(--muted); vertical-align:middle; }}
+.mail-inbox details[open] .mail-caret {{ transform:rotate(90deg); }}
+.mail-who {{ font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
+.mail-line {{ min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
+.mail-line strong {{ font-weight:650; color:var(--ink); }}
+.mail-snip {{ color:var(--muted); font-weight:400; }}
+.mail-when {{ color:var(--muted); font-size:.84rem; white-space:nowrap; }}
+.mail-route {{ margin:8px 8px 0; color:var(--muted); font-size:.86rem; }}
+.letter {{ white-space:pre-wrap; background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; margin:8px 8px 14px; font:14px/1.45 ui-monospace,monospace; }}
 nav a.logout {{ margin-top:18px; color:#C8BEB4; }}
 .nav-toggle {{ background:var(--rail); margin-bottom:12px; }}
 .backdrop {{ display:none; }}
@@ -518,6 +734,18 @@ tr.click:hover td, tr.news-item[data-open="1"] td {{ background:#FBF7F2; }}
 button, .btn {{ font:inherit; background:var(--orange); color:#fff; border:0; border-radius:8px; padding:8px 12px; font-weight:700; cursor:pointer; }}
 .btn.ghost {{ background:#F7F4F0; color:var(--ink); border:1px solid var(--line); }}
 textarea {{ width:100%; min-height:420px; font:14px/1.45 ui-monospace,monospace; border:1px solid var(--line); border-radius:10px; padding:12px; background:#fff; color:var(--ink); }}
+label.draft-to {{ display:flex; gap:8px; align-items:center; max-width:560px; margin:12px 0; font-size:.78rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }}
+label.draft-to input {{ flex:1; min-width:0; font:inherit; font-weight:600; letter-spacing:0; text-transform:none; color:var(--ink); padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; }}
+.mail-list {{ display:grid; gap:0; }}
+.mail-row {{ display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 12px; align-items:center; padding:12px 0; border-bottom:1px solid var(--line); }}
+.mail-row:first-child {{ padding-top:0; }}
+.mail-subject {{ min-width:0; }}
+.mail-subject strong {{ display:block; }}
+.mail-subject span {{ display:block; color:var(--muted); font-size:.8rem; margin-top:2px; }}
+.mail-send {{ display:flex; gap:8px; align-items:center; }}
+.mail-send input {{ width:min(280px, 42vw); font:inherit; font-weight:600; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); }}
+.mail-note {{ grid-column:1 / -1; margin:0; color:var(--red); font-size:.82rem; }}
+.mail-note[hidden] {{ display:none; }}
 .cite {{ font-size:.82rem; color:var(--muted); border-left:3px solid var(--orange); padding-left:10px; margin:8px 0; }}
 form.inline {{ display:flex; gap:8px; flex-wrap:wrap; align-items:end; }}
 .news-tools {{ display:flex; gap:12px; flex-wrap:wrap; align-items:end; justify-content:space-between; margin:8px 0 12px; }}
@@ -558,6 +786,8 @@ form.dates input {{ width:auto; margin:0; }}
 .date-menu.end {{ margin-top:18px; margin-bottom:0; }}
 .date-menu.end .date-panel {{ top:auto; bottom:calc(100% + 6px); }}
 .suggest {{ position:relative; max-width:560px; }}
+form.hkex-search .suggest {{ flex:1 1 420px; min-width:min(420px, 100%); }}
+form.hkex-search input[type=number] {{ width:7.5rem; }}
 .suggest input {{ width:100%; font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; margin-top:6px; }}
 .suggest-list {{ position:absolute; z-index:30; left:0; right:0; top:calc(100% + 4px); background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 12px 28px rgba(44,40,37,.14); max-height:320px; overflow:auto; }}
 .suggest-item {{ display:block; width:100%; text-align:left; background:#fff; color:var(--ink); border:0; border-bottom:1px solid var(--line); border-radius:0; padding:8px 12px; font-weight:600; }}
@@ -568,9 +798,54 @@ form.dates input {{ width:auto; margin:0; }}
 .date-actions {{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }}
 .date-panel button.ghost {{ background:#F7F4F0; color:var(--ink); border:1px solid var(--line); }}
 .trend-chart, #trend-svg {{ width:100%; height:auto; display:block; }}
+.trend-layout {{ display:grid; grid-template-columns:minmax(280px, 460px) 260px; gap:8px 28px; align-items:center; justify-content:start; }}
+.trend-line-layout {{ grid-template-columns:minmax(0,1fr) 220px; margin:4px 0 8px; }}
+.trend-section {{ margin-top:16px; }}
+.trend-plot {{ position:relative; min-width:0; }}
+.donut-hit, .trend-dot {{ cursor:pointer; }}
+.trend-tip {{ position:absolute; z-index:6; transform:translate(-50%, calc(-100% - 10px)); background:#2C2825; color:#fff; border-radius:8px; padding:8px 10px; font-size:.78rem; line-height:1.35; pointer-events:none; white-space:nowrap; box-shadow:0 8px 20px rgba(44,40,37,.22); }}
+.trend-tip[hidden] {{ display:none; }}
+.trend-tip strong, .trend-tip span, .trend-tip b {{ display:block; }}
+.trend-tip span {{ color:#E7E0D8; font-weight:400; }}
+.trend-tip b {{ margin-top:2px; }}
 .legend {{ display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:8px; font-size:.84rem; }}
-.legend i {{ display:inline-block; width:10px; height:10px; border-radius:99px; margin-right:6px; }}
+.legend-vertical {{ flex-direction:column; flex-wrap:nowrap; gap:14px; margin:0; align-items:stretch; }}
+.legend-item {{ display:grid; grid-template-columns:14px minmax(0,1fr); gap:8px; align-items:start; }}
+.legend i, .legend-item i {{ display:block; width:12px; height:12px; border-radius:99px; margin-top:4px; }}
+.legend-item strong {{ display:block; line-height:1.3; }}
+.legend-item .unit {{ display:block; margin-top:2px; color:var(--muted); font-size:.72rem; font-weight:700; letter-spacing:.04em; }}
+.legend-item .value {{ display:block; margin-top:2px; font-weight:700; }}
+#trend-filter {{ display:flex; flex-wrap:wrap; align-items:center; margin-bottom:8px; }}
+#trend-filter .label {{ width:100%; }}
+#trend-filter label {{ display:flex; gap:6px; align-items:center; margin:4px 14px 4px 0; font-weight:600; }}
+#trend-filter input {{ width:auto; margin:0; }}
+.trend-controls {{ display:flex; gap:12px; align-items:end; margin-left:auto; flex-wrap:wrap; }}
+#trend-series-months {{ margin:0; }}
+#trend-filter label.trend-borrower {{ margin-left:0; }}
+#trend-filter label.trend-borrower select {{ min-width:220px; max-width:320px; font-weight:600; }}
+@media (max-width:900px) {{
+  .trend-layout {{ grid-template-columns:1fr; }}
+}}
 .scroll {{ overflow-x:auto; }}
+body.news-lock {{ height:100vh; overflow:hidden; }}
+body.news-lock .shell {{ height:100vh; min-height:0; }}
+body.news-lock main {{ height:100vh; overflow:hidden; display:flex; flex-direction:column; padding-bottom:16px; }}
+.news-screen {{ display:flex; flex-direction:column; min-height:0; }}
+body.news-lock .news-screen {{ flex:1; }}
+.news-screen .lead {{ max-width:none; margin:0 0 10px; }}
+.news-boards {{ min-height:0; display:grid; grid-template-columns:1fr 1fr; gap:12px; }}
+body.news-lock .news-boards {{ flex:1; grid-template-rows:minmax(0, 1fr); }}
+.news-board {{ min-height:0; display:flex; flex-direction:column; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; }}
+.news-board h2 {{ margin:0 0 4px; font-size:1.15rem; }}
+.news-board .news-tools {{ margin:8px 0; }}
+.news-board .news-filters, .mail-tools .news-filters {{ margin-left:0; }}
+.news-scroll {{ min-height:0; overflow-y:scroll; border:1px solid var(--line); border-radius:10px; background:#fff; }}
+body.news-lock .news-scroll {{ flex:1; }}
+.news-scroll thead th {{ position:sticky; top:0; background:#fff; z-index:1; }}
+tr[hidden], .sent-mail[hidden] {{ display:none !important; }}
+@media (max-width:900px) {{
+  .news-boards {{ grid-template-columns:1fr; grid-template-rows:minmax(0, 1fr) minmax(0, 1fr); }}
+}}
 table.trend th, table.trend td {{ white-space:nowrap; }}
 table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
 @media (max-width:900px) {{
@@ -582,16 +857,17 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
   .shell.collapsed nav {{ transform:translateX(-105%); padding:22px 16px; width:min(280px,86vw); overflow:auto; }}
   .backdrop {{ position:fixed; inset:0; background:rgba(44,40,37,.35); z-index:25; }}
   .shell:not(.collapsed) .backdrop {{ display:block; }}
-  .metrics, .grid, .grid3, .news-read dl {{ grid-template-columns:1fr; }}
+  .metrics, .grid, .grid3, .news-read dl, .mail-row {{ grid-template-columns:1fr; }}
+  .mail-send input {{ flex:1; width:auto; min-width:0; }}
   main {{ padding:16px 16px 72px; }}
 }}
 </style>
 </head>
-<body>
+<body{" class=\"news-lock\"" if active == "news" else ""}>
 <div class="shell" id="shell">
   <nav id="rail">
     <div class="mark">BEA -<br><span>Risk Intelligence</span></div>
-    <p>Portfolio numbers follow the last checked month. Other pages keep the date choice in a menu.</p>
+    <p>Each page keeps its own reporting dates.</p>
     {''.join(links)}
     <a class="logout" href="/logout">Sign out</a>
   </nav>
@@ -599,12 +875,10 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
   <main>
     <div class="topbar">
       <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="rail">Hide menu</button>
-      {chart_month_menu() if active == "dashboard" else ""}
     </div>
     <div class="banner">{escape(BOOK["banner"])}</div>
-    {"" if active in {"dashboard", "news"} else date_bar()}
+    {"" if active in {"news", "reports-external", "assistant", "drafts"} else date_bar()}
     {body}
-    {date_bar("bottom") if active == "news" else ""}
   </main>
 </div>
 <script>
@@ -624,20 +898,37 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
     if (!narrow) localStorage.setItem("rip-nav", collapsed ? "1" : "0");
   }});
   document.getElementById("backdrop").addEventListener("click", function () {{ apply(true); }});
-  var menu = document.querySelector(".date-menu");
-  if (menu) {{
-    var dateToggle = menu.querySelector(".date-toggle");
-    dateToggle.addEventListener("click", function () {{
-      var open = menu.classList.toggle("open");
-      dateToggle.setAttribute("aria-expanded", open ? "true" : "false");
-    }});
-    document.addEventListener("click", function (event) {{
-      if (!menu.contains(event.target)) {{
-        menu.classList.remove("open");
-        dateToggle.setAttribute("aria-expanded", "false");
-      }}
+  var reportMenu = document.querySelector(".nav-sub");
+  if (reportMenu) {{
+    var reportButton = reportMenu.querySelector(".nav-parent");
+    reportButton.addEventListener("click", function () {{
+      var open = reportMenu.classList.toggle("open");
+      reportButton.setAttribute("aria-expanded", open ? "true" : "false");
     }});
   }}
+  document.querySelectorAll(".date-menu").forEach(function (menu) {{
+    var dateToggle = menu.querySelector(".date-toggle");
+    if (!dateToggle) return;
+    dateToggle.addEventListener("click", function (event) {{
+      event.stopPropagation();
+      var open = menu.classList.toggle("open");
+      dateToggle.setAttribute("aria-expanded", open ? "true" : "false");
+      document.querySelectorAll(".date-menu").forEach(function (other) {{
+        if (other === menu) return;
+        other.classList.remove("open");
+        var button = other.querySelector(".date-toggle");
+        if (button) button.setAttribute("aria-expanded", "false");
+      }});
+    }});
+  }});
+  document.addEventListener("click", function (event) {{
+    document.querySelectorAll(".date-menu").forEach(function (menu) {{
+      if (menu.contains(event.target)) return;
+      menu.classList.remove("open");
+      var button = menu.querySelector(".date-toggle");
+      if (button) button.setAttribute("aria-expanded", "false");
+    }});
+  }});
 }})();
 </script>
 </body>
@@ -693,7 +984,7 @@ def dashboard() -> str:
     )
     body = f"""
     <div class="label">Portfolio</div><h1>Management dashboard</h1>
-    <p class="lead">The number panels are {escape(position)}, the last checked month. The chart draws every checked month, and its legend is that same month. Financial statements, covenants and the news headlines are still demonstration figures.</p>
+    <p class="lead">The number panels follow the reporting dates for this dashboard, currently {escape(position)}. The trend series has its own months and borrower. Financial statements, covenants and the news headlines are still demonstration figures.</p>
     {metrics([
         ("Customers", str(port["customers"]), False),
         ("Drawn exposure", money(port["drawn_hkd"]), False),
@@ -752,6 +1043,12 @@ def news_facts(pairs: list[tuple[str, str]]) -> str:
     return f"<dl>{rows}</dl>"
 
 
+def sent_news_link(item: dict) -> str:
+    if item["severity"] == "LOW":
+        return ""
+    return f'<a href="/drafts#sent-{escape(item["id"])}">Open the message sent to the relationship manager</a>'
+
+
 def news_detail(item: dict) -> str:
     article, fields = news_fields(item["body"])
     factors = item["factors"]
@@ -782,11 +1079,12 @@ def news_detail(item: dict) -> str:
             *book_rows,
         ]
         links = (
-            f'<a href="/email?id=MAIL-NEWS-APEX">Open the adverse-news email draft</a>'
+            f'{sent_news_link(item)}'
             f'<a href="/industry?name={escape(person["industry"])}">Continue to the {escape(person["industry"])} industry review</a>'
         )
     else:
         links = (
+            f'{sent_news_link(item)}'
             f'<a href="/industry?name={escape(item["industry"])}">Continue to the {escape(item["industry"])} review</a>'
             f'<a href="/email?id=MAIL-IND-WHOLESALE">Open the industry email draft</a>'
         )
@@ -993,114 +1291,200 @@ def handle_news_form(form: dict[str, list[str]]) -> str:
     return "added"
 
 
+def news_action_form(item: dict) -> str:
+    state = news_desk.load_state()
+    record = state["actions"].get(item["id"]) if isinstance(state["actions"].get(item["id"]), dict) else {}
+    customer_id = (record or {}).get("customer_id") or item.get("customer_id") or ""
+    raw = next((row for row in BOOK["customers"] if row["customer_id"] == customer_id), None)
+    text = (record or {}).get("text") or news_desk.draft_action(item, raw)
+    confirmed = (record or {}).get("confirmed_text") or ""
+    confirmed_customer = (record or {}).get("confirmed_customer_id") or ""
+    if confirmed and confirmed == text and confirmed_customer == customer_id:
+        status = f"In the {obligor_name(confirmed_customer)} report."
+    elif confirmed:
+        status = "Saved here. The report still has the previous wording until you confirm."
+    else:
+        status = "Draft. Not in a report yet."
+    return (
+        '<div class="action-block">'
+        f'<div class="label">Action</div>'
+        f'<form method="post" action="/news-actions">'
+        f'<input type="hidden" name="news_id" value="{escape(item["id"])}">'
+        f'<label>Borrower<br><select name="customer_{escape(item["id"])}">{borrower_options(customer_id)}</select></label>'
+        f'<label>Action<br><textarea class="action" name="text_{escape(item["id"])}">{escape(text)}</textarea></label>'
+        f'<p class="lead">{escape(status)}</p>'
+        '<p class="date-actions"><button type="submit" class="ghost" name="intent" value="save">Save edits</button>'
+        '<button type="submit" name="intent" value="confirm">Confirm and add to the report</button></p>'
+        '</form></div>'
+    )
+
+
+INDUSTRY_NEWS = {"Sector Related News", "General News"}
+
+
+def news_group(item: dict) -> str:
+    return "industry" if item.get("news_type") in INDUSTRY_NEWS else "obligor"
+
+
+def news_borrower_name(item: dict) -> str:
+    person = customer(item.get("customer_id") or "")
+    if person:
+        return person["legal_name"]
+    entities = [part.strip() for part in str(item.get("entities") or "").split(",") if part.strip()]
+    return entities[0] if entities else "Not named"
+
+
+def news_industry_name(item: dict) -> str:
+    if item.get("customer_id"):
+        label = item.get("industry") or ""
+        if label and label != "Not linked on the book":
+            return label
+    text = item.get("headline") or ""
+    if "水" in text:
+        return "Public Utilities"
+    if "基建" in text:
+        return "Transportation & Infrastructure"
+    if "公用" in text:
+        return "Public Utilities"
+    return "Unclassified"
+
+
 def news_page(note: str = "") -> str:
-    rows = []
+    grouped = {"obligor": [], "industry": []}
     for order, item in enumerate(BOOK["news"]):
-        factors = item["factors"]
-        flag = '<span class="tag tag-red">Material</span>' if factors["material"] else '<span class="tag tag-grey">Below threshold</span>'
-        levels = "".join(
-            f'<option{" selected" if item["severity"] == level else ""}>{level}</option>'
-            for level in news_desk.SEVERITIES
-        )
-        rows.append(
-            f'<tr class="news-item click" data-order="{order}" data-severity="{escape(item["severity"])}" data-time="{news_stamp(item["date"])}">'
-            f'<td class="pick"><input form="news-pick" type="checkbox" name="ids" value="{escape(item["id"])}" aria-label="Select headline"></td>'
-            f'<td>{escape(item["headline"])}'
-            f'<div style="color:var(--muted);font-size:.8rem">{escape(item["date"])} · {escape(item["source"])}</div></td>'
-            f'<td>{escape(item["industry"])}</td>'
-            f'<td><select class="sev" data-id="{escape(item["id"])}" data-saved="{escape(item["severity"])}" aria-label="Severity">{levels}</select> <span class="sev-note" hidden>Saved</span></td>'
-            f'<td>{flag}</td></tr>'
-            f'<tr class="news-detail" hidden><td colspan="5">{news_detail(item)}</td></tr>'
-        )
+        grouped[news_group(item)].append((order, item))
+
+    def rows_for(kind: str) -> str:
+        rows = []
+        for order, item in grouped[kind]:
+            factors = item["factors"]
+            flag = '<span class="tag tag-red">Material</span>' if factors["material"] else '<span class="tag tag-grey">Below threshold</span>'
+            levels = "".join(
+                f'<option{" selected" if item["severity"] == level else ""}>{level}</option>'
+                for level in news_desk.SEVERITIES
+            )
+            borrower = news_borrower_name(item)
+            industry = news_industry_name(item)
+            label = borrower if kind == "obligor" else industry
+            rows.append(
+                f'<tr class="news-item click" data-order="{order}" data-severity="{escape(item["severity"])}" data-time="{news_stamp(item["date"])}" data-borrower="{escape(borrower)}" data-industry="{escape(industry)}">'
+                f'<td>{escape(item["headline"])}'
+                f'<div style="color:var(--muted);font-size:.8rem">{escape(item["date"])} · {escape(item["source"])}</div></td>'
+                f'<td>{escape(label)}</td>'
+                f'<td><select class="sev" data-id="{escape(item["id"])}" data-saved="{escape(item["severity"])}" aria-label="Severity">{levels}</select> <span class="sev-note" hidden>Saved</span></td>'
+                f'<td>{flag}</td></tr>'
+                f'<tr class="news-detail" hidden><td colspan="4">{news_detail(item)}{news_action_form(item)}</td></tr>'
+            )
+        return "".join(rows)
+
+    def choices(kind: str, field: str) -> str:
+        names = sorted({(news_borrower_name(item) if field == "borrower" else news_industry_name(item)) for _, item in grouped[kind]})
+        return "".join(f"<option>{escape(name)}</option>" for name in names)
+
+    def board(kind: str, title: str, column: str, field: str) -> str:
+        return f"""
+        <section class="news-board" data-filter="{field}">
+          <h2>{title}</h2>
+          <div class="news-tools">
+            <div class="news-filters">
+              <label><span class="label">{column}</span><br>
+                <select class="board-filter"><option value="">All</option>{choices(kind, field)}</select>
+              </label>
+              <label><span class="label">Severity</span><br>
+                <select class="severity-filter">
+                  <option value="">All</option>
+                  <option>CRITICAL</option>
+                  <option>HIGH</option>
+                  <option>MEDIUM</option>
+                  <option>LOW</option>
+                </select>
+              </label>
+              <label><span class="label">Sort</span><br>
+                <select class="news-sort">
+                  <option value="listed">As listed</option>
+                  <option value="severity-desc">Severity, high to low</option>
+                  <option value="severity-asc">Severity, low to high</option>
+                  <option value="date-desc">Date, newest</option>
+                  <option value="date-asc">Date, oldest</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div class="news-scroll"><table><thead><tr><th>Item</th><th>{column}</th><th>Severity</th><th></th></tr></thead>
+            <tbody>{rows_for(kind)}<tr class="news-empty" hidden><td colspan="4">No news matches this filter.</td></tr></tbody>
+          </table></div>
+        </section>"""
+    message = ACTION_NOTES.get(note, "")
+    message_html = f"<p><strong>{escape(message)}</strong></p>" if message else ""
     return f"""
-    <div class="label">Step 1 of 3</div><h1>Adverse news</h1>
-    <p class="lead">These headlines are the Apex negative-news file. Click a headline to open its detail here. Click the severity to change it, and the change is saved. Select one or more headlines to draft an action for the borrower report. Materiality uses exposure, security coverage, guarantor support, financial strength and open warnings.</p>
-    <form id="news-pick" method="post" action="/news-actions"></form>
-    <div>
-      <div class="news-tools">
-        <button type="submit" form="news-pick" name="intent" value="generate" id="news-generate">Generate actions</button>
-        <div class="news-filters">
-        <label><span class="label">Severity</span><br>
-          <select id="severity-filter">
-            <option value="">All</option>
-            <option>CRITICAL</option>
-            <option>HIGH</option>
-            <option>MEDIUM</option>
-            <option>LOW</option>
-          </select>
-        </label>
-        <label><span class="label">Sort</span><br>
-          <select id="news-sort">
-            <option value="listed">As listed</option>
-            <option value="severity-desc">Severity, high to low</option>
-            <option value="severity-asc">Severity, low to high</option>
-            <option value="date-desc">Date, newest</option>
-            <option value="date-asc">Date, oldest</option>
-          </select>
-        </label>
-        </div>
-      </div>
-      <div class="scroll"><table><thead><tr><th class="pick"></th><th>Item</th><th>Industry</th><th>Severity</th><th></th></tr></thead><tbody id="news-body">{''.join(rows)}
-        <tr id="news-empty" hidden><td colspan="5">No news at this severity.</td></tr>
-      </tbody></table></div>
+    <div class="news-screen">
+    <div class="label">Adverse news</div><h1>Adverse news</h1>
+    <p class="lead">Adverse news is a daily update. Obligor related news is filtered by borrower. Industry news is filtered by industry. Click a headline to open the article and its action. Severity changes save immediately.</p>
+    {message_html}
+    <div class="news-boards">
+      {board("obligor", "Obligor related news", "Borrower", "borrower")}
+      {board("industry", "Industry news", "Industry", "industry")}
     </div>
-    {action_desk(note)}
+    </div>
     <script>
     (function () {{
       var rank = {{"CRITICAL": 4, "HIGH": 3, "MEDIUM": 2, "LOW": 1}};
-      var filter = document.getElementById("severity-filter");
-      var sort = document.getElementById("news-sort");
-      var body = document.getElementById("news-body");
-      var empty = document.getElementById("news-empty");
-      var generate = document.getElementById("news-generate");
-      function pairs() {{
-        return [...body.querySelectorAll("tr.news-item")].map(function (row) {{
-          return {{row: row, detail: row.nextElementSibling}};
-        }});
-      }}
-      function apply() {{
-        var want = filter.value;
-        var mode = sort.value;
-        var items = pairs();
-        items.sort(function (a, b) {{
-          if (mode === "severity-desc") return (rank[b.row.dataset.severity] - rank[a.row.dataset.severity]) || (Number(a.row.dataset.order) - Number(b.row.dataset.order));
-          if (mode === "severity-asc") return (rank[a.row.dataset.severity] - rank[b.row.dataset.severity]) || (Number(a.row.dataset.order) - Number(b.row.dataset.order));
-          if (mode === "date-desc") return Number(b.row.dataset.time) - Number(a.row.dataset.time);
-          if (mode === "date-asc") return Number(a.row.dataset.time) - Number(b.row.dataset.time);
-          return Number(a.row.dataset.order) - Number(b.row.dataset.order);
-        }});
-        var shown = 0;
-        items.forEach(function (item) {{
-          var visible = !want || item.row.dataset.severity === want;
-          item.row.hidden = !visible;
-          item.detail.hidden = !visible || item.row.dataset.open !== "1";
-          if (visible) shown += 1;
-          body.appendChild(item.row);
-          body.appendChild(item.detail);
-        }});
-        empty.hidden = shown > 0;
-        body.appendChild(empty);
-      }}
-      function refreshGenerate() {{
-        generate.disabled = ![...body.querySelectorAll('input[name="ids"]')].some(function (box) {{ return box.checked; }});
-      }}
-      body.addEventListener("click", function (event) {{
-        if (event.target.closest("select, input, button, a, textarea, label")) return;
-        var row = event.target.closest("tr.news-item");
-        if (!row) return;
-        var detail = row.nextElementSibling;
-        var open = row.dataset.open !== "1";
-        row.dataset.open = open ? "1" : "";
-        detail.hidden = !open;
-        if (open) detail.scrollIntoView({{block: "nearest"}});
-      }});
-      body.addEventListener("change", function (event) {{
-        var select = event.target.closest("select.sev");
-        if (!select) {{
-          if (event.target.name === "ids") refreshGenerate();
-          return;
+      document.querySelectorAll(".news-board").forEach(function (board) {{
+        var key = board.dataset.filter;
+        var filter = board.querySelector(".board-filter");
+        var severity = board.querySelector(".severity-filter");
+        var sort = board.querySelector(".news-sort");
+        var body = board.querySelector("tbody");
+        var empty = board.querySelector(".news-empty");
+        function pairs() {{
+          return [...body.querySelectorAll("tr.news-item")].map(function (row) {{
+            return {{row: row, detail: row.nextElementSibling}};
+          }});
         }}
+        function apply() {{
+          var want = severity.value;
+          var named = filter.value;
+          var mode = sort.value;
+          var items = pairs();
+          items.sort(function (a, b) {{
+            if (mode === "severity-desc") return (rank[b.row.dataset.severity] - rank[a.row.dataset.severity]) || (Number(a.row.dataset.order) - Number(b.row.dataset.order));
+            if (mode === "severity-asc") return (rank[a.row.dataset.severity] - rank[b.row.dataset.severity]) || (Number(a.row.dataset.order) - Number(b.row.dataset.order));
+            if (mode === "date-desc") return Number(b.row.dataset.time) - Number(a.row.dataset.time);
+            if (mode === "date-asc") return Number(a.row.dataset.time) - Number(b.row.dataset.time);
+            return Number(a.row.dataset.order) - Number(b.row.dataset.order);
+          }});
+          var shown = 0;
+          items.forEach(function (item) {{
+            var visible = (!want || item.row.dataset.severity === want) && (!named || item.row.dataset[key] === named);
+            item.row.hidden = !visible;
+            item.detail.hidden = !visible || item.row.dataset.open !== "1";
+            if (visible) shown += 1;
+            body.appendChild(item.row);
+            body.appendChild(item.detail);
+          }});
+          empty.hidden = shown > 0;
+          body.appendChild(empty);
+        }}
+        board.addEventListener("news-refresh", apply);
+        body.addEventListener("click", function (event) {{
+          if (event.target.closest("select, input, button, a, textarea, label")) return;
+          var row = event.target.closest("tr.news-item");
+          if (!row) return;
+          var detail = row.nextElementSibling;
+          var open = row.dataset.open !== "1";
+          row.dataset.open = open ? "1" : "";
+          detail.hidden = !open;
+          if (open) detail.scrollIntoView({{block: "nearest"}});
+        }});
+        filter.addEventListener("change", apply);
+        severity.addEventListener("change", apply);
+        sort.addEventListener("change", apply);
+      }});
+      document.addEventListener("change", function (event) {{
+        var select = event.target.closest("select.sev");
+        if (!select) return;
         var row = select.closest("tr.news-item");
+        var board = select.closest(".news-board");
         var previous = select.dataset.saved || row.dataset.severity;
         var chosen = select.value;
         var note = select.parentElement.querySelector(".sev-note");
@@ -1120,25 +1504,15 @@ def news_page(note: str = "") -> str:
           note.hidden = false;
           note.textContent = "Saved";
           setTimeout(function () {{ note.hidden = true; }}, 1200);
-          apply();
+          board.dispatchEvent(new Event("news-refresh"));
         }}).catch(function () {{
           select.value = previous;
           note.hidden = false;
           note.textContent = "Not saved";
         }});
       }});
-      filter.addEventListener("change", apply);
-      sort.addEventListener("change", apply);
-      refreshGenerate();
     }})();
-    </script>
-    <div class="card" style="margin-top:12px"><div class="label">ECL of the names named in the feed</div>
-      {trend_table([(customer(cid)["legal_name"], lambda iso, cid=cid: money(customer(cid)["series"][view().dates.index(iso)]["ecl_hkd"])) for cid in dict.fromkeys(item["customer_id"] for item in BOOK["news"] if item["customer_id"])])}
-    </div>
-    <div class="card" style="margin-top:12px"><div class="label">Days past due of the names named in the feed</div>
-      {trend_table([(customer(cid)["legal_name"], lambda iso, cid=cid: str(customer(cid)["series"][view().dates.index(iso)]["dpd"])) for cid in dict.fromkeys(item["customer_id"] for item in BOOK["news"] if item["customer_id"])])}
-    </div>
-    """
+    </script>"""
 
 
 def industry_on(iso: str, name: str) -> dict:
@@ -1204,19 +1578,32 @@ def industry_page(name: str) -> str:
     """
 
 
-def repayment_page(window: int) -> str:
+def repayment_threshold(raw: str | None) -> int:
+    text = str(raw or "").replace(",", "").strip()
+    if not text:
+        return THRESHOLD
+    try:
+        value = int(float(text))
+    except ValueError:
+        return THRESHOLD
+    if value < 0:
+        return THRESHOLD
+    return min(value, 100_000_000_000)
+
+
+def repayment_page(window: int, threshold: int = THRESHOLD) -> str:
     people = [person for person in (customer(item["customer_id"]) for item in BOOK["customers"]) if person and person.get("on_position", True)]
     rows = []
     for item in people:
-        if item["next_due_hkd"] < THRESHOLD or item["next_due_days"] > window:
+        if item["next_due_hkd"] < threshold or item["next_due_days"] > window:
             continue
         rows.append(item)
     rows.sort(key=lambda item: item["next_due_days"])
     lines = []
     for item in rows:
         draft = (
-            f'<a href="/email?id={escape(item["repay_draft_id"])}">Draft</a>'
-            if item.get("repay_draft_id")
+            f'<a href="/drafts#sent-repay-{escape(item["customer_id"])}">Sent to {escape(item["rm"])}</a>'
+            if item["next_due_hkd"] >= THRESHOLD and isinstance(item["next_due_days"], int) and item["next_due_days"] <= REPAY_NOTICE_DAYS
             else "—"
         )
         kind = "Refinancing" if item["refinancing"] else "Instalment"
@@ -1226,32 +1613,18 @@ def repayment_page(window: int) -> str:
             f'<td>{money(item["next_due_hkd"])}</td><td>{item["next_due_days"]} days</td>'
             f'<td>{escape(item["next_due_source"])}</td><td>{kind}</td><td>{draft}</td></tr>'
         )
-    body = "".join(lines) or '<tr><td colspan="6">No obligation above HKD 5,000,000 falls in this window.</td></tr>'
-    ageing = "".join(
-        f'<tr><td><a href="/customer?id={escape(item["customer_id"])}">{escape(item["legal_name"])}</a></td><td>{item["dpd"]}</td><td>{escape(item["dpd_component"])}</td><td>{money(item["drawn_hkd"])}</td></tr>'
-        for item in sorted(people, key=lambda row: row["dpd"], reverse=True)
-        if item["dpd"] > 0
-    )
+    body = "".join(lines) or f'<tr><td colspan="6">No obligation above {escape(money(threshold))} falls in this window.</td></tr>'
     return f"""
-    <div class="label">Repayment</div><h1>Obligations above HKD 5,000,000</h1>
-    <p class="lead">Position {escape(view().label())}. Due dates and amounts are the next principal on that date's cash flow schedule. The window is {window} days. Days past due follow the same position, and the trend shows how both move across the checked dates.</p>
+    <div class="label">Repayment</div><h1>Repayment schedule</h1>
+    <p class="lead">Position {escape(view().label())}. Due dates and amounts are the next principal on that date's cash flow schedule. The threshold starts at HKD 5,000,000 and can be changed. The window is {window} days.</p>
     <form class="inline" method="get" action="/repayment">
+      <label>Threshold (HKD)<br><input type="number" name="threshold" min="0" step="1000000" value="{threshold}"></label>
       <label>Window (days)<br><input type="number" name="window" min="7" max="365" value="{window}"></label>
       <button type="submit">Apply</button>
-      <a class="btn ghost" href="/repayment?window=31">One month</a>
-      <a class="btn ghost" href="/repayment?window=92">One quarter</a>
+      <a class="btn ghost" href="/repayment?window=31&threshold={threshold}">One month</a>
+      <a class="btn ghost" href="/repayment?window=92&threshold={threshold}">One quarter</a>
     </form>
-    <div class="card" style="margin-top:12px"><table><thead><tr><th>Customer</th><th>Amount</th><th>Due</th><th>Source</th><th>Type</th><th></th></tr></thead><tbody>{body}</tbody></table></div>
-    <div class="card" style="margin-top:12px"><div class="label">Approaching 30, 60, 90 and 180 days</div>
-      <table><thead><tr><th>Customer</th><th>DPD</th><th>Component</th><th>Drawn</th></tr></thead><tbody>{ageing}</tbody></table>
-      <p><a href="/email?id=MAIL-DPD-LANTERN">Open the days-past-due draft</a></p>
-    </div>
-    <div class="card" style="margin-top:12px"><div class="label">Days past due across the checked dates</div>
-      {trend_table([(item["legal_name"], lambda iso, cid=item["customer_id"]: str(customer(cid)["series"][view().dates.index(iso)]["dpd"])) for item in people if any(point["dpd"] > 0 for point in item["series"])])}
-    </div>
-    <div class="card" style="margin-top:12px"><div class="label">Next principal across the checked dates</div>
-      {trend_table([(item["legal_name"], lambda iso, cid=item["customer_id"]: money(customer(cid)["series"][view().dates.index(iso)]["next_due_hkd"]) + " on " + customer(cid)["series"][view().dates.index(iso)]["next_due_date"]) for item in people])}
-    </div>"""
+    <div class="card" style="margin-top:12px"><table><thead><tr><th>Customer</th><th>Amount</th><th>Due</th><th>Source</th><th>Type</th><th></th></tr></thead><tbody>{body}</tbody></table></div>"""
 
 
 def financial_page(cid: str, scenario: str) -> str:
@@ -1378,7 +1751,90 @@ def parse_multipart(content_type: str, body: bytes) -> dict[str, dict]:
     return fields
 
 
-def reports_page(kind: str, detail: str, cid: str, generated: str = "") -> str:
+def hkex_hits(borrower: str, year: str) -> list[dict]:
+    query = " ".join(borrower.split()).lower()
+    if len(query) < 2 or not str(year).strip().isdigit():
+        return []
+    wanted = int(year)
+    hits = []
+    for item in HKEX_FILINGS:
+        if item["year"] != wanted:
+            continue
+        names = [item["issuer"], *item["names"]]
+        if any(query in name.lower() for name in names):
+            hits.append(item)
+    return hits
+
+
+def external_reports_page(borrower: str, year: str) -> str:
+    borrower = " ".join(borrower.split())
+    year = year.strip()
+    ready = len(borrower) >= 2 and year.isdigit()
+    hits = hkex_hits(borrower, year) if ready else []
+    if not borrower and not year:
+        result = "<p>Enter a borrower and a year.</p>"
+    elif not ready:
+        result = "<p>Enter a borrower and a four-digit year.</p>"
+    elif not hits:
+        result = f"<p>No HKEX report is on file for {escape(borrower)} in {escape(year)}. The Gemini agent has not retrieved one yet.</p>"
+    else:
+        cards = []
+        for item in hits:
+            cards.append(
+                f'<article class="sent-mail"><div class="label">HKEX</div>'
+                f'<h2>{escape(item["issuer"])}</h2>'
+                f'<p>{escape(item["document"])} · {item["year"]}</p>'
+                f'<p>Retrieved for the search {escape(borrower)}, {escape(year)}. '
+                f'The Gemini agent collects this filing from HKEX. The document is not stored here yet. '
+                f'When it arrives, it is an input to the internal report.</p></article>'
+            )
+        result = "".join(cards)
+    catalog = json.dumps([item["name"] for item in OBLIGORS] + ["Apex Water Solutions Ltd. (3768.HK)"])
+    return f"""
+    <div class="label">Report</div><h1>External report</h1>
+    <p class="lead">Search by borrower and year for a financial report collected from HKEX.</p>
+    <form class="inline hkex-search" method="get" action="/reports">
+      <input type="hidden" name="source" value="external">
+      <div class="suggest">
+        <label>Borrower<br><input id="hkex-borrower" name="borrower" value="{escape(borrower)}" placeholder="Borrower or stock code" autocomplete="off"></label>
+        <div class="suggest-list" id="hkex-list" hidden></div>
+      </div>
+      <label>Year<br><input name="year" type="number" min="1990" max="2100" value="{escape(year)}" placeholder="2025"></label>
+      <button type="submit">Search</button>
+    </form>
+    <div class="card" style="margin-top:12px">{result}</div>
+    <script>
+    (function () {{
+      var names = {catalog};
+      var input = document.getElementById("hkex-borrower");
+      var list = document.getElementById("hkex-list");
+      function render() {{
+        var query = input.value.trim().toLowerCase();
+        if (!query) {{ list.hidden = true; list.innerHTML = ""; return; }}
+        var hits = names.filter(function (name) {{ return name.toLowerCase().indexOf(query) >= 0; }}).slice(0, 8);
+        list.hidden = false;
+        list.innerHTML = hits.length ? hits.map(function (name) {{
+          return '<button type="button" class="suggest-item" data-name="' + name.replace(/"/g, "&quot;") + '">' + name + "</button>";
+        }}).join("") : '<p style="margin:8px 12px;color:#6F6862">No borrower matches.</p>';
+      }}
+      input.addEventListener("input", render);
+      list.addEventListener("mousedown", function (event) {{
+        var button = event.target.closest("button");
+        if (!button) return;
+        event.preventDefault();
+        input.value = button.getAttribute("data-name");
+        list.hidden = true;
+      }});
+      document.addEventListener("click", function (event) {{
+        if (!input.parentElement.parentElement.contains(event.target)) list.hidden = true;
+      }});
+    }})();
+    </script>"""
+
+
+def reports_page(kind: str, detail: str, cid: str, generated: str = "", source: str = "", borrower: str = "", year: str = "") -> str:
+    if source == "external":
+        return external_reports_page(borrower, year)
     row = customer(cid) or customer(default_customer_id())
     port = view().portfolio()
     if kind == "customer":
@@ -1426,7 +1882,7 @@ def reports_page(kind: str, detail: str, cid: str, generated: str = "") -> str:
         for item in OBLIGORS
     ])
     return f"""
-    <div class="label">Reports</div><h1>Reports</h1>
+    <div class="label">Report</div><h1>Internal report</h1>
     <p class="lead">Search for a borrower. The closest names appear as you type. Choose one, generate the paper, then download the proposal or the monitoring report.</p>
     <div class="card">
       <div class="label">Borrower</div>
@@ -1623,18 +2079,344 @@ def answer_for(row: dict, question: str) -> tuple[str, list[dict]]:
     )
 
 
-def drafts_page() -> str:
-    rows = "".join(
-        f'<tr><td><a href="/email?id={escape(item["id"])}">{escape(item["subject"])}</a></td><td>{escape(item["kind"])}</td><td>{escape(NOTIFY)}</td></tr>'
-        for item in BOOK["drafts"]
+def recipient_address(raw: str | None) -> str:
+    """One address for the draft. Newlines cannot open another header."""
+    return "".join(str(raw or "").split())[:254]
+
+
+def script_json(value) -> str:
+    return json.dumps(value, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+
+
+def mail_row(entry_id: str, subject: str, meta: str) -> str:
+    return (
+        f'<div class="mail-row" data-id="{escape(entry_id)}">'
+        f'<div class="mail-subject"><strong>{escape(subject)}</strong><span>{escape(meta)}</span></div>'
+        f'<div class="mail-send">'
+        f'<input type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="name@example.com" aria-label="Recipient for {escape(subject)}">'
+        f'<button type="button">Send</button>'
+        f'</div>'
+        f'<p class="mail-note" hidden></p>'
+        f'</div>'
     )
+
+
+def mail_script(payload: dict) -> str:
     return f"""
-    <div class="label">Outbox</div><h1>Email drafts</h1>
-    <p class="lead">Each letter is complete and written from the analysis. They are not sent from this site. Open one, copy it or download the .eml file, and send it yourself to {escape(NOTIFY)}.</p>
-    <div class="card"><table><thead><tr><th>Subject</th><th>Kind</th><th>To</th></tr></thead><tbody>{rows}</tbody></table></div>"""
+    <script>
+    (function () {{
+      var letters = {script_json(payload)};
+      var memory = {{}};
+      try {{ memory = JSON.parse(sessionStorage.getItem("rip-draft-to") || "{{}}"); }} catch (error) {{ memory = {{}}; }}
+      function clean(value) {{ return String(value || "").replace(/\\s+/g, "").slice(0, 254); }}
+      function usable(address) {{ return address.indexOf("@") > 0 && address.indexOf("@") < address.length - 1; }}
+      document.querySelectorAll(".mail-row").forEach(function (row) {{
+        var input = row.querySelector("input");
+        if (memory[row.dataset.id]) input.value = memory[row.dataset.id];
+        input.addEventListener("input", function () {{
+          memory[row.dataset.id] = clean(input.value);
+          sessionStorage.setItem("rip-draft-to", JSON.stringify(memory));
+        }});
+      }});
+      document.addEventListener("click", function (event) {{
+        var button = event.target.closest(".mail-send button");
+        if (!button) return;
+        var row = button.closest(".mail-row");
+        var input = row.querySelector("input");
+        var note = row.querySelector(".mail-note");
+        var address = clean(input.value);
+        var letter = letters[row.dataset.id];
+        if (!usable(address)) {{
+          note.hidden = false;
+          note.textContent = "Enter a recipient for this subject.";
+          input.focus();
+          return;
+        }}
+        note.hidden = true;
+        memory[row.dataset.id] = address;
+        sessionStorage.setItem("rip-draft-to", JSON.stringify(memory));
+        var url = "mailto:" + address
+          + "?subject=" + encodeURIComponent(letter.subject)
+          + "&body=" + encodeURIComponent(letter.body);
+        if (window.ripOpenMail) window.ripOpenMail(url);
+        else window.location.href = url;
+      }});
+    }})();
+    </script>"""
 
 
-def live_letter(draft: dict) -> str:
+def news_mail(item: dict) -> dict:
+    linked = ""
+    person = customer(item.get("customer_id") or "")
+    if person:
+        linked = (
+            f"\n\nLinked borrower {person['legal_name']}: drawn {money(person['drawn_hkd'])}, "
+            f"stage {person['stage']}, {person['dpd']} days past due."
+        )
+    text = " ".join(str(item.get("body") or "").split())
+    if len(text) > 700:
+        text = text[:697].rstrip() + "..."
+    subject = item["headline"]
+    body = (
+        f"{BOOK['banner']}\n\n"
+        f"{item['date']}. {subject}\n"
+        f"Source: {item['source']}. Severity: {item['severity']}.\n\n"
+        f"{text}{linked}\n\n"
+        "This draft is not a credit decision."
+    )
+    return {"subject": subject, "body": body}
+
+
+def draft_mail(draft: dict) -> dict:
+    text = live_letter(draft, "")
+    if text.startswith("To:"):
+        text = text.split("\n", 1)[1]
+    if text.startswith("Subject:"):
+        text = text.split("\n", 1)[1].lstrip("\n")
+    return {"subject": draft["subject"], "body": text}
+
+
+def relationship_mailbox(item: dict) -> tuple[str, str]:
+    person = next((row for row in BOOK["customers"] if row["customer_id"] == item.get("customer_id")), None)
+    name = ((person or {}).get("rm") or "").strip()
+    if not name or "facilit" in name.lower():
+        return "Credit desk", "credit.desk@hkbea.example"
+    local = ".".join(part.lower() for part in name.split())
+    return name, f"{local}@hkbea.example"
+
+
+def news_borrower(item: dict) -> dict | None:
+    cid = item.get("customer_id") or news_desk.suggest_customer(item, BOOK["customers"])
+    if not cid:
+        blob = " ".join(str(item.get(key) or "") for key in ("headline", "entities", "body"))
+        if "Apex Infrastructure" in blob:
+            cid = "BOR-AIIC"
+        elif "Apex Property" in blob:
+            cid = "BOR-APL"
+        elif "Apex" in blob:
+            cid = "BOR-AGHL"
+    return customer(cid) if cid else None
+
+
+def sent_letter(item: dict, person: dict | None) -> str:
+    name, address = relationship_mailbox(person or item)
+    article, _fields = news_fields(item["body"])
+    linked = f"\nLinked borrower: {person['legal_name']}." if person else "\nNo borrower on the book is named in this item."
+    return (
+        f"To: {name} <{address}>\n"
+        f"Sent: {item['date']}, 08:20 HKT\n"
+        f"Subject: {item['headline']}\n\n"
+        f"This message was sent automatically to the relationship manager. Severity: {item['severity']}.\n\n"
+        f"{article.strip()}\n"
+        f"{linked}\n"
+        f"Relationship manager: {name}."
+    )
+
+
+def repayment_letter(person: dict) -> str:
+    name, address = relationship_mailbox(person)
+    return (
+        f"To: {name} <{address}>\n"
+        f"Sent: {view().label()}, 08:20 HKT\n"
+        f"Subject: Large repayment — {person['legal_name']}\n\n"
+        f"This repayment notice was sent automatically to the relationship manager.\n\n"
+        f"{person['legal_name']} has principal of {money(person['next_due_hkd'])} due on {person['next_due_date']}, "
+        f"{person['next_due_days']} days after {view().label()}.\n\n"
+        f"The amount is on {person['next_contract']}, method {str(person['next_method']).replace('_', ' ').title()}. "
+        f"It is above the HKD 5,000,000 monitoring threshold.\n"
+        f"Group drawn is {money(person['drawn_hkd'])}. LTV is {person['ltv']}.\n"
+        f"Relationship manager: {name}."
+    )
+
+
+def repayment_notices() -> list[dict]:
+    people = [
+        person for person in (customer(item["customer_id"]) for item in BOOK["customers"])
+        if person and person.get("on_position")
+    ]
+    rows = [
+        item for item in people
+        if isinstance(item.get("next_due_hkd"), (int, float))
+        and item["next_due_hkd"] >= THRESHOLD
+        and isinstance(item.get("next_due_days"), int)
+        and item["next_due_days"] <= REPAY_NOTICE_DAYS
+    ]
+    rows.sort(key=lambda item: (item["next_due_days"], -item["next_due_hkd"]))
+    return rows
+
+
+def mail_snippet(text: str) -> str:
+    skip = (
+        "to:", "sent:", "subject:", "synthetic", "dear ",
+        "this message was sent", "this draft was written", "please send this",
+        "position ", "financial statements were not",
+    )
+    for line in text.splitlines():
+        clean = " ".join(line.split())
+        if not clean or clean.lower().startswith(skip):
+            continue
+        return clean if len(clean) <= 88 else clean[:87].rstrip() + "…"
+    return ""
+
+
+def mail_card(entry_id: str, name: str, borrower: str, subject: str, when: str, route: str, letter: str, sent_at: int = 0) -> str:
+    return (
+        f'<details class="sent-mail" id="{escape(entry_id)}" data-rm="{escape(name)}" data-borrower="{escape(borrower)}" data-sent="{sent_at}">'
+        f'<summary><span class="mail-who"><span class="mail-caret" aria-hidden="true"></span>{escape(name)}</span>'
+        f'<span class="mail-line"><strong>{escape(subject)}</strong> <span class="mail-snip">— {escape(mail_snippet(letter))}</span></span>'
+        f'<span class="mail-when">{escape(when)}</span></summary>'
+        f'<p class="mail-route">{route}</p>'
+        f'<div class="letter">{escape(letter)}</div></details>'
+    )
+
+
+def drafts_page() -> str:
+    cards = []
+    rms: list[str] = []
+    borrowers: list[str] = []
+
+    def remember(name: str, borrower: str) -> None:
+        if name and name not in rms:
+            rms.append(name)
+        if borrower and borrower not in borrowers:
+            borrowers.append(borrower)
+
+    for item in BOOK["news"]:
+        if item["severity"] == "LOW":
+            continue
+        person = news_borrower(item)
+        name, address = relationship_mailbox(person or item)
+        borrower = person["legal_name"] if person else "Not linked"
+        remember(name, borrower if person else "")
+        letter = sent_letter(item, person)
+        cards.append(mail_card(
+            f"sent-{item['id']}",
+            name,
+            borrower,
+            item["headline"],
+            item["date"],
+            f'To: {escape(name)} &lt;{escape(address)}&gt; · Borrower: {escape(borrower)} · {escape(item["severity"])} · Sent {escape(item["date"])}, 08:20 HKT',
+            letter,
+            news_stamp(item["date"]),
+        ))
+    for person in repayment_notices():
+        name, address = relationship_mailbox(person)
+        remember(name, person["legal_name"])
+        letter = repayment_letter(person)
+        cards.append(mail_card(
+            f"sent-repay-{person['customer_id']}",
+            name,
+            person["legal_name"],
+            f"Large repayment — {person['legal_name']}",
+            view().label(),
+            f'To: {escape(name)} &lt;{escape(address)}&gt; · Borrower: {escape(person["legal_name"])} · Repayment · Sent {escape(view().label())}, 08:20 HKT',
+            letter,
+            news_stamp(view().label()),
+        ))
+    low_count = sum(1 for item in BOOK["news"] if item["severity"] == "LOW")
+    held_line = f"{low_count} low priority news items are not sent."
+    unsent = []
+    for draft in BOOK["drafts"]:
+        if draft["id"] == "MAIL-REPAY-LANTERN":
+            continue
+        person = next((row for row in BOOK["customers"] if row["customer_id"] == draft.get("customer_id")), None)
+        borrower = person["legal_name"] if person else ""
+        name = (person or {}).get("rm") or ""
+        if name and name not in rms:
+            rms.append(name)
+        if borrower and borrower not in borrowers:
+            borrowers.append(borrower)
+        who = escape(name) if name else "Draft"
+        named = escape(borrower) if borrower else "Not linked"
+        unsent.append(
+            f'<details class="sent-mail" data-rm="{escape(name)}" data-borrower="{escape(borrower)}">'
+            f'<summary><span class="mail-who"><span class="mail-caret" aria-hidden="true"></span>{who}</span>'
+            f'<span class="mail-line"><strong>{escape(draft["subject"])}</strong> <span class="mail-snip">— {escape(mail_snippet(draft["body"]))}</span></span>'
+            f'<span class="mail-when">Draft</span></summary>'
+            f'<p class="mail-route">Borrower: {named} · RM: {escape(name) if name else "—"} · Not sent · <a href="/email?id={escape(draft["id"])}">Open this draft</a></p>'
+            f'<div class="letter">{escape(draft["body"])}</div></details>'
+        )
+    rm_options = "".join(f"<option>{escape(name)}</option>" for name in sorted(rms))
+    borrower_options = "".join(f"<option>{escape(name)}</option>" for name in sorted(borrowers))
+    return f"""
+    <div class="label">Outbox</div><h1>Email portal</h1>
+    <p class="lead">News other than low priority is sent to the relationship manager. So is each repayment of at least HKD 5,000,000 due within 92 days. Low priority news is not sent. Filter either list by RM or borrower. Addresses are demonstration mailboxes.</p>
+    <div class="news-tools mail-tools">
+      <div class="news-filters">
+        <label><span class="label">RM</span><br>
+          <select id="mail-rm"><option value="">All</option>{rm_options}</select>
+        </label>
+        <label><span class="label">Borrower</span><br>
+          <select id="mail-borrower"><option value="">All</option>{borrower_options}</select>
+        </label>
+      </div>
+    </div>
+    <div class="card mail-inbox" id="mail-list">
+      <div class="mail-head">
+        <h2>Sent</h2>
+        <button type="button" class="ghost" id="mail-sort">Send time, newest first</button>
+      </div>
+      {''.join(cards) or '<p>No message has been sent for this position.</p>'}
+      <p id="mail-empty" hidden>No sent message matches this RM and borrower.</p>
+    </div>
+    <div class="card mail-inbox" id="unsent-list" style="margin-top:12px">
+      <h2>Unsent Draft</h2>
+      {''.join(unsent) or '<p>No draft is waiting.</p>'}
+      <p id="unsent-empty" hidden>No unsent draft matches this RM and borrower.</p>
+    </div>
+    <p class="lead">{escape(held_line)}</p>
+    <script>
+    (function () {{
+      var rm = document.getElementById("mail-rm");
+      var borrower = document.getElementById("mail-borrower");
+      function bind(rootId, emptyId) {{
+        var root = document.getElementById(rootId);
+        var cards = [...root.querySelectorAll(".sent-mail")];
+        var empty = document.getElementById(emptyId);
+        return function () {{
+          var shown = 0;
+          cards.forEach(function (card) {{
+            var ok = (!rm.value || card.dataset.rm === rm.value) && (!borrower.value || card.dataset.borrower === borrower.value);
+            card.hidden = !ok;
+            if (ok) shown += 1;
+          }});
+          empty.hidden = shown > 0 || !cards.length;
+        }};
+      }}
+      var applyUnsent = bind("unsent-list", "unsent-empty");
+      var applySent = bind("mail-list", "mail-empty");
+      function apply() {{ applyUnsent(); applySent(); }}
+      rm.addEventListener("change", apply);
+      borrower.addEventListener("change", apply);
+      var list = document.getElementById("mail-list");
+      var sortBtn = document.getElementById("mail-sort");
+      var newest = true;
+      function sortSent() {{
+        var rows = [...list.querySelectorAll(".sent-mail")];
+        rows.sort(function (a, b) {{
+          var diff = Number(a.dataset.sent) - Number(b.dataset.sent);
+          if (diff) return newest ? -diff : diff;
+          return a.id < b.id ? -1 : 1;
+        }});
+        var empty = document.getElementById("mail-empty");
+        rows.forEach(function (row) {{ list.insertBefore(row, empty); }});
+        sortBtn.textContent = newest ? "Send time, newest first" : "Send time, oldest first";
+      }}
+      sortSent();
+      sortBtn.addEventListener("click", function () {{
+        newest = !newest;
+        sortSent();
+      }});
+      var opened = document.getElementById((location.hash || "").slice(1));
+      if (opened && opened.tagName === "DETAILS") {{
+        opened.open = true;
+        opened.scrollIntoView({{block: "center"}});
+      }}
+    }})();
+    </script>"""
+
+
+def live_letter(draft: dict, recipient: str = "") -> str:
     port = view().portfolio()
     people = [person for person in (customer(item["customer_id"]) for item in BOOK["customers"]) if person and person.get("on_position", True)]
     checked = ", ".join(view().label(date) for date in view().dates)
@@ -1645,7 +2427,7 @@ def live_letter(draft: dict) -> str:
     ) or "none"
     banner = BOOK["banner"]
     intro = (
-        f"To: {NOTIFY}\nSubject: {draft['subject']}\n\n{banner}\n\nDear colleague,\n\n"
+        f"To: {recipient_address(recipient)}\nSubject: {draft['subject']}\n\n{banner}\n\nDear colleague,\n\n"
         f"Position {view().label()}. Checked dates: {checked}. "
         f"Drawn {money(port['drawn_hkd'])}. ECL {money(port['ecl_hkd'])}. "
         "This draft follows the checked dates. It is not a credit decision.\n\n"
@@ -1686,11 +2468,42 @@ def live_letter(draft: dict) -> str:
 
 def email_page(draft_id: str) -> str:
     draft = next((item for item in BOOK["drafts"] if item["id"] == draft_id), BOOK["drafts"][0])
+    if draft["id"] == "MAIL-NEWS-APEX":
+        rows = []
+        payload = {}
+        for item in BOOK["news"]:
+            payload[item["id"]] = news_mail(item)
+            rows.append(mail_row(item["id"], item["headline"], f'{item["date"]} · {item["source"]} · {item["severity"]}'))
+        return f"""
+        <div class="label">Adverse news</div><h1>News drafts</h1>
+        <p class="lead">Each headline is its own subject. Type a recipient beside that subject and send it on its own. Send opens your mail program. This site does not deliver the message.</p>
+        <div class="card"><div class="mail-list">{''.join(rows)}</div></div>
+        {mail_script(payload)}"""
+    letter = live_letter(draft)
+    payload = {draft["id"]: draft_mail(draft)}
     return f"""
     <div class="label">{escape(draft["kind"])}</div><h1>{escape(draft["subject"])}</h1>
-    <p class="lead">To {escape(NOTIFY)}. The letter uses the checked reporting dates. Download it and send it from your own mailbox.</p>
-    <p><a class="btn" href="/email.eml?id={escape(draft["id"])}">Download .eml</a></p>
-    <textarea readonly>{escape(live_letter(draft))}</textarea>"""
+    <p class="lead">This subject keeps its own recipient. Send opens your mail program. This site does not deliver the message.</p>
+    <div class="mail-list">{mail_row(draft["id"], draft["subject"], draft["kind"])}</div>
+    <p><a class="btn ghost" id="draft-download" href="/email.eml?id={escape(draft["id"])}">Download .eml</a></p>
+    <textarea id="draft-letter" readonly>{escape(letter)}</textarea>
+    {mail_script(payload)}
+    <script>
+    (function () {{
+      var row = document.querySelector(".mail-row");
+      var input = row.querySelector("input");
+      var letter = document.getElementById("draft-letter");
+      var link = document.getElementById("draft-download");
+      function paint() {{
+        var address = input.value.replace(/\\s+/g, "").slice(0, 254);
+        var lines = letter.value.split("\\n");
+        lines[0] = "To: " + address;
+        letter.value = lines.join("\\n");
+        link.href = "/email.eml?id=" + encodeURIComponent(row.dataset.id) + (address ? "&to=" + encodeURIComponent(address) : "");
+      }}
+      input.addEventListener("input", paint);
+    }})();
+    </script>"""
 
 
 def customer_page(cid: str) -> str:
@@ -1821,9 +2634,9 @@ ROUTES = {
     "dashboard": lambda q: dashboard(),
     "news": lambda q: news_page((q.get("note") or [""])[0]),
     "industry": lambda q: industry_page((q.get("name") or [default_industry()])[0]),
-    "repayment": lambda q: repayment_page(int((q.get("window") or ["92"])[0] or 92)),
+    "repayment": lambda q: repayment_page(int((q.get("window") or ["92"])[0] or 92), repayment_threshold((q.get("threshold") or [""])[0])),
     "financial": lambda q: financial_page((q.get("customer") or [default_customer_id()])[0], (q.get("scenario") or ["revenue_decline"])[0]),
-    "reports": lambda q: reports_page((q.get("kind") or ["mir"])[0], (q.get("detail") or ["summary"])[0], (q.get("customer") or [default_customer_id()])[0], (q.get("generated") or [""])[0]),
+    "reports": lambda q: reports_page((q.get("kind") or ["mir"])[0], (q.get("detail") or ["summary"])[0], (q.get("customer") or [default_customer_id()])[0], (q.get("generated") or [""])[0], (q.get("source") or [""])[0], (q.get("borrower") or [""])[0], (q.get("year") or [""])[0]),
     "assistant": lambda q: assistant_page((q.get("q") or ["What are the key risks for this customer?"])[0], (q.get("customer") or [default_customer_id()])[0]),
     "drafts": lambda q: drafts_page(),
     "email": lambda q: email_page((q.get("id") or ["MAIL-NEWS-APEX"])[0]),
@@ -1849,7 +2662,10 @@ class Handler(BaseHTTPRequestHandler):
         if not signed_in:
             self._redirect("/login")
             return
-        requested = query.get("d") or dates_from_cookie(self.headers.get("Cookie"))
+        scope = date_scope(parsed.path + (("?" + parsed.query) if parsed.query else ""))
+        requested = query.get("d") or dates_from_cookie(self.headers.get("Cookie"), scope)
+        if key in {"assistant", "drafts", "email"}:
+            requested = list(BOOK["dates"])
         bind_view(requested, parsed.path + (("?" + parsed.query) if parsed.query else ""))
         if key in {"proposal-file", "report-file"}:
             requested_id = (query.get("id") or [""])[0]
@@ -1885,7 +2701,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         if key == "email.eml":
             draft = next((item for item in BOOK["drafts"] if item["id"] == (query.get("id") or [""])[0]), BOOK["drafts"][0])
-            payload = live_letter(draft).encode("utf-8")
+            payload = live_letter(draft, (query.get("to") or [""])[0]).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "message/rfc822")
             self.send_header("Content-Disposition", f'attachment; filename="{draft["id"]}.eml"')
@@ -1895,7 +2711,10 @@ class Handler(BaseHTTPRequestHandler):
             return
         if key not in ROUTES:
             key = "dashboard"
-        body = page(key, "drafts" if key == "email" else key, ROUTES[key](query))
+        section = "drafts" if key == "email" else key
+        if key == "reports" and (query.get("source") or [""])[0] == "external":
+            section = "reports-external"
+        body = page(key, section, ROUTES[key](query))
         self._html(body)
 
     def do_POST(self) -> None:  # noqa: N802
@@ -1959,7 +2778,7 @@ class Handler(BaseHTTPRequestHandler):
             nxt = (form.get("next") or ["/dashboard"])[0]
             if not nxt.startswith("/") or nxt.startswith("//"):
                 nxt = "/dashboard"
-            self._redirect(nxt, date_cookie(chosen))
+            self._redirect(nxt, date_cookie(self.headers.get("Cookie"), date_scope(nxt), chosen))
             return
         if action != "login":
             self.send_error(404)

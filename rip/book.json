@@ -4116,7 +4116,7 @@
     }
   ],
   "threshold_hkd": 5000000,
-  "notify_to": "yiyangyao2@gmail.com",
+  "notify_to": "credit.desk@hkbea.example",
   "default_customer_id": "BOR-PF",
   "default_industry": "Property Investment",
   "ecl_sources": [
@@ -9048,29 +9048,29 @@
       "prior_ecl_hkd": 8503000.0,
       "provision_hkd": 10731000.0,
       "revenue_hkd": [
-        4820000000,
-        4260000000,
-        3640000000
+        1180000000,
+        1140000000,
+        1140000000
       ],
       "margin_pct": [
-        21.4,
-        18.6,
-        15.2
+        67.8,
+        67.5,
+        67.5
       ],
       "liquidity_ratio": [
-        1.38,
-        1.22,
-        1.08
+        1.35,
+        1.32,
+        1.3
       ],
       "leverage": [
-        4.6,
-        5.3,
-        6.2
+        1.86,
+        1.85,
+        1.85
       ],
       "interest_coverage": [
-        2.6,
-        2.1,
-        1.7
+        2.3,
+        2.2,
+        2.2
       ],
       "coverage_assumption": 2.5,
       "coverage_threshold": 2.0,
@@ -9090,14 +9090,11 @@
           "description": "Stage 2 on the portfolio extract at 30 Sep 2026."
         },
         {
-          "description": "Demonstration statements: interest cover is 1.7 times, below the 2.0 times covenant. Statements are not in the portfolio file."
-        },
-        {
-          "description": "Placeholder news: office leasing on the Kowloon towers is behind the budget used at approval."
+          "description": "Annual-review statements at FY2025: interest cover 2.2 times against a 2.0 times covenant, net gearing 1.85 times. No covenant breach on those statements."
         }
       ],
       "full_file": true,
-      "summary": "Apex Global Holdings Limited has 5 on-balance facilities totalling HKD 517,465,000, including a bond of HKD 68,963,000, and 1 off-balance facilities with property market value HKD 91,676,000. On-balance market value is HKD 788,670,000 and net realizable value is HKD 591,679,000. LTV is 0.66. Current grade is 14 and the original grade is 11. Stage 2, days past due 65, ECL HKD 10,731,000. Outstanding on 31 Aug 2026 was HKD 517,465,000 and ECL was HKD 8,503,000. Relationship manager Chris Leung is a demonstration name. Demonstration statements, not on the portfolio file: interest cover 1.7 times against a 2.0 times covenant.",
+      "summary": "Apex Global Holdings Limited has 5 on-balance facilities totalling HKD 517,465,000, including a bond of HKD 68,963,000, and 1 off-balance facilities with property market value HKD 91,676,000. On-balance market value is HKD 788,670,000 and net realizable value is HKD 591,679,000. LTV is 0.66. Current grade is 14 and the original grade is 11. Stage 2, days past due 65, ECL HKD 10,731,000. Outstanding on 31 Aug 2026 was HKD 517,465,000 and ECL was HKD 8,503,000. Relationship manager Chris Leung is a demonstration name. Group statements in the 31 October 2025 annual review, not the portfolio-extract balances: interest cover 2.2 times against a 2.0 times covenant. Net gearing is 1.85 times. There is no covenant breach on those statements.",
       "documents": {
         "credit_paper": {
           "title": "Credit extract \u2014 Apex Global Holdings Limited",
@@ -9111,8 +9108,8 @@
         },
         "financials": {
           "title": "Demonstration statements \u2014 Apex Global Holdings Limited",
-          "locator": "Placeholder financials for the covenant screen. Not in the uploaded extracts.",
-          "passage": "2024 to 2026 revenue HKD 4,820,000,000, HKD 4,260,000,000, HKD 3,640,000,000. Interest cover 2.6 times, 2.1 times, 1.7 times. Covenant 2.0 times. Replace these figures when statements are provided."
+          "locator": "Apex Group annual review at 31 October 2025, section C3.",
+          "passage": "2024 to 2026 revenue HKD 1,180,000,000, HKD 1,140,000,000, HKD 1,140,000,000. Interest cover 2.3 times, 2.2 times, 2.2 times. Covenant 2.0 times. Net gearing 1.86 times, 1.85 times, 1.85 times. EBITDA FY2025 HKD 770,000,000. Finance costs FY2025 HKD 350,000,000. These are the group figures in the 31 October 2025 annual review."
         },
         "repayment": {
           "title": "Cash flow schedule \u2014 CTR-0010-03",
@@ -94135,7 +94132,7 @@
       "drawn_hkd": 1334089000.0,
       "stage2": 2,
       "migrations": 0,
-      "open_warnings": 6,
+      "open_warnings": 5,
       "dpd_accounts": 2,
       "collateral_hkd": 1977091000.0
     },
@@ -94164,8 +94161,8 @@
         "exposure_hkd": 517465000.0,
         "security_coverage": 1.52,
         "guarantor_support": "Apex Group parent comfort letter, unsecured",
-        "financial_strength": "rating 14, interest cover 1.7 times",
-        "warning_signals": 4,
+        "financial_strength": "rating 14, interest cover 2.2 times",
+        "warning_signals": 3,
         "score": 95,
         "material": true
       }
@@ -94183,8 +94180,8 @@
         "exposure_hkd": 517465000.0,
         "security_coverage": 1.52,
         "guarantor_support": "Apex Group parent comfort letter, unsecured",
-        "financial_strength": "rating 14, interest cover 1.7 times",
-        "warning_signals": 4,
+        "financial_strength": "rating 14, interest cover 2.2 times",
+        "warning_signals": 3,
         "score": 95,
         "material": true
       }
@@ -94202,8 +94199,8 @@
         "exposure_hkd": 517465000.0,
         "security_coverage": 1.52,
         "guarantor_support": "Apex Group parent comfort letter, unsecured",
-        "financial_strength": "rating 14, interest cover 1.7 times",
-        "warning_signals": 4,
+        "financial_strength": "rating 14, interest cover 2.2 times",
+        "warning_signals": 3,
         "score": 80,
         "material": true
       }
@@ -94316,8 +94313,8 @@
         "exposure_hkd": 517465000.0,
         "security_coverage": 1.52,
         "guarantor_support": "Apex Group parent comfort letter, unsecured",
-        "financial_strength": "rating 14, interest cover 1.7 times",
-        "warning_signals": 4,
+        "financial_strength": "rating 14, interest cover 2.2 times",
+        "warning_signals": 3,
         "score": 80,
         "material": true
       }
@@ -94373,8 +94370,8 @@
         "exposure_hkd": 517465000.0,
         "security_coverage": 1.52,
         "guarantor_support": "Apex Group parent comfort letter, unsecured",
-        "financial_strength": "rating 14, interest cover 1.7 times",
-        "warning_signals": 4,
+        "financial_strength": "rating 14, interest cover 2.2 times",
+        "warning_signals": 3,
         "score": 60,
         "material": true
       }
@@ -94639,8 +94636,8 @@
         "exposure_hkd": 517465000.0,
         "security_coverage": 1.52,
         "guarantor_support": "Apex Group parent comfort letter, unsecured",
-        "financial_strength": "rating 14, interest cover 1.7 times",
-        "warning_signals": 4,
+        "financial_strength": "rating 14, interest cover 2.2 times",
+        "warning_signals": 3,
         "score": 35,
         "material": false
       }
@@ -94715,8 +94712,8 @@
         "exposure_hkd": 517465000.0,
         "security_coverage": 1.52,
         "guarantor_support": "Apex Group parent comfort letter, unsecured",
-        "financial_strength": "rating 14, interest cover 1.7 times",
-        "warning_signals": 4,
+        "financial_strength": "rating 14, interest cover 2.2 times",
+        "warning_signals": 3,
         "score": 35,
         "material": false
       }
@@ -94747,35 +94744,35 @@
       "kind": "Adverse news",
       "subject": "Adverse news \u2014 Apex Global Holdings Limited",
       "customer_id": "BOR-AGHL",
-      "body": "To: yiyangyao2@gmail.com\nSubject: Adverse news \u2014 Apex Global Holdings Limited\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\n12 Sep 2026. Office leasing at Apex Global's Kowloon towers is behind budget.\n\nA placeholder alert says two commercial floors in the Kowloon towers leased by Apex Global Holdings are still vacant against the budget used at the last review. No loss amount is stated. Replace this item when the live feed is connected.\n\nMateriality score 85. Drawn HKD 517,465,000. Collateral coverage 1.52. Guarantor: Apex Group parent comfort letter, unsecured. Interest cover on the demonstration statements is 1.7 times.\n\nA second placeholder says a contractor has filed a claim against Industrial Development Investment Corp. Replace both items when the live alert feed is provided.\n\nThis note asks the relationship manager to check the leasing budget. It does not downgrade the name, call default, or exit the relationship.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
+      "body": "To: credit.desk@hkbea.example\nSubject: Adverse news \u2014 Apex Global Holdings Limited\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\n12 Sep 2026. Office leasing at Apex Global's Kowloon towers is behind budget.\n\nA placeholder alert says two commercial floors in the Kowloon towers leased by Apex Global Holdings are still vacant against the budget used at the last review. No loss amount is stated. Replace this item when the live feed is connected.\n\nMateriality score 85. Drawn HKD 517,465,000. Collateral coverage 1.52. Guarantor: Apex Group parent comfort letter, unsecured. Interest cover on the annual-review statements is 2.2 times.\n\nA second placeholder says a contractor has filed a claim against Industrial Development Investment Corp. Replace both items when the live alert feed is provided.\n\nThis note asks the relationship manager to check the leasing budget. It does not downgrade the name, call default, or exit the relationship.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
     },
     {
       "id": "MAIL-IND-WHOLESALE",
       "kind": "Industry stress",
       "subject": "Industry review \u2014 Property Investment",
       "customer_id": "",
-      "body": "To: yiyangyao2@gmail.com\nSubject: Industry review \u2014 Property Investment\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\n28 Sep 2026. Hong Kong commercial vacancy stayed high through the third quarter. A sector placeholder says grade-A and fringe office vacancy did not improve in the quarter. It does not name a default. It is here so the industry step has a headline until a live feed arrives.\n\nProperty Investment drawn is HKD 1,996,813,000 across 5 groups. Stage 2 names: 1. Migrations since 31 Aug 2026: 0. Open warnings: 4.\n\nProperty Development drawn is HKD 1,334,089,000 across 3 groups. Government drawn is HKD 647,250,000 across 2 groups.\n\nOn-balance collateral market value is Residential Property HKD 3,085,119,000, Commercial Property HKD 2,863,550,000. Portfolio LTV on the on-balance collateral is 0.67. Current PD grades did not change between the December 2025 and November 2026 month-ends.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
+      "body": "To: credit.desk@hkbea.example\nSubject: Industry review \u2014 Property Investment\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\n28 Sep 2026. Hong Kong commercial vacancy stayed high through the third quarter. A sector placeholder says grade-A and fringe office vacancy did not improve in the quarter. It does not name a default. It is here so the industry step has a headline until a live feed arrives.\n\nProperty Investment drawn is HKD 1,996,813,000 across 5 groups. Stage 2 names: 1. Migrations since 31 Aug 2026: 0. Open warnings: 4.\n\nProperty Development drawn is HKD 1,334,089,000 across 3 groups. Government drawn is HKD 647,250,000 across 2 groups.\n\nOn-balance collateral market value is Residential Property HKD 3,085,119,000, Commercial Property HKD 2,863,550,000. Portfolio LTV on the on-balance collateral is 0.67. Current PD grades did not change between the December 2025 and November 2026 month-ends.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
     },
     {
       "id": "MAIL-REPAY-LANTERN",
       "kind": "Large repayment",
       "subject": "Large repayment \u2014 Industrial Development Investment Corp.",
       "customer_id": "BOR-IDIC",
-      "body": "To: yiyangyao2@gmail.com\nSubject: Large repayment \u2014 Industrial Development Investment Corp.\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\nIndustrial Development Investment Corp. has principal of HKD 163,443,000 due on 28/10/2026, 28 days after 30 Sep 2026.\n\nThe amount is on CTR-0006-03, method Equal Amort. It is above the HKD 5,000,000 monitoring threshold.\n\nGroup drawn is HKD 512,405,000. On-balance property market value is HKD 785,431,000. LTV is 0.65.\n\nThe relationship owner should confirm the funding source for this instalment. The draft does not extend the date and it does not waive the payment.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
+      "body": "To: credit.desk@hkbea.example\nSubject: Large repayment \u2014 Industrial Development Investment Corp.\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\nIndustrial Development Investment Corp. has principal of HKD 163,443,000 due on 28/10/2026, 28 days after 30 Sep 2026.\n\nThe amount is on CTR-0006-03, method Equal Amort. It is above the HKD 5,000,000 monitoring threshold.\n\nGroup drawn is HKD 512,405,000. On-balance property market value is HKD 785,431,000. LTV is 0.65.\n\nThe relationship owner should confirm the funding source for this instalment. The draft does not extend the date and it does not waive the payment.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
     },
     {
       "id": "MAIL-DPD-LANTERN",
       "kind": "Days past due",
       "subject": "Days past due \u2014 portfolio extract",
       "customer_id": "",
-      "body": "To: yiyangyao2@gmail.com\nSubject: Days past due \u2014 portfolio extract\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\nThe portfolio extract at 30 Sep 2026 records days past due on three names: Apex Global Holdings Limited at 65 days, drawn HKD 517,465,000, ECL HKD 10,731,000; Industrial Development Investment Corp. at 65 days, drawn HKD 512,405,000, ECL HKD 3,295,000; Provincial Capital Holdings at 65 days, drawn HKD 571,119,000, ECL HKD 3,604,000.\n\nStage on each of these names is 2, the same stage as 31 Aug 2026. The days-past-due figure is PAST_DUE_DAY on the portfolio file.\n\nThe cash-flow dates above HKD 5,000,000 are future principal dates. This draft does not treat those future dates as past due.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
+      "body": "To: credit.desk@hkbea.example\nSubject: Days past due \u2014 portfolio extract\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\nThe portfolio extract at 30 Sep 2026 records days past due on three names: Apex Global Holdings Limited at 65 days, drawn HKD 517,465,000, ECL HKD 10,731,000; Industrial Development Investment Corp. at 65 days, drawn HKD 512,405,000, ECL HKD 3,295,000; Provincial Capital Holdings at 65 days, drawn HKD 571,119,000, ECL HKD 3,604,000.\n\nStage on each of these names is 2, the same stage as 31 Aug 2026. The days-past-due figure is PAST_DUE_DAY on the portfolio file.\n\nThe cash-flow dates above HKD 5,000,000 are future principal dates. This draft does not treat those future dates as past due.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
     },
     {
       "id": "MAIL-COV-APEX",
       "kind": "Covenant scenario",
       "subject": "Covenant test \u2014 Apex Global Holdings Limited",
       "customer_id": "BOR-AGHL",
-      "body": "To: yiyangyao2@gmail.com\nSubject: Covenant test \u2014 Apex Global Holdings Limited\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\nFinancial statements were not in the uploaded files. The figures below are a demonstration so the covenant screen can be used.\n\nLatest demonstration interest cover for Apex Global Holdings Limited is 1.7 times. The covenant is 2.0 times, so the name is outside the covenant on this placeholder.\n\nA revenue decline of 15 percent moves cover to about 1.1 times. Margin, funding cost and liquidity cases are on the financials screen.\n\nWhat is from the extract: drawn HKD 517,465,000, property market value HKD 788,670,000, LTV 0.66.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
+      "body": "To: credit.desk@hkbea.example\nSubject: Covenant test \u2014 Apex Global Holdings Limited\n\nSYNTHETIC HACKATHON DATA - NOT FOR CUSTOMER, CREDIT, COMPLIANCE, RISK, REGULATORY OR BUSINESS DECISION-MAKING\n\nDear colleague,\n\nThis draft was written from the property portfolio collateral extract and the generated cash flow schedule as at 30 Sep 2026. It is not a credit decision.\n\nThe group statements are those used in the 31 October 2025 annual review. They are not the portfolio-extract balances.\n\nLatest interest cover for Apex Global Holdings Limited is 2.2 times. The covenant is 2.0 times, so the name is inside the covenant on those statements.\n\nA revenue decline of 15 percent moves cover to about 1.6 times. Margin, funding cost and liquidity cases are on the financials screen.\n\nWhat is from the extract: drawn HKD 517,465,000, property market value HKD 788,670,000, LTV 0.66.\n\nPlease send this from your own mailbox if you want it delivered.\n\nRisk intelligence demonstration"
     }
   ],
   "portfolio": {
@@ -94848,6 +94845,6 @@
       "BOR-STBB"
     ],
     "overdue_reviews": 3,
-    "open_warnings": 10
+    "open_warnings": 9
   }
 }

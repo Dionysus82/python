@@ -14,7 +14,7 @@ DB_CANDIDATES = [
 OUT = ROOT / "book.json"
 AS_OF = "2026-09-30"
 THRESHOLD = 5_000_000
-NOTIFY = "yiyangyao2@gmail.com"
+NOTIFY = "credit.desk@hkbea.example"
 
 PD = {1: 0.002, 2: 0.004, 3: 0.008, 4: 0.015, 5: 0.035, 6: 0.07, 7: 0.12}
 LGD = 0.45
