@@ -673,9 +673,8 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
       {chart_month_menu() if active == "dashboard" else ""}
     </div>
     <div class="banner">{escape(BOOK["banner"])}</div>
-    {"" if active in {"dashboard", "news"} else date_bar()}
+    {"" if active in {"dashboard", "news", "reports-external"} else date_bar()}
     {body}
-    {date_bar("bottom") if active == "news" else ""}
   </main>
 </div>
 <script>
@@ -1123,7 +1122,7 @@ def news_page(note: str = "") -> str:
     message_html = f"<p><strong>{escape(message)}</strong></p>" if message else ""
     return f"""
     <div class="label">Adverse news</div><h1>Adverse news</h1>
-    <p class="lead">These items are the uploaded adverse-news file. Click a headline to open the article and its action. The action is already written. Severity changes save immediately. A Gemini agent will later search for industry news; that panel stays empty until the agent is connected.</p>
+    <p class="lead">Adverse news is a daily update. These items are the uploaded file. Click a headline to open the article and its action. The action is already written. Severity changes save immediately. A Gemini agent will later search for industry news; that panel stays empty until the agent is connected.</p>
     {message_html}
     <div>
       <div class="news-tools">
