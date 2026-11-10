@@ -19,7 +19,10 @@ ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 import agent_slot
+import build_obligor_reports
+import news_desk
 BOOK = json.loads((ROOT / "book.json").read_text(encoding="utf-8"))
+news_desk.apply_severity(BOOK["news"])
 REPORT_FILES = ROOT / "report_files"
 OBLIGORS = json.loads((REPORT_FILES / "obligors.json").read_text(encoding="utf-8"))
 UPLOADS = REPORT_FILES / "uploads"
@@ -517,7 +520,18 @@ button, .btn {{ font:inherit; background:var(--orange); color:#fff; border:0; bo
 textarea {{ width:100%; min-height:420px; font:14px/1.45 ui-monospace,monospace; border:1px solid var(--line); border-radius:10px; padding:12px; background:#fff; color:var(--ink); }}
 .cite {{ font-size:.82rem; color:var(--muted); border-left:3px solid var(--orange); padding-left:10px; margin:8px 0; }}
 form.inline {{ display:flex; gap:8px; flex-wrap:wrap; align-items:end; }}
-.news-tools {{ display:flex; gap:8px; flex-wrap:wrap; align-items:end; justify-content:flex-end; margin:8px 0 12px; }}
+.news-tools {{ display:flex; gap:12px; flex-wrap:wrap; align-items:end; justify-content:space-between; margin:8px 0 12px; }}
+.news-filters {{ display:flex; gap:8px; flex-wrap:wrap; align-items:end; margin-left:auto; }}
+select.sev {{ font:inherit; font-weight:700; font-size:.78rem; padding:4px 8px; border-radius:99px; max-width:9.5rem; }}
+.sev-note {{ margin-left:6px; color:var(--muted); font-size:.75rem; }}
+.sev-note[hidden] {{ display:none; }}
+td.pick, th.pick {{ width:2.2rem; }}
+td.pick input {{ width:auto; margin:4px 0 0; }}
+textarea.action {{ display:block; width:100%; max-width:720px; min-height:120px; margin-top:4px; font-family:inherit; font:inherit; line-height:1.45; }}
+.action-block {{ border-top:1px solid var(--line); margin-top:14px; padding-top:12px; }}
+.action-block label {{ display:block; margin-top:8px; }}
+.action-block select {{ display:block; width:100%; max-width:420px; margin-top:4px; }}
+button.ghost {{ background:#F7F4F0; color:var(--ink); border:1px solid var(--line); }}
 .news-read {{ color:var(--ink); line-height:1.55; display:grid; gap:14px; padding:6px 4px 10px; }}
 .news-read p {{ margin:0; }}
 .news-copy {{ max-width:78ch; }}
@@ -744,6 +758,7 @@ def news_detail(item: dict) -> str:
     file_rows = [
         ("News type", escape(fields.get("news_type", ""))),
         ("Signal", escape(fields.get("signal", ""))),
+        ("Severity", f'<span class="sev-live">{escape(item["severity"])}</span>'),
         ("Entities", escape(fields.get("entities", ""))),
     ]
     book_rows = [
@@ -783,23 +798,229 @@ def news_detail(item: dict) -> str:
     )
 
 
-def news_page(selected: list[str]) -> str:
+ACTION_NOTES = {
+    "ready": "Actions for the selected headlines are below. Edit the wording, then confirm to add them to the borrower report.",
+    "saved": "Edits are saved on this page. They stay out of the report until you confirm.",
+    "added": "The confirmed wording is now in the borrower monitoring report, under Adverse news actions.",
+    "choose": "Choose a borrower and keep the wording for each action before adding it to a report. The edits were saved.",
+    "pick": "Select at least one headline, then generate actions.",
+}
+
+
+def obligor_name(cid: str) -> str:
+    found = next((item for item in OBLIGORS if item["id"] == cid), None)
+    if found:
+        return found["name"]
+    raw = next((row for row in BOOK["customers"] if row["customer_id"] == cid), None)
+    return raw["legal_name"] if raw else ""
+
+
+def borrower_options(selected: str) -> str:
+    options = ['<option value="">Choose a borrower</option>']
+    for item in OBLIGORS:
+        mark = " selected" if item["id"] == selected else ""
+        options.append(f'<option value="{escape(item["id"])}"{mark}>{escape(item["name"])}</option>')
+    return "".join(options)
+
+
+def action_desk(note: str) -> str:
+    state = news_desk.load_state()
+    known = {item["id"]: item for item in BOOK["news"]}
+    order = {item["id"]: index for index, item in enumerate(BOOK["news"])}
+    records = [(news_id, record) for news_id, record in state["actions"].items() if news_id in known and isinstance(record, dict)]
+    records.sort(key=lambda pair: order[pair[0]])
+    message = ACTION_NOTES.get(note, "")
+    message_html = f"<p><strong>{escape(message)}</strong></p>" if message else ""
+    confirmed: list[str] = []
+    for _, record in records:
+        cid = record.get("confirmed_customer_id") or ""
+        if record.get("confirmed_text") and cid and cid not in confirmed:
+            confirmed.append(cid)
+    links = " ".join(
+        f'<a href="/report-file?id={escape(cid)}">Download the {escape(obligor_name(cid))} report</a>'
+        for cid in confirmed
+    )
+    link_html = f'<p class="news-links">{links}</p>' if links else ""
+    intro = (
+        "Select one or more headlines, then generate actions. Edit the wording here. "
+        "Confirm adds each action to that borrower's monitoring report, in section 4, Adverse news actions. "
+        "The annual-review proposal is left unchanged."
+    )
+    if not records:
+        return f"""
+        <div class="card" id="action-desk" style="margin-top:12px">
+          <div class="label">Actions</div>
+          <p>{intro}</p>
+          {message_html}
+        </div>"""
+    blocks = []
+    for news_id, record in records:
+        item = known[news_id]
+        customer_id = record.get("customer_id") or ""
+        confirmed_customer = record.get("confirmed_customer_id") or ""
+        confirmed_text = record.get("confirmed_text") or ""
+        text = record.get("text") or ""
+        if confirmed_text and confirmed_text == text and confirmed_customer == customer_id:
+            status = f"In the {obligor_name(confirmed_customer)} report."
+        elif confirmed_text:
+            status = f"The {obligor_name(confirmed_customer)} report still has the previous wording until you confirm this edit."
+        else:
+            status = "Draft. Not in a report yet."
+        blocks.append(
+            "<div class=\"action-block\">"
+            f'<input type="hidden" name="news_id" value="{escape(news_id)}">'
+            f"<p><strong>{escape(item['headline'])}</strong><br>"
+            f'<span style="color:var(--muted)">{escape(item["date"])} · {escape(item["source"])} · {escape(item["severity"])}</span></p>'
+            f'<label>Borrower<br><select name="customer_{escape(news_id)}">{borrower_options(customer_id)}</select></label>'
+            f'<label>Action<br><textarea class="action" name="text_{escape(news_id)}">{escape(text)}</textarea></label>'
+            f'<p class="lead">{escape(status)}</p></div>'
+        )
+    return f"""
+    <div class="card" id="action-desk" style="margin-top:12px">
+      <div class="label">Actions</div>
+      <p>{intro}</p>
+      {message_html}{link_html}
+      <form method="post" action="/news-actions">
+        {''.join(blocks)}
+        <p class="date-actions">
+          <button type="submit" class="ghost" name="intent" value="save">Save edits</button>
+          <button type="submit" name="intent" value="confirm">Confirm and add to the report</button>
+        </p>
+      </form>
+    </div>"""
+
+
+def confirmed_report_actions(state: dict, customer_id: str) -> list[dict]:
+    rows = []
+    for item in BOOK["news"]:
+        record = state["actions"].get(item["id"]) or {}
+        if not isinstance(record, dict) or record.get("confirmed_customer_id") != customer_id:
+            continue
+        text = (record.get("confirmed_text") or "").strip()
+        if not text:
+            continue
+        rows.append({
+            "headline": item["headline"],
+            "severity": record.get("confirmed_severity") or item["severity"],
+            "source": item["source"],
+            "date": item["date"],
+            "text": text,
+        })
+    return rows
+
+
+def rebuild_reports(customer_ids: set[str]) -> None:
+    state = news_desk.load_state()
+    for customer_id in sorted(customer_ids):
+        raw = next((row for row in BOOK["customers"] if row["customer_id"] == customer_id), None)
+        folder = REPORT_FILES / "obligors" / customer_id
+        if raw is None or not folder.is_dir():
+            continue
+        document = build_obligor_reports.build_report(raw, raw["history"][-1], confirmed_report_actions(state, customer_id))
+        document.save(folder / "report.docx")
+
+
+def handle_news_form(form: dict[str, list[str]]) -> str:
+    intent = (form.get("intent") or ["generate"])[0]
+    known = {item["id"]: item for item in BOOK["news"]}
+    obligor_ids = {item["id"] for item in OBLIGORS}
+    borrowers = {row["customer_id"]: row for row in BOOK["customers"]}
+    if intent == "generate":
+        chosen = [known[item] for item in form.get("ids", []) if item in known]
+        if not chosen:
+            return "pick"
+
+        def generate(state: dict) -> None:
+            for item in chosen:
+                record = state["actions"].get(item["id"])
+                if not isinstance(record, dict):
+                    record = {}
+                customer_id = record.get("customer_id") or news_desk.suggest_customer(item, BOOK["customers"])
+                if customer_id not in obligor_ids:
+                    customer_id = ""
+                record["customer_id"] = customer_id
+                record["text"] = news_desk.draft_action(item, borrowers.get(customer_id))
+                state["actions"][item["id"]] = record
+
+        news_desk.update_state(generate)
+        return "ready"
+    posted = []
+    for news_id in form.get("news_id", []):
+        if news_id not in known:
+            continue
+        customer_id = (form.get(f"customer_{news_id}") or [""])[0]
+        if customer_id not in obligor_ids:
+            customer_id = ""
+        text = news_desk.clean_text((form.get(f"text_{news_id}") or [""])[0])
+        posted.append((news_id, customer_id, text))
+    if not posted:
+        return "pick"
+
+    def store_drafts(state: dict) -> None:
+        for news_id, customer_id, text in posted:
+            record = state["actions"].get(news_id)
+            if not isinstance(record, dict):
+                record = {}
+            record["customer_id"] = customer_id
+            record["text"] = text
+            state["actions"][news_id] = record
+
+    if intent != "confirm":
+        news_desk.update_state(store_drafts)
+        return "saved"
+    if any(not customer_id or not text for _, customer_id, text in posted):
+        news_desk.update_state(store_drafts)
+        return "choose"
+    touched: set[str] = set()
+
+    def confirm(state: dict) -> None:
+        for news_id, customer_id, text in posted:
+            record = state["actions"].get(news_id)
+            if not isinstance(record, dict):
+                record = {}
+            previous = record.get("confirmed_customer_id") or ""
+            if previous:
+                touched.add(previous)
+            record["customer_id"] = customer_id
+            record["text"] = text
+            record["confirmed_text"] = text
+            record["confirmed_customer_id"] = customer_id
+            record["confirmed_severity"] = known[news_id]["severity"]
+            state["actions"][news_id] = record
+            touched.add(customer_id)
+
+    news_desk.update_state(confirm)
+    rebuild_reports(touched)
+    return "added"
+
+
+def news_page(note: str = "") -> str:
     rows = []
     for order, item in enumerate(BOOK["news"]):
         factors = item["factors"]
         flag = '<span class="tag tag-red">Material</span>' if factors["material"] else '<span class="tag tag-grey">Below threshold</span>'
+        levels = "".join(
+            f'<option{" selected" if item["severity"] == level else ""}>{level}</option>'
+            for level in news_desk.SEVERITIES
+        )
         rows.append(
             f'<tr class="news-item click" data-order="{order}" data-severity="{escape(item["severity"])}" data-time="{news_stamp(item["date"])}">'
+            f'<td class="pick"><input form="news-pick" type="checkbox" name="ids" value="{escape(item["id"])}" aria-label="Select headline"></td>'
             f'<td>{escape(item["headline"])}'
             f'<div style="color:var(--muted);font-size:.8rem">{escape(item["date"])} · {escape(item["source"])}</div></td>'
-            f'<td>{escape(item["industry"])}</td><td>{escape(item["severity"])}</td><td>{flag}</td></tr>'
-            f'<tr class="news-detail" hidden><td colspan="4">{news_detail(item)}</td></tr>'
+            f'<td>{escape(item["industry"])}</td>'
+            f'<td><select class="sev" data-id="{escape(item["id"])}" data-saved="{escape(item["severity"])}" aria-label="Severity">{levels}</select> <span class="sev-note" hidden>Saved</span></td>'
+            f'<td>{flag}</td></tr>'
+            f'<tr class="news-detail" hidden><td colspan="5">{news_detail(item)}</td></tr>'
         )
     return f"""
     <div class="label">Step 1 of 3</div><h1>Adverse news</h1>
-    <p class="lead">These headlines are the Apex negative-news file. Click a headline to open its detail here. Materiality uses exposure, security coverage, guarantor support, financial strength and open warnings.</p>
+    <p class="lead">These headlines are the Apex negative-news file. Click a headline to open its detail here. Click the severity to change it, and the change is saved. Select one or more headlines to draft an action for the borrower report. Materiality uses exposure, security coverage, guarantor support, financial strength and open warnings.</p>
+    <form id="news-pick" method="post" action="/news-actions"></form>
     <div>
       <div class="news-tools">
+        <button type="submit" form="news-pick" name="intent" value="generate" id="news-generate">Generate actions</button>
+        <div class="news-filters">
         <label><span class="label">Severity</span><br>
           <select id="severity-filter">
             <option value="">All</option>
@@ -818,11 +1039,13 @@ def news_page(selected: list[str]) -> str:
             <option value="date-asc">Date, oldest</option>
           </select>
         </label>
+        </div>
       </div>
-      <table><thead><tr><th>Item</th><th>Industry</th><th>Severity</th><th></th></tr></thead><tbody id="news-body">{''.join(rows)}
-        <tr id="news-empty" hidden><td colspan="4">No news at this severity.</td></tr>
-      </tbody></table>
+      <div class="scroll"><table><thead><tr><th class="pick"></th><th>Item</th><th>Industry</th><th>Severity</th><th></th></tr></thead><tbody id="news-body">{''.join(rows)}
+        <tr id="news-empty" hidden><td colspan="5">No news at this severity.</td></tr>
+      </tbody></table></div>
     </div>
+    {action_desk(note)}
     <script>
     (function () {{
       var rank = {{"CRITICAL": 4, "HIGH": 3, "MEDIUM": 2, "LOW": 1}};
@@ -830,6 +1053,7 @@ def news_page(selected: list[str]) -> str:
       var sort = document.getElementById("news-sort");
       var body = document.getElementById("news-body");
       var empty = document.getElementById("news-empty");
+      var generate = document.getElementById("news-generate");
       function pairs() {{
         return [...body.querySelectorAll("tr.news-item")].map(function (row) {{
           return {{row: row, detail: row.nextElementSibling}};
@@ -858,7 +1082,11 @@ def news_page(selected: list[str]) -> str:
         empty.hidden = shown > 0;
         body.appendChild(empty);
       }}
+      function refreshGenerate() {{
+        generate.disabled = ![...body.querySelectorAll('input[name="ids"]')].some(function (box) {{ return box.checked; }});
+      }}
       body.addEventListener("click", function (event) {{
+        if (event.target.closest("select, input, button, a, textarea, label")) return;
         var row = event.target.closest("tr.news-item");
         if (!row) return;
         var detail = row.nextElementSibling;
@@ -867,8 +1095,42 @@ def news_page(selected: list[str]) -> str:
         detail.hidden = !open;
         if (open) detail.scrollIntoView({{block: "nearest"}});
       }});
+      body.addEventListener("change", function (event) {{
+        var select = event.target.closest("select.sev");
+        if (!select) {{
+          if (event.target.name === "ids") refreshGenerate();
+          return;
+        }}
+        var row = select.closest("tr.news-item");
+        var previous = select.dataset.saved || row.dataset.severity;
+        var chosen = select.value;
+        var note = select.parentElement.querySelector(".sev-note");
+        fetch("/news-severity", {{
+          method: "POST",
+          headers: {{"Content-Type": "application/x-www-form-urlencoded"}},
+          credentials: "same-origin",
+          body: "id=" + encodeURIComponent(select.dataset.id) + "&severity=" + encodeURIComponent(chosen)
+        }}).then(function (response) {{
+          if (!response.ok) throw new Error("save");
+          return response.json();
+        }}).then(function () {{
+          row.dataset.severity = chosen;
+          select.dataset.saved = chosen;
+          var live = row.nextElementSibling.querySelector(".sev-live");
+          if (live) live.textContent = chosen;
+          note.hidden = false;
+          note.textContent = "Saved";
+          setTimeout(function () {{ note.hidden = true; }}, 1200);
+          apply();
+        }}).catch(function () {{
+          select.value = previous;
+          note.hidden = false;
+          note.textContent = "Not saved";
+        }});
+      }});
       filter.addEventListener("change", apply);
       sort.addEventListener("change", apply);
+      refreshGenerate();
     }})();
     </script>
     <div class="card" style="margin-top:12px"><div class="label">ECL of the names named in the feed</div>
@@ -1558,7 +1820,7 @@ def session_ok(header: str | None) -> bool:
 
 ROUTES = {
     "dashboard": lambda q: dashboard(),
-    "news": lambda q: news_page(q.get("selected", [])),
+    "news": lambda q: news_page((q.get("note") or [""])[0]),
     "industry": lambda q: industry_page((q.get("name") or [default_industry()])[0]),
     "repayment": lambda q: repayment_page(int((q.get("window") or ["92"])[0] or 92)),
     "financial": lambda q: financial_page((q.get("customer") or [default_customer_id()])[0], (q.get("scenario") or ["revenue_decline"])[0]),
@@ -1659,6 +1921,25 @@ class Handler(BaseHTTPRequestHandler):
             save_proposal(rm, filename, payload)
             self._redirect("/reports")
             return
+        if action in {"news-severity", "news-actions"}:
+            if not session_ok(self.headers.get("Cookie")):
+                if action == "news-severity":
+                    self._json({"ok": False}, 401)
+                else:
+                    self._redirect("/login")
+                return
+            if length > (2_000 if action == "news-severity" else 400_000):
+                self.send_error(413)
+                return
+            form = parse_qs(self.rfile.read(length).decode("utf-8"))
+            if action == "news-severity":
+                severity = (form.get("severity") or [""])[0]
+                ok = news_desk.set_severity(BOOK["news"], (form.get("id") or [""])[0], severity)
+                self._json({"ok": ok, "severity": severity if ok else ""}, 200 if ok else 400)
+                return
+            note = handle_news_form(form)
+            self._redirect(f"/news?note={note}#action-desk")
+            return
         if length > 20000:
             self.send_error(413)
             return
@@ -1702,6 +1983,14 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Set-Cookie", cookie)
         self.send_header("Location", location)
         self.end_headers()
+
+    def _json(self, payload: dict, status: int = 200) -> None:
+        raw = json.dumps(payload).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(raw)))
+        self.end_headers()
+        self.wfile.write(raw)
 
     def _html(self, payload: bytes, status: int = 200) -> None:
         self.send_response(status)
