@@ -29,11 +29,31 @@ HKEX_FILINGS = [
         "id": "3768-annual",
         "issuer": "Apex Water Solutions Ltd. (3768.HK)",
         "document": "Annual report 2025",
+        "year": 2025,
+        "names": [
+            "Apex Water Solutions Ltd.",
+            "Apex Water Solutions",
+            "3768.HK",
+            "3768",
+            "Apex Global Holdings Limited",
+            "Apex Global Holdings",
+            "BOR-AGHL",
+        ],
     },
     {
         "id": "3768-interim",
         "issuer": "Apex Water Solutions Ltd. (3768.HK)",
         "document": "Interim report 2026",
+        "year": 2026,
+        "names": [
+            "Apex Water Solutions Ltd.",
+            "Apex Water Solutions",
+            "3768.HK",
+            "3768",
+            "Apex Global Holdings Limited",
+            "Apex Global Holdings",
+            "BOR-AGHL",
+        ],
     },
 ]
 REPORT_FILES = ROOT / "report_files"
@@ -473,16 +493,17 @@ def page(title: str, active: str, body: str) -> bytes:
     links = []
     for key, label in nav:
         if key == "reports":
-            opened = " open" if active == "reports" else ""
-            current = " active" if active == "reports" else ""
-            filings = "".join(
-                f'<a href="/reports?filing={escape(item["id"])}">{escape(item["issuer"])} — {escape(item["document"])}</a>'
-                for item in HKEX_FILINGS
-            )
+            opened = " open" if active in {"reports", "reports-external"} else ""
+            current = " active" if active in {"reports", "reports-external"} else ""
+            internal = "active" if active == "reports" else ""
+            external = "active" if active == "reports-external" else ""
             links.append(
                 f'<div class="nav-sub{opened}">'
-                f'<button type="button" class="nav-parent{current}" aria-expanded="{"true" if active == "reports" else "false"}">Report</button>'
-                f'<div class="nav-menu"><a href="/reports">Output report</a>{filings}</div></div>'
+                f'<button type="button" class="nav-parent{current}" aria-expanded="{"true" if opened else "false"}">Report</button>'
+                f'<div class="nav-menu">'
+                f'<a class="{internal}" href="/reports">Internal report</a>'
+                f'<a class="{external}" href="/reports?source=external">External report</a>'
+                f'</div></div>'
             )
             continue
         cls = "active" if key == active else ""
@@ -605,6 +626,8 @@ form.dates input {{ width:auto; margin:0; }}
 .date-menu.end {{ margin-top:18px; margin-bottom:0; }}
 .date-menu.end .date-panel {{ top:auto; bottom:calc(100% + 6px); }}
 .suggest {{ position:relative; max-width:560px; }}
+form.hkex-search .suggest {{ flex:1 1 420px; min-width:min(420px, 100%); }}
+form.hkex-search input[type=number] {{ width:7.5rem; }}
 .suggest input {{ width:100%; font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; margin-top:6px; }}
 .suggest-list {{ position:absolute; z-index:30; left:0; right:0; top:calc(100% + 4px); background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 12px 28px rgba(44,40,37,.14); max-height:320px; overflow:auto; }}
 .suggest-item {{ display:block; width:100%; text-align:left; background:#fff; color:var(--ink); border:0; border-bottom:1px solid var(--line); border-radius:0; padding:8px 12px; font-weight:600; }}
@@ -1459,7 +1482,90 @@ def parse_multipart(content_type: str, body: bytes) -> dict[str, dict]:
     return fields
 
 
-def reports_page(kind: str, detail: str, cid: str, generated: str = "", filing: str = "") -> str:
+def hkex_hits(borrower: str, year: str) -> list[dict]:
+    query = " ".join(borrower.split()).lower()
+    if len(query) < 2 or not str(year).strip().isdigit():
+        return []
+    wanted = int(year)
+    hits = []
+    for item in HKEX_FILINGS:
+        if item["year"] != wanted:
+            continue
+        names = [item["issuer"], *item["names"]]
+        if any(query in name.lower() for name in names):
+            hits.append(item)
+    return hits
+
+
+def external_reports_page(borrower: str, year: str) -> str:
+    borrower = " ".join(borrower.split())
+    year = year.strip()
+    ready = len(borrower) >= 2 and year.isdigit()
+    hits = hkex_hits(borrower, year) if ready else []
+    if not borrower and not year:
+        result = "<p>Enter a borrower and a year.</p>"
+    elif not ready:
+        result = "<p>Enter a borrower and a four-digit year.</p>"
+    elif not hits:
+        result = f"<p>No HKEX report is on file for {escape(borrower)} in {escape(year)}. The Gemini agent has not retrieved one yet.</p>"
+    else:
+        cards = []
+        for item in hits:
+            cards.append(
+                f'<article class="sent-mail"><div class="label">HKEX</div>'
+                f'<h2>{escape(item["issuer"])}</h2>'
+                f'<p>{escape(item["document"])} · {item["year"]}</p>'
+                f'<p>Retrieved for the search {escape(borrower)}, {escape(year)}. '
+                f'The Gemini agent collects this filing from HKEX. The document is not stored here yet. '
+                f'When it arrives, it is an input to the internal report.</p></article>'
+            )
+        result = "".join(cards)
+    catalog = json.dumps([item["name"] for item in OBLIGORS] + ["Apex Water Solutions Ltd. (3768.HK)"])
+    return f"""
+    <div class="label">Report</div><h1>External report</h1>
+    <p class="lead">Search by borrower and year for a financial report collected from HKEX.</p>
+    <form class="inline hkex-search" method="get" action="/reports">
+      <input type="hidden" name="source" value="external">
+      <div class="suggest">
+        <label>Borrower<br><input id="hkex-borrower" name="borrower" value="{escape(borrower)}" placeholder="Borrower or stock code" autocomplete="off"></label>
+        <div class="suggest-list" id="hkex-list" hidden></div>
+      </div>
+      <label>Year<br><input name="year" type="number" min="1990" max="2100" value="{escape(year)}" placeholder="2025"></label>
+      <button type="submit">Search</button>
+    </form>
+    <div class="card" style="margin-top:12px">{result}</div>
+    <script>
+    (function () {{
+      var names = {catalog};
+      var input = document.getElementById("hkex-borrower");
+      var list = document.getElementById("hkex-list");
+      function render() {{
+        var query = input.value.trim().toLowerCase();
+        if (!query) {{ list.hidden = true; list.innerHTML = ""; return; }}
+        var hits = names.filter(function (name) {{ return name.toLowerCase().indexOf(query) >= 0; }}).slice(0, 8);
+        list.hidden = false;
+        list.innerHTML = hits.length ? hits.map(function (name) {{
+          return '<button type="button" class="suggest-item" data-name="' + name.replace(/"/g, "&quot;") + '">' + name + "</button>";
+        }}).join("") : '<p style="margin:8px 12px;color:#6F6862">No borrower matches.</p>';
+      }}
+      input.addEventListener("input", render);
+      list.addEventListener("mousedown", function (event) {{
+        var button = event.target.closest("button");
+        if (!button) return;
+        event.preventDefault();
+        input.value = button.getAttribute("data-name");
+        list.hidden = true;
+      }});
+      document.addEventListener("click", function (event) {{
+        if (!input.parentElement.parentElement.contains(event.target)) list.hidden = true;
+      }});
+    }})();
+    </script>"""
+
+
+def reports_page(kind: str, detail: str, cid: str, generated: str = "", source: str = "", borrower: str = "", year: str = "") -> str:
+    if source == "external":
+        return external_reports_page(borrower, year)
     row = customer(cid) or customer(default_customer_id())
     port = view().portfolio()
     if kind == "customer":
@@ -1506,19 +1612,9 @@ def reports_page(kind: str, detail: str, cid: str, generated: str = "", filing: 
         }
         for item in OBLIGORS
     ])
-    chosen = next((item for item in HKEX_FILINGS if item["id"] == filing), None)
-    filing_card = ""
-    if chosen:
-        filing_card = (
-            f'<div class="card" style="margin-bottom:12px"><div class="label">HKEX filing</div>'
-            f'<h2>{escape(chosen["issuer"])}</h2>'
-            f'<p>{escape(chosen["document"])}. The Gemini agent will retrieve this from HKEX. It is not in the platform yet. '
-            f'When the file arrives, it is an input to the output report on this page.</p></div>'
-        )
     return f"""
-    {filing_card}
-    <div class="label">Reports</div><h1>Report</h1>
-    <p class="lead">Search for a borrower. The closest names appear as you type. Choose one, generate the paper, then download the proposal or the monitoring report. HKEX filings opened from the Report menu are a later input to that output report.</p>
+    <div class="label">Report</div><h1>Internal report</h1>
+    <p class="lead">Search for a borrower. The closest names appear as you type. Choose one, generate the paper, then download the proposal or the monitoring report.</p>
     <div class="card">
       <div class="label">Borrower</div>
       <div class="suggest">
@@ -2081,7 +2177,7 @@ ROUTES = {
     "industry": lambda q: industry_page((q.get("name") or [default_industry()])[0]),
     "repayment": lambda q: repayment_page(int((q.get("window") or ["92"])[0] or 92)),
     "financial": lambda q: financial_page((q.get("customer") or [default_customer_id()])[0], (q.get("scenario") or ["revenue_decline"])[0]),
-    "reports": lambda q: reports_page((q.get("kind") or ["mir"])[0], (q.get("detail") or ["summary"])[0], (q.get("customer") or [default_customer_id()])[0], (q.get("generated") or [""])[0], (q.get("filing") or [""])[0]),
+    "reports": lambda q: reports_page((q.get("kind") or ["mir"])[0], (q.get("detail") or ["summary"])[0], (q.get("customer") or [default_customer_id()])[0], (q.get("generated") or [""])[0], (q.get("source") or [""])[0], (q.get("borrower") or [""])[0], (q.get("year") or [""])[0]),
     "assistant": lambda q: assistant_page((q.get("q") or ["What are the key risks for this customer?"])[0], (q.get("customer") or [default_customer_id()])[0]),
     "drafts": lambda q: drafts_page(),
     "email": lambda q: email_page((q.get("id") or ["MAIL-NEWS-APEX"])[0]),
@@ -2153,7 +2249,10 @@ class Handler(BaseHTTPRequestHandler):
             return
         if key not in ROUTES:
             key = "dashboard"
-        body = page(key, "drafts" if key == "email" else key, ROUTES[key](query))
+        section = "drafts" if key == "email" else key
+        if key == "reports" and (query.get("source") or [""])[0] == "external":
+            section = "reports-external"
+        body = page(key, section, ROUTES[key](query))
         self._html(body)
 
     def do_POST(self) -> None:  # noqa: N802
