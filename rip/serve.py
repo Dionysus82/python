@@ -685,12 +685,22 @@ nav button.nav-parent.active, .nav-sub.open > button.nav-parent {{ background:rg
 .nav-menu {{ display:none; margin:0 0 6px 14px; }}
 .nav-sub.open .nav-menu {{ display:block; }}
 .nav-menu a {{ font-size:.86rem; padding:7px 10px; }}
-.sent-mail {{ padding:14px 0; border-top:1px solid var(--line); }}
-.sent-mail:first-child, #unsent-list .sent-mail:first-of-type, #mail-list .sent-mail:first-of-type {{ border-top:0; padding-top:0; }}
-#unsent-list > h2, #mail-list > h2 {{ font-size:1.2rem; margin:0 0 8px; }}
-.sent-mail h2 {{ font-size:1.05rem; margin:4px 0 8px; }}
-.sent-mail p {{ margin:2px 0; }}
-.letter {{ white-space:pre-wrap; background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; margin-top:10px; font:14px/1.45 ui-monospace,monospace; }}
+#unsent-list > h2, #mail-list > h2 {{ font-size:1.2rem; margin:0 0 4px; }}
+.mail-inbox details {{ border-top:1px solid var(--line); }}
+.mail-inbox details:first-of-type {{ border-top:0; }}
+.mail-inbox summary {{ display:grid; grid-template-columns:minmax(128px,190px) minmax(0,1fr) auto; gap:14px; align-items:center; padding:11px 6px; cursor:pointer; list-style:none; }}
+.mail-inbox summary::-webkit-details-marker {{ display:none; }}
+.mail-inbox summary::marker {{ content:""; }}
+.mail-inbox summary:hover, .mail-inbox details[open] summary {{ background:#F7F1EB; border-radius:8px; }}
+.mail-caret {{ display:inline-block; width:0; height:0; margin-right:8px; border-top:4px solid transparent; border-bottom:4px solid transparent; border-left:5px solid var(--muted); vertical-align:middle; }}
+.mail-inbox details[open] .mail-caret {{ transform:rotate(90deg); }}
+.mail-who {{ font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
+.mail-line {{ min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
+.mail-line strong {{ font-weight:650; color:var(--ink); }}
+.mail-snip {{ color:var(--muted); font-weight:400; }}
+.mail-when {{ color:var(--muted); font-size:.84rem; white-space:nowrap; }}
+.mail-route {{ margin:8px 8px 0; color:var(--muted); font-size:.86rem; }}
+.letter {{ white-space:pre-wrap; background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; margin:8px 8px 14px; font:14px/1.45 ui-monospace,monospace; }}
 nav a.logout {{ margin-top:18px; color:#C8BEB4; }}
 .nav-toggle {{ background:var(--rail); margin-bottom:12px; }}
 .backdrop {{ display:none; }}
@@ -2181,6 +2191,20 @@ def sent_letter(item: dict) -> str:
     )
 
 
+def mail_snippet(text: str) -> str:
+    skip = (
+        "to:", "sent:", "subject:", "synthetic", "dear ",
+        "this message was sent", "this draft was written", "please send this",
+        "position ", "financial statements were not",
+    )
+    for line in text.splitlines():
+        clean = " ".join(line.split())
+        if not clean or clean.lower().startswith(skip):
+            continue
+        return clean if len(clean) <= 88 else clean[:87].rstrip() + "…"
+    return ""
+
+
 def drafts_page() -> str:
     critical = [item for item in BOOK["news"] if item["severity"] == "CRITICAL"]
     held = [item for item in BOOK["news"] if item["severity"] != "CRITICAL"]
@@ -2195,15 +2219,14 @@ def drafts_page() -> str:
             rms.append(name)
         if borrower not in borrowers:
             borrowers.append(borrower)
+        letter = sent_letter(item)
         cards.append(
-            f'<article class="sent-mail" id="sent-{escape(item["id"])}" data-rm="{escape(name)}" data-borrower="{escape(borrower)}">'
-            f'<div class="label">Sent automatically</div>'
-            f'<h2>{escape(item["headline"])}</h2>'
-            f'<p>RM: {escape(name)}</p>'
-            f'<p>Borrower: {escape(borrower)}</p>'
-            f'<p>To: {escape(name)} &lt;{escape(address)}&gt;</p>'
-            f'<p>Sent: {escape(item["date"])}, 08:20 HKT</p>'
-            f'<div class="letter">{escape(sent_letter(item))}</div></article>'
+            f'<details class="sent-mail" id="sent-{escape(item["id"])}" data-rm="{escape(name)}" data-borrower="{escape(borrower)}">'
+            f'<summary><span class="mail-who"><span class="mail-caret" aria-hidden="true"></span>{escape(name)}</span>'
+            f'<span class="mail-line"><strong>{escape(item["headline"])}</strong> <span class="mail-snip">— {escape(mail_snippet(letter))}</span></span>'
+            f'<span class="mail-when">{escape(item["date"])}</span></summary>'
+            f'<p class="mail-route">To: {escape(name)} &lt;{escape(address)}&gt; · Borrower: {escape(borrower)} · Sent {escape(item["date"])}, 08:20 HKT</p>'
+            f'<div class="letter">{escape(letter)}</div></details>'
         )
     counts = {}
     for item in held:
@@ -2218,16 +2241,15 @@ def drafts_page() -> str:
             rms.append(name)
         if borrower and borrower not in borrowers:
             borrowers.append(borrower)
-        who = escape(name) if name else "—"
+        who = escape(name) if name else "Draft"
         named = escape(borrower) if borrower else "Not linked"
         unsent.append(
-            f'<article class="sent-mail" data-rm="{escape(name)}" data-borrower="{escape(borrower)}">'
-            f'<div class="label">Not sent</div>'
-            f'<h2><a href="/email?id={escape(draft["id"])}">{escape(draft["subject"])}</a></h2>'
-            f'<p>{escape(draft["kind"])}</p>'
-            f'<p>RM: {who}</p>'
-            f'<p>Borrower: {named}</p>'
-            f'<div class="letter">{escape(draft["body"])}</div></article>'
+            f'<details class="sent-mail" data-rm="{escape(name)}" data-borrower="{escape(borrower)}">'
+            f'<summary><span class="mail-who"><span class="mail-caret" aria-hidden="true"></span>{who}</span>'
+            f'<span class="mail-line"><strong>{escape(draft["subject"])}</strong> <span class="mail-snip">— {escape(mail_snippet(draft["body"]))}</span></span>'
+            f'<span class="mail-when">Draft</span></summary>'
+            f'<p class="mail-route">Borrower: {named} · RM: {escape(name) if name else "—"} · Not sent · <a href="/email?id={escape(draft["id"])}">Open this draft</a></p>'
+            f'<div class="letter">{escape(draft["body"])}</div></details>'
         )
     rm_options = "".join(f"<option>{escape(name)}</option>" for name in sorted(rms))
     borrower_options = "".join(f"<option>{escape(name)}</option>" for name in sorted(borrowers))
@@ -2244,15 +2266,15 @@ def drafts_page() -> str:
         </label>
       </div>
     </div>
-    <div class="card" id="unsent-list">
-      <h2>Unsent Draft</h2>
-      {''.join(unsent) or '<p>No draft is waiting.</p>'}
-      <p id="unsent-empty" hidden>No unsent draft matches this RM and borrower.</p>
-    </div>
-    <div class="card" id="mail-list" style="margin-top:12px">
+    <div class="card mail-inbox" id="mail-list">
       <h2>Sent</h2>
       {''.join(cards) or '<p>No critical item is on the file.</p>'}
       <p id="mail-empty" hidden>No sent message matches this RM and borrower.</p>
+    </div>
+    <div class="card mail-inbox" id="unsent-list" style="margin-top:12px">
+      <h2>Unsent Draft</h2>
+      {''.join(unsent) or '<p>No draft is waiting.</p>'}
+      <p id="unsent-empty" hidden>No unsent draft matches this RM and borrower.</p>
     </div>
     <p class="lead">{escape(held_line)} remain on the adverse-news page and are not in either list.</p>
     <script>
@@ -2278,6 +2300,11 @@ def drafts_page() -> str:
       function apply() {{ applyUnsent(); applySent(); }}
       rm.addEventListener("change", apply);
       borrower.addEventListener("change", apply);
+      var opened = document.getElementById((location.hash || "").slice(1));
+      if (opened && opened.tagName === "DETAILS") {{
+        opened.open = true;
+        opened.scrollIntoView({{block: "center"}});
+      }}
     }})();
     </script>"""
 
