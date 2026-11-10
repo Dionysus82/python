@@ -801,7 +801,7 @@ def news_detail(item: dict) -> str:
 ACTION_NOTES = {
     "ready": "Actions for the selected headlines are below. Edit the wording, then confirm to add them to the borrower report.",
     "saved": "Edits are saved on this page. They stay out of the report until you confirm.",
-    "added": "The confirmed wording is now under section 7, Other Market News, of the borrower monitoring report.",
+    "added": "A summary of the selected news is now in section 7, and a summary of the actions is under section 9, of the borrower monitoring report.",
     "choose": "Choose a borrower and keep the wording for each action before adding it to a report. The edits were saved.",
     "pick": "Select at least one headline, then generate actions.",
 }
@@ -843,7 +843,7 @@ def action_desk(note: str) -> str:
     link_html = f'<p class="news-links">{links}</p>' if links else ""
     intro = (
         "Select one or more headlines, then generate actions. Edit the wording here. "
-        "Confirm adds each action under section 7, Other Market News, of that borrower's monitoring report. "
+        "Confirm summarises the selected news into section 7, Other Market News, and summarises the actions under section 9, Suggested Action Plan. "
         "The rest of that report stays in place. The annual-review proposal is left unchanged."
     )
     if not records:
@@ -916,8 +916,7 @@ def rebuild_reports(customer_ids: set[str]) -> None:
         folder = REPORT_FILES / "obligors" / customer_id
         if raw is None or not folder.is_dir():
             continue
-        document = build_obligor_reports.build_report(raw, raw["history"][-1], confirmed_report_actions(state, customer_id))
-        document.save(folder / "report.docx")
+        build_obligor_reports.save_report(raw, raw["history"][-1], confirmed_report_actions(state, customer_id), folder / "report.docx")
 
 
 def handle_news_form(form: dict[str, list[str]]) -> str:
