@@ -216,7 +216,7 @@ def measure(value, pattern: str) -> str:
     return pattern.format(value)
 
 
-def date_bar() -> str:
+def date_bar(where: str = "top") -> str:
     chosen = view()
     count = len(chosen.dates)
     if count == len(BOOK["dates"]):
@@ -231,8 +231,9 @@ def date_bar() -> str:
         boxes.append(
             f'<label><input type="checkbox" name="d" value="{iso}" {checked}>{escape(chosen.label(iso))}</label>'
         )
+    placed = "date-menu end" if where == "bottom" else "date-menu"
     return f"""
-    <form class="date-menu" method="post" action="/dates">
+    <form class="{placed}" method="post" action="/dates">
       <input type="hidden" name="next" value="{escape(chosen.next_path)}">
       <button type="button" class="date-toggle" aria-expanded="false" aria-controls="date-panel">
         <span class="label">Reporting dates</span>
@@ -536,6 +537,8 @@ form.dates input {{ width:auto; margin:0; }}
 .date-panel {{ display:none; position:absolute; z-index:20; top:calc(100% + 6px); left:0; width:min(320px, 86vw); max-height:70vh; overflow:auto; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; box-shadow:0 12px 28px rgba(44,40,37,.14); }}
 .date-menu.open .date-panel {{ display:block; }}
 .date-menu.corner .date-panel {{ left:auto; right:0; }}
+.date-menu.end {{ margin-top:18px; margin-bottom:0; }}
+.date-menu.end .date-panel {{ top:auto; bottom:calc(100% + 6px); }}
 .suggest {{ position:relative; max-width:560px; }}
 .suggest input {{ width:100%; font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; margin-top:6px; }}
 .suggest-list {{ position:absolute; z-index:30; left:0; right:0; top:calc(100% + 4px); background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 12px 28px rgba(44,40,37,.14); max-height:320px; overflow:auto; }}
@@ -581,8 +584,9 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
       {chart_month_menu() if active == "dashboard" else ""}
     </div>
     <div class="banner">{escape(BOOK["banner"])}</div>
-    {"" if active == "dashboard" else date_bar()}
+    {"" if active in {"dashboard", "news"} else date_bar()}
     {body}
+    {date_bar("bottom") if active == "news" else ""}
   </main>
 </div>
 <script>
