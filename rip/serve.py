@@ -641,6 +641,25 @@ form.hkex-search input[type=number] {{ width:7.5rem; }}
 .legend {{ display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:8px; font-size:.84rem; }}
 .legend i {{ display:inline-block; width:10px; height:10px; border-radius:99px; margin-right:6px; }}
 .scroll {{ overflow-x:auto; }}
+body.news-lock {{ height:100vh; overflow:hidden; }}
+body.news-lock .shell {{ height:100vh; min-height:0; }}
+body.news-lock main {{ height:100vh; overflow:hidden; display:flex; flex-direction:column; padding-bottom:16px; }}
+.news-screen {{ display:flex; flex-direction:column; min-height:0; }}
+body.news-lock .news-screen {{ flex:1; }}
+.news-screen .lead {{ max-width:none; margin:0 0 10px; }}
+.news-boards {{ min-height:0; display:grid; grid-template-columns:1fr 1fr; gap:12px; }}
+body.news-lock .news-boards {{ flex:1; grid-template-rows:minmax(0, 1fr); }}
+.news-board {{ min-height:0; display:flex; flex-direction:column; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; }}
+.news-board h2 {{ margin:0 0 4px; font-size:1.15rem; }}
+.news-board .news-tools {{ margin:8px 0; }}
+.news-board .news-filters, .mail-tools .news-filters {{ margin-left:0; }}
+.news-scroll {{ min-height:0; overflow-y:scroll; border:1px solid var(--line); border-radius:10px; background:#fff; }}
+body.news-lock .news-scroll {{ flex:1; }}
+.news-scroll thead th {{ position:sticky; top:0; background:#fff; z-index:1; }}
+tr[hidden], .sent-mail[hidden] {{ display:none !important; }}
+@media (max-width:900px) {{
+  .news-boards {{ grid-template-columns:1fr; grid-template-rows:minmax(0, 1fr) minmax(0, 1fr); }}
+}}
 table.trend th, table.trend td {{ white-space:nowrap; }}
 table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
 @media (max-width:900px) {{
@@ -658,7 +677,7 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
 }}
 </style>
 </head>
-<body>
+<body{" class=\"news-lock\"" if active == "news" else ""}>
 <div class="shell" id="shell">
   <nav id="rail">
     <div class="mark">BEA -<br><span>Risk Intelligence</span></div>
@@ -1100,111 +1119,172 @@ def news_action_form(item: dict) -> str:
     )
 
 
+INDUSTRY_NEWS = {"Sector Related News", "General News"}
+
+
+def news_group(item: dict) -> str:
+    return "industry" if item.get("news_type") in INDUSTRY_NEWS else "obligor"
+
+
+def news_borrower_name(item: dict) -> str:
+    person = customer(item.get("customer_id") or "")
+    if person:
+        return person["legal_name"]
+    entities = [part.strip() for part in str(item.get("entities") or "").split(",") if part.strip()]
+    return entities[0] if entities else "Not named"
+
+
+def news_industry_name(item: dict) -> str:
+    if item.get("customer_id"):
+        label = item.get("industry") or ""
+        if label and label != "Not linked on the book":
+            return label
+    text = item.get("headline") or ""
+    if "水" in text:
+        return "Public Utilities"
+    if "基建" in text:
+        return "Transportation & Infrastructure"
+    if "公用" in text:
+        return "Public Utilities"
+    return "Unclassified"
+
+
 def news_page(note: str = "") -> str:
-    rows = []
+    grouped = {"obligor": [], "industry": []}
     for order, item in enumerate(BOOK["news"]):
-        factors = item["factors"]
-        flag = '<span class="tag tag-red">Material</span>' if factors["material"] else '<span class="tag tag-grey">Below threshold</span>'
-        levels = "".join(
-            f'<option{" selected" if item["severity"] == level else ""}>{level}</option>'
-            for level in news_desk.SEVERITIES
-        )
-        rows.append(
-            f'<tr class="news-item click" data-order="{order}" data-severity="{escape(item["severity"])}" data-time="{news_stamp(item["date"])}">'
-            f'<td>{escape(item["headline"])}'
-            f'<div style="color:var(--muted);font-size:.8rem">{escape(item["date"])} · {escape(item["source"])}</div></td>'
-            f'<td>{escape(item["industry"])}</td>'
-            f'<td><select class="sev" data-id="{escape(item["id"])}" data-saved="{escape(item["severity"])}" aria-label="Severity">{levels}</select> <span class="sev-note" hidden>Saved</span></td>'
-            f'<td>{flag}</td></tr>'
-            f'<tr class="news-detail" hidden><td colspan="4">{news_detail(item)}{news_action_form(item)}</td></tr>'
-        )
+        grouped[news_group(item)].append((order, item))
+
+    def rows_for(kind: str) -> str:
+        rows = []
+        for order, item in grouped[kind]:
+            factors = item["factors"]
+            flag = '<span class="tag tag-red">Material</span>' if factors["material"] else '<span class="tag tag-grey">Below threshold</span>'
+            levels = "".join(
+                f'<option{" selected" if item["severity"] == level else ""}>{level}</option>'
+                for level in news_desk.SEVERITIES
+            )
+            borrower = news_borrower_name(item)
+            industry = news_industry_name(item)
+            label = borrower if kind == "obligor" else industry
+            rows.append(
+                f'<tr class="news-item click" data-order="{order}" data-severity="{escape(item["severity"])}" data-time="{news_stamp(item["date"])}" data-borrower="{escape(borrower)}" data-industry="{escape(industry)}">'
+                f'<td>{escape(item["headline"])}'
+                f'<div style="color:var(--muted);font-size:.8rem">{escape(item["date"])} · {escape(item["source"])}</div></td>'
+                f'<td>{escape(label)}</td>'
+                f'<td><select class="sev" data-id="{escape(item["id"])}" data-saved="{escape(item["severity"])}" aria-label="Severity">{levels}</select> <span class="sev-note" hidden>Saved</span></td>'
+                f'<td>{flag}</td></tr>'
+                f'<tr class="news-detail" hidden><td colspan="4">{news_detail(item)}{news_action_form(item)}</td></tr>'
+            )
+        return "".join(rows)
+
+    def choices(kind: str, field: str) -> str:
+        names = sorted({(news_borrower_name(item) if field == "borrower" else news_industry_name(item)) for _, item in grouped[kind]})
+        return "".join(f"<option>{escape(name)}</option>" for name in names)
+
+    def board(kind: str, title: str, column: str, field: str) -> str:
+        return f"""
+        <section class="news-board" data-filter="{field}">
+          <h2>{title}</h2>
+          <div class="news-tools">
+            <div class="news-filters">
+              <label><span class="label">{column}</span><br>
+                <select class="board-filter"><option value="">All</option>{choices(kind, field)}</select>
+              </label>
+              <label><span class="label">Severity</span><br>
+                <select class="severity-filter">
+                  <option value="">All</option>
+                  <option>CRITICAL</option>
+                  <option>HIGH</option>
+                  <option>MEDIUM</option>
+                  <option>LOW</option>
+                </select>
+              </label>
+              <label><span class="label">Sort</span><br>
+                <select class="news-sort">
+                  <option value="listed">As listed</option>
+                  <option value="severity-desc">Severity, high to low</option>
+                  <option value="severity-asc">Severity, low to high</option>
+                  <option value="date-desc">Date, newest</option>
+                  <option value="date-asc">Date, oldest</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div class="news-scroll"><table><thead><tr><th>Item</th><th>{column}</th><th>Severity</th><th></th></tr></thead>
+            <tbody>{rows_for(kind)}<tr class="news-empty" hidden><td colspan="4">No news matches this filter.</td></tr></tbody>
+          </table></div>
+        </section>"""
     message = ACTION_NOTES.get(note, "")
     message_html = f"<p><strong>{escape(message)}</strong></p>" if message else ""
     return f"""
+    <div class="news-screen">
     <div class="label">Adverse news</div><h1>Adverse news</h1>
-    <p class="lead">Adverse news is a daily update. These items are the uploaded file. Click a headline to open the article and its action. The action is already written. Severity changes save immediately. A Gemini agent will later search for industry news; that panel stays empty until the agent is connected.</p>
+    <p class="lead">Adverse news is a daily update. Obligor related news is filtered by borrower. Industry news is filtered by industry. Click a headline to open the article and its action. Severity changes save immediately.</p>
     {message_html}
-    <div>
-      <div class="news-tools">
-        <div class="news-filters">
-        <label><span class="label">Severity</span><br>
-          <select id="severity-filter">
-            <option value="">All</option>
-            <option>CRITICAL</option>
-            <option>HIGH</option>
-            <option>MEDIUM</option>
-            <option>LOW</option>
-          </select>
-        </label>
-        <label><span class="label">Sort</span><br>
-          <select id="news-sort">
-            <option value="listed">As listed</option>
-            <option value="severity-desc">Severity, high to low</option>
-            <option value="severity-asc">Severity, low to high</option>
-            <option value="date-desc">Date, newest</option>
-            <option value="date-asc">Date, oldest</option>
-          </select>
-        </label>
-        </div>
-      </div>
-      <div class="scroll"><table><thead><tr><th>Item</th><th>Industry</th><th>Severity</th><th></th></tr></thead><tbody id="news-body">{''.join(rows)}
-        <tr id="news-empty" hidden><td colspan="4">No news at this severity.</td></tr>
-      </tbody></table></div>
+    <div class="news-boards">
+      {board("obligor", "Obligor related news", "Borrower", "borrower")}
+      {board("industry", "Industry news", "Industry", "industry")}
     </div>
-    <div class="card" style="margin-top:12px">
-      <div class="label">Industry news</div>
-      <h2>Gemini agent</h2>
-      <p>No industry search is connected yet. When the Gemini agent is attached, it will look for industry news and list the items it finds in this panel.</p>
     </div>
     <script>
     (function () {{
       var rank = {{"CRITICAL": 4, "HIGH": 3, "MEDIUM": 2, "LOW": 1}};
-      var filter = document.getElementById("severity-filter");
-      var sort = document.getElementById("news-sort");
-      var body = document.getElementById("news-body");
-      var empty = document.getElementById("news-empty");
-      function pairs() {{
-        return [...body.querySelectorAll("tr.news-item")].map(function (row) {{
-          return {{row: row, detail: row.nextElementSibling}};
+      document.querySelectorAll(".news-board").forEach(function (board) {{
+        var key = board.dataset.filter;
+        var filter = board.querySelector(".board-filter");
+        var severity = board.querySelector(".severity-filter");
+        var sort = board.querySelector(".news-sort");
+        var body = board.querySelector("tbody");
+        var empty = board.querySelector(".news-empty");
+        function pairs() {{
+          return [...body.querySelectorAll("tr.news-item")].map(function (row) {{
+            return {{row: row, detail: row.nextElementSibling}};
+          }});
+        }}
+        function apply() {{
+          var want = severity.value;
+          var named = filter.value;
+          var mode = sort.value;
+          var items = pairs();
+          items.sort(function (a, b) {{
+            if (mode === "severity-desc") return (rank[b.row.dataset.severity] - rank[a.row.dataset.severity]) || (Number(a.row.dataset.order) - Number(b.row.dataset.order));
+            if (mode === "severity-asc") return (rank[a.row.dataset.severity] - rank[b.row.dataset.severity]) || (Number(a.row.dataset.order) - Number(b.row.dataset.order));
+            if (mode === "date-desc") return Number(b.row.dataset.time) - Number(a.row.dataset.time);
+            if (mode === "date-asc") return Number(a.row.dataset.time) - Number(b.row.dataset.time);
+            return Number(a.row.dataset.order) - Number(b.row.dataset.order);
+          }});
+          var shown = 0;
+          items.forEach(function (item) {{
+            var visible = (!want || item.row.dataset.severity === want) && (!named || item.row.dataset[key] === named);
+            item.row.hidden = !visible;
+            item.detail.hidden = !visible || item.row.dataset.open !== "1";
+            if (visible) shown += 1;
+            body.appendChild(item.row);
+            body.appendChild(item.detail);
+          }});
+          empty.hidden = shown > 0;
+          body.appendChild(empty);
+        }}
+        board.addEventListener("news-refresh", apply);
+        body.addEventListener("click", function (event) {{
+          if (event.target.closest("select, input, button, a, textarea, label")) return;
+          var row = event.target.closest("tr.news-item");
+          if (!row) return;
+          var detail = row.nextElementSibling;
+          var open = row.dataset.open !== "1";
+          row.dataset.open = open ? "1" : "";
+          detail.hidden = !open;
+          if (open) detail.scrollIntoView({{block: "nearest"}});
         }});
-      }}
-      function apply() {{
-        var want = filter.value;
-        var mode = sort.value;
-        var items = pairs();
-        items.sort(function (a, b) {{
-          if (mode === "severity-desc") return (rank[b.row.dataset.severity] - rank[a.row.dataset.severity]) || (Number(a.row.dataset.order) - Number(b.row.dataset.order));
-          if (mode === "severity-asc") return (rank[a.row.dataset.severity] - rank[b.row.dataset.severity]) || (Number(a.row.dataset.order) - Number(b.row.dataset.order));
-          if (mode === "date-desc") return Number(b.row.dataset.time) - Number(a.row.dataset.time);
-          if (mode === "date-asc") return Number(a.row.dataset.time) - Number(b.row.dataset.time);
-          return Number(a.row.dataset.order) - Number(b.row.dataset.order);
-        }});
-        var shown = 0;
-        items.forEach(function (item) {{
-          var visible = !want || item.row.dataset.severity === want;
-          item.row.hidden = !visible;
-          item.detail.hidden = !visible || item.row.dataset.open !== "1";
-          if (visible) shown += 1;
-          body.appendChild(item.row);
-          body.appendChild(item.detail);
-        }});
-        empty.hidden = shown > 0;
-        body.appendChild(empty);
-      }}
-      body.addEventListener("click", function (event) {{
-        if (event.target.closest("select, input, button, a, textarea, label")) return;
-        var row = event.target.closest("tr.news-item");
-        if (!row) return;
-        var detail = row.nextElementSibling;
-        var open = row.dataset.open !== "1";
-        row.dataset.open = open ? "1" : "";
-        detail.hidden = !open;
-        if (open) detail.scrollIntoView({{block: "nearest"}});
+        filter.addEventListener("change", apply);
+        severity.addEventListener("change", apply);
+        sort.addEventListener("change", apply);
       }});
-      body.addEventListener("change", function (event) {{
+      document.addEventListener("change", function (event) {{
         var select = event.target.closest("select.sev");
         if (!select) return;
         var row = select.closest("tr.news-item");
+        var board = select.closest(".news-board");
         var previous = select.dataset.saved || row.dataset.severity;
         var chosen = select.value;
         var note = select.parentElement.querySelector(".sev-note");
@@ -1224,24 +1304,15 @@ def news_page(note: str = "") -> str:
           note.hidden = false;
           note.textContent = "Saved";
           setTimeout(function () {{ note.hidden = true; }}, 1200);
-          apply();
+          board.dispatchEvent(new Event("news-refresh"));
         }}).catch(function () {{
           select.value = previous;
           note.hidden = false;
           note.textContent = "Not saved";
         }});
       }});
-      filter.addEventListener("change", apply);
-      sort.addEventListener("change", apply);
     }})();
-    </script>
-    <div class="card" style="margin-top:12px"><div class="label">ECL of the names named in the feed</div>
-      {trend_table([(customer(cid)["legal_name"], lambda iso, cid=cid: money(customer(cid)["series"][view().dates.index(iso)]["ecl_hkd"])) for cid in dict.fromkeys(item["customer_id"] for item in BOOK["news"] if item["customer_id"])])}
-    </div>
-    <div class="card" style="margin-top:12px"><div class="label">Days past due of the names named in the feed</div>
-      {trend_table([(customer(cid)["legal_name"], lambda iso, cid=cid: str(customer(cid)["series"][view().dates.index(iso)]["dpd"])) for cid in dict.fromkeys(item["customer_id"] for item in BOOK["news"] if item["customer_id"])])}
-    </div>
-    """
+    </script>"""
 
 
 def industry_on(iso: str, name: str) -> dict:
@@ -1935,12 +2006,22 @@ def drafts_page() -> str:
     critical = [item for item in BOOK["news"] if item["severity"] == "CRITICAL"]
     held = [item for item in BOOK["news"] if item["severity"] != "CRITICAL"]
     cards = []
+    rms: list[str] = []
+    borrowers: list[str] = []
     for item in critical:
         name, address = relationship_mailbox(item)
+        person = next((row for row in BOOK["customers"] if row["customer_id"] == item.get("customer_id")), None)
+        borrower = person["legal_name"] if person else "Not linked"
+        if name not in rms:
+            rms.append(name)
+        if borrower not in borrowers:
+            borrowers.append(borrower)
         cards.append(
-            f'<article class="sent-mail" id="sent-{escape(item["id"])}">'
+            f'<article class="sent-mail" id="sent-{escape(item["id"])}" data-rm="{escape(name)}" data-borrower="{escape(borrower)}">'
             f'<div class="label">Sent automatically</div>'
             f'<h2>{escape(item["headline"])}</h2>'
+            f'<p>RM: {escape(name)}</p>'
+            f'<p>Borrower: {escape(borrower)}</p>'
             f'<p>To: {escape(name)} &lt;{escape(address)}&gt;</p>'
             f'<p>Sent: {escape(item["date"])}, 08:20 HKT</p>'
             f'<div class="letter">{escape(sent_letter(item))}</div></article>'
@@ -1949,11 +2030,44 @@ def drafts_page() -> str:
     for item in held:
         counts[item["severity"]] = counts.get(item["severity"], 0) + 1
     held_line = ", ".join(f"{counts[level]} {level.lower()}" for level in ("HIGH", "MEDIUM", "LOW") if counts.get(level))
+    rm_options = "".join(f"<option>{escape(name)}</option>" for name in sorted(rms))
+    borrower_options = "".join(f"<option>{escape(name)}</option>" for name in sorted(borrowers))
     return f"""
     <div class="label">Outbox</div><h1>Email portal</h1>
-    <p class="lead">Critical news is sent automatically to the relationship manager. The record below is the message, the time it went, and the address it went to. Addresses are demonstration mailboxes. High, medium and low items are not sent.</p>
-    <div class="card">{''.join(cards) or '<p>No critical item is on the file.</p>'}</div>
-    <p class="lead">{escape(held_line)} were kept on the adverse-news page and were not sent.</p>"""
+    <p class="lead">Critical news is sent automatically to the relationship manager. Filter the sent messages by RM or borrower. The record is the message, the time it went, and the address it went to. Addresses are demonstration mailboxes. High, medium and low items are not sent.</p>
+    <div class="news-tools mail-tools">
+      <div class="news-filters">
+        <label><span class="label">RM</span><br>
+          <select id="mail-rm"><option value="">All</option>{rm_options}</select>
+        </label>
+        <label><span class="label">Borrower</span><br>
+          <select id="mail-borrower"><option value="">All</option>{borrower_options}</select>
+        </label>
+      </div>
+    </div>
+    <div class="card" id="mail-list">{''.join(cards) or '<p>No critical item is on the file.</p>'}
+      <p id="mail-empty" hidden>No sent message matches this RM and borrower.</p>
+    </div>
+    <p class="lead">{escape(held_line)} were kept on the adverse-news page and were not sent.</p>
+    <script>
+    (function () {{
+      var rm = document.getElementById("mail-rm");
+      var borrower = document.getElementById("mail-borrower");
+      var cards = [...document.querySelectorAll("#mail-list .sent-mail")];
+      var empty = document.getElementById("mail-empty");
+      function apply() {{
+        var shown = 0;
+        cards.forEach(function (card) {{
+          var ok = (!rm.value || card.dataset.rm === rm.value) && (!borrower.value || card.dataset.borrower === borrower.value);
+          card.hidden = !ok;
+          if (ok) shown += 1;
+        }});
+        empty.hidden = shown > 0 || !cards.length;
+      }}
+      rm.addEventListener("change", apply);
+      borrower.addEventListener("change", apply);
+    }})();
+    </script>"""
 
 
 def live_letter(draft: dict, recipient: str = "") -> str:
