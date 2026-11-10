@@ -23,10 +23,12 @@ CHART = ROOT / "Org_Chart_for_Apex.jfif"
 NAVY = "1F4E79"
 AMBER = "8C3E16"
 CLOSE = (
-    "While the account's risk profile has deteriorated compared with the position at loan origination, "
-    "the account remains performing, fully secured and supported by stable operating cash flow. "
-    "Continued support is considered acceptable subject to enhanced monitoring and successful execution "
-    "of the borrower's deleveraging and refinancing plans."
+    "While the Group faces a more challenging operating environment compared with previous years, "
+    "the account remains performing, repayment conduct remains satisfactory and the Bank continues to "
+    "benefit from adequate collateral support. Given the borrower's stable rental income stream, "
+    "satisfactory occupancy profile and acceptable collateral coverage, the current facilities remain "
+    "supportable. Continued monitoring of property market developments, leverage trends and refinancing "
+    "requirements is recommended."
 )
 
 
@@ -115,7 +117,7 @@ def build():
     title.paragraph_format.space_after = Pt(2)
     set_run(title.add_run(), "Annual Review — Apex Group", bold=True, size=20, color=NAVY)
     sub = doc.add_paragraph()
-    set_run(sub.add_run(), "Credit memo date 31 October 2026  ·  Reference FL/1158A", size=12, color=AMBER)
+    set_run(sub.add_run(), "Credit memo date 31 October 2025  ·  Reference FL/1158A", size=12, color=AMBER)
     para(
         doc,
         "Simulated annual review proposal prepared from the credit monitoring report and the organisation chart. Not a credit decision.",
@@ -132,7 +134,7 @@ def build():
             ["New application", "No"],
             ["Limit increase", "No"],
             ["Annual renewal / review", "Yes"],
-            ["Others", "Waiver of the 50% LTV covenant, and continuation of enhanced monitoring"],
+            ["Others", "No covenant waiver. Continue monitoring of property valuations."],
         ],
     )
 
@@ -165,16 +167,17 @@ def build():
         ["Item", "Date"],
         [
             ["Facilities granted since", "December 2020"],
-            ["This review due date", "31 October 2026"],
-            ["Proposed next review due date", "31 October 2027"],
+            ["This review due date", "31 October 2025"],
+            ["Proposed next review due date", "31 October 2026"],
             ["Date of approval", "For Credit Committee"],
         ],
     )
     para(
         doc,
-        "This paper seeks approval for the annual review, maintenance of the existing term loan, maintenance of "
-        "borrower grade Pass-14, a waiver of the 50% loan-to-value covenant breach, continuation of the revised "
-        "amortisation schedule, and continuation of enhanced monitoring. No new money is requested.",
+        "This paper seeks approval for the annual review, continuation of the existing facilities, maintenance of "
+        "borrower grade Pass-14, maintenance of the existing facility structure, and continued monitoring of "
+        "property valuations and refinancing plans. The 50% loan-to-value covenant is maintained without a waiver. "
+        "No new money is requested.",
     )
 
     heading(doc, "A. Facility section")
@@ -198,7 +201,7 @@ def build():
     )
     table(
         doc,
-        ["Item", "Position at 31 October 2026"],
+        ["Item", "Position at 31 October 2025"],
         [
             ["Outstanding exposure", "HK$425.0 million"],
             ["Clean exposure", "Nil"],
@@ -227,8 +230,8 @@ def build():
         doc,
         ["Item", "Position"],
         [
-            ["Deviation", "Yes. LTV is 51.8% against a maximum covenant of 50%."],
-            ["Risk assessment and justification", "Waiver is requested in A9. The breach comes from a lower valuation, not from missed interest. Coverage remains 1.93x and clean exposure is nil."],
+            ["Deviation", "No. LTV is 48.9% against a maximum covenant of 50%."],
+            ["Risk assessment and justification", "The covenant is complied with at this review. Coverage is 2.05x and clean exposure is nil. Valuation movement remains a monitoring item. See A5 and A9."],
         ],
     )
 
@@ -265,48 +268,50 @@ def build():
     para(
         doc,
         "Maintaining HK$425.0 million is justified as a renewal of the performing secured loan, not as new money. "
-        "The outstanding is 51.8% of the latest charged value of HK$820.0 million, which is the point of the waiver, "
-        "and 1.93x covered. The tenor runs to 30 September 2027 and now includes principal of HK$25 million in "
+        "The outstanding is 48.9% of the latest appraised value of HK$870.0 million, inside the 50% covenant, "
+        "and 2.05x covered. The tenor runs to 30 September 2027 and includes principal of HK$25 million in "
         "December 2026, March 2027 and June 2027, with HK$325 million at final maturity. That schedule is the "
-        "response to refinancing risk. A derivative limit is not proposed.",
+        "existing facility structure. A derivative limit is not proposed.",
     )
 
     subhead(doc, "A5 : Security details and coverage")
     table(
         doc,
-        ["Security", "Address", "Latest valuation"],
+        ["Property", "Address", "Property type", "Latest valuation", "Mortgage ranking"],
         [
-            ["Grade-A office building, Central", "Apex Central Tower, Central, Hong Kong", "HK$620.0 million"],
-            ["Retail shops, Tsim Sha Tsui", "Harbour Retail Plaza, Tsim Sha Tsui, Kowloon, Hong Kong", "HK$200.0 million"],
-            ["Total collateral value", "", "HK$820.0 million"],
+            ["Apex Central Tower", "Apex Central Tower, 18 Queen's Road Central, Central, Hong Kong", "Grade-A office", "HK$670.0 million", "First legal mortgage"],
+            ["Shops in Harbour Retail Plaza", "Shop 3A-3G, Harbour Retail Plaza, 28 Canton Road, Tsim Sha Tsui, Kowloon", "Retail shops", "HK$200.0 million", "First legal mortgage"],
+            ["Total collateral value", "", "", "HK$870.0 million", ""],
         ],
-        [5.2, 8.2, 4.2],
+        [3.0, 6.2, 2.4, 3.2, 2.8],
     )
     table(
         doc,
         ["Item", "Amount"],
         [
             ["Outstanding exposure", "HK$425.0 million"],
-            ["Collateral value", "HK$820.0 million"],
-            ["Security coverage", "1.93x"],
-            ["LTV", "51.8%"],
+            ["Collateral value", "HK$870.0 million"],
+            ["Security coverage", "2.05x"],
+            ["LTV", "48.9%"],
             ["LTV covenant", "50.0%"],
-            ["Covenant status", "Breached"],
+            ["Covenant status", "Complied"],
             ["Clean exposure", "Nil"],
-            ["Prior-year collateral value", "HK$870.0 million"],
-            ["Prior-year LTV", "About 48.9%"],
+            ["Collateral value at origination", "HK$1,020.0 million"],
+            ["LTV at origination", "49%"],
         ],
     )
     para(
         doc,
-        "Charged value fell from HK$870.0 million to HK$820.0 million over the year, mainly with the Hong Kong office "
-        "market. LTV therefore moved from about 48.9% to 51.8%. About 76% of charged value is the Central office. "
-        "The Bank remains fully secured. The top-up clause remains: if LTV exceeds 50%, the borrower is to prepay or "
-        "give additional security acceptable to the Bank so that LTV is not above the trigger. A waiver of the present "
-        "breach is requested, together with a plan to restore compliance. On HK$820.0 million of collateral, debt of "
-        "about HK$410.0 million would sit on the covenant, so about HK$15.0 million of reduction restores headroom if "
-        "values do not fall further. After the breach the borrower placed HK$50.0 million on deposit. The deposit is "
-        "not pledged, can be withdrawn, and is not counted for the covenant.",
+        "Commercial property market sentiment weakened during 2024–2025, particularly in the office and retail sectors. "
+        "While property valuations experienced moderate downward pressure compared with peak levels, the Group's pledged "
+        "properties continued to provide satisfactory collateral coverage. Based on the latest valuation completed in 2025, "
+        "the properties were valued at HK$870.0 million in aggregate. About 77% of that value is Apex Central Tower. "
+        "Outstanding exposure of HK$425.0 million is an LTV of 48.9%, which remained within the 50% covenant as of the "
+        "review date. The top-up clause remains: if LTV exceeds 50%, the borrower is to prepay or give additional security "
+        "acceptable to the Bank so that LTV is not above the trigger. No waiver is requested. "
+        "The Group maintains approximately HK$50.0 million of time deposits with the Bank as part of its overall banking "
+        "relationship. Whilst such deposits provide relationship support, they are not pledged in favour of the Bank and "
+        "therefore are not recognised as part of the approved security package.",
     )
 
     subhead(doc, "A6 : Loan classification and internal rating")
@@ -323,9 +328,9 @@ def build():
     )
     para(
         doc,
-        "Pass-14 is the heightened performing grade. It is maintained because the LTV breach, the 2027 maturity "
-        "cluster and the weaker leasing outlook are real, while interest is current and the loan is fully secured. "
-        "The grade is not a classified exposure.",
+        "Pass-14 is the heightened performing grade. It is maintained because the 2027 maturity cluster and the weaker "
+        "leasing outlook are real, while the LTV covenant is complied with, interest is current and the loan is fully "
+        "secured. The grade is not a classified exposure.",
     )
 
     subhead(doc, "A6.1 : Capital requirement")
@@ -345,7 +350,7 @@ def build():
     )
 
     subhead(doc, "A7 : Account performance")
-    para(doc, "No payment irregularities were found. See section E3. The LTV covenant is the exception, and it is a valuation breach rather than a past-due item.")
+    para(doc, "No payment irregularities were found. See section E3. The 50% LTV covenant is complied with at this review. It is not a past-due item.")
 
     subhead(doc, "A8 : Actions from the previous approval")
     table(
@@ -353,9 +358,9 @@ def build():
         ["Previous condition", "Status at this review"],
         [
             ["Replace the original bullet with quarterly principal through September 2027.", "In force. First principal of HK$25.0 million is due 30 December 2026 and is not yet due."],
-            ["Monitor leasing of the charged properties.", "Office occupancy has moved from 89% to 83%. Average rents are down about 8%. Update is in section B2."],
-            ["Follow the asset disposal plan and report any adversity.", "Two retail units were sold in 3Q2026 for net proceeds of HK$48.6 million, applied mainly to debt. Further assets of about HK$120.0 million are on the market. Progress is slower than planned."],
-            ["Pursue refinancing of 2027 maturities.", "Indicative term sheets from two regional banks. No binding commitment at 31 October 2026."],
+            ["Monitor leasing of the charged properties.", "Office and retail sentiment was softer through 2024 and 2025. The core book continues to produce rent. Update is in section B2."],
+            ["Follow any asset disposal and report any adversity.", "No completed disposal is recorded at this review. Any future net proceeds from charged assets are to be applied to debt."],
+            ["Pursue refinancing of 2027 maturities.", "No binding commitment is on file at 31 October 2025. Refinancing remains a monitoring item."],
         ],
     )
 
@@ -365,7 +370,7 @@ def build():
     para(doc, "Pros", bold=True, space_after=4)
     para(
         doc,
-        "1. Fully secured, with nil clean exposure. Charged property is HK$820.0 million against HK$425.0 million, coverage 1.93x. The breach of the 50% covenant comes from the valuation, not from a failure to pay interest.",
+        "1. Fully secured, with nil clean exposure. Charged property is HK$870.0 million against HK$425.0 million, coverage 2.05x. The 50% LTV covenant is complied with. Interest has been paid on time.",
     )
     para(
         doc,
@@ -377,16 +382,16 @@ def build():
     )
     para(
         doc,
-        "4. Deleveraging has started. Net proceeds of HK$48.6 million from two retail units in 3Q2026 were applied mainly to debt. A further HK$120.0 million is being marketed.",
+        "4. The existing amortisation schedule already replaces the original bullet. Future disposal proceeds, if any, are to be applied to debt. No completed disposal is relied on in this paper.",
     )
     para(
         doc,
-        "5. Refinancing access is still open. Two regional banks have given indicative terms for 2027 maturities. The Bank is agent on the syndicated facility of HK$6,240 million maturing in December 2028.",
+        "5. The Bank is agent on the syndicated facility of HK$6,240 million maturing in December 2028. Refinancing of the 2027 maturities is a monitoring item. No binding commitment is on file at this review.",
     )
     para(doc, "Cons", bold=True, space_after=4)
     para(
         doc,
-        "1. LTV covenant breach. LTV is 51.8% against 50%. Collateral fell from HK$870.0 million to HK$820.0 million over the year. The unpledged HK$50.0 million deposit does not cure the covenant.",
+        "1. Although the Group remains compliant with the LTV covenant at the review date, continued weakness in Hong Kong commercial property valuations may place pressure on collateral coverage in future. Further declines in office and retail property values could reduce the valuation buffer currently available under the 50% LTV covenant. Accordingly, property valuation movement remains a key monitoring item for the Bank. The HK$50.0 million time deposit is not pledged and is not part of the security package.",
     )
     para(
         doc,
@@ -394,46 +399,42 @@ def build():
     )
     para(
         doc,
-        "3. Weaker leasing. FY2026 revenue is expected to fall by about 12% year on year. Office occupancy has fallen from 89% to 83%. Average rents are down about 8%.",
+        "3. Weaker leasing. Commercial property sentiment in the office and retail sectors was softer through 2024 and 2025. Rental income remains the source of debt service. A further fall in occupancy or rent would reduce the cash flow available for the 2027 maturities.",
     )
     para(
         doc,
-        "4. Execution risk. The remaining disposals are slower than planned. The two refinancing discussions are not binding. Central Grade-A values are still under pressure, and that building is about 76% of our collateral.",
+        "4. Refinancing of the 2027 maturities is not yet committed. Apex Central Tower is about 77% of our collateral, so office values remain the main valuation risk.",
     )
     para(doc, "Risk mitigation", bold=True, space_after=4)
     para(
         doc,
         "The grade stays Pass-14 and the classification stays Pass. The loan is fully secured, clean exposure is nil, "
-        "and interest has been paid on time. The original bullet has already been replaced with quarterly principal, "
-        "which cuts the amount left for final maturity. Disposal proceeds are to be applied to debt. About HK$15.0 million "
-        "of reduction would restore the 50% covenant at the present valuation. Enhanced monitoring covers the December 2026 "
-        "instalment, the 2027 refinancing timetable and the disposal programme. The relationship manager will continue to "
-        "ask for the HK$50.0 million deposit to be pledged. Support is the corporate guarantee of Apex Property Limited. "
-        "It is not treated as an unlimited shareholder guarantee. " + CLOSE,
+        "and interest has been paid on time. The 50% LTV covenant is maintained without a waiver. The original bullet "
+        "has already been replaced with quarterly principal, which cuts the amount left for final maturity. Monitoring "
+        "covers property valuations, the December 2026 instalment and the 2027 refinancing timetable. The HK$50.0 million "
+        "time deposit remains a relationship balance. It is not pledged and it is not treated as security. Support is "
+        "the corporate guarantee of Apex Property Limited. It is not treated as an unlimited shareholder guarantee. " + CLOSE,
     )
     para(doc, "Recommendation", bold=True, space_after=4)
     para(doc, "We recommend that Credit Committee approve:")
     for line in [
         "the annual review;",
-        "maintenance of the term loan at HK$425.0 million, priced at HIBOR + 4.3%;",
+        "continuation of the existing facilities at HK$425.0 million, priced at HIBOR + 4.3%;",
         "maintenance of borrower grade Pass-14 and loan classification Pass;",
-        "a waiver of the 50% LTV covenant breach, limited to that covenant;",
-        "continuation of the amortisation schedule through 30 September 2027;",
-        "application of disposal proceeds to debt reduction;",
-        "enhanced monitoring of refinancing and disposals; and",
-        "continued engagement on a pledge of the HK$50.0 million deposit.",
+        "maintenance of the existing facility structure, including the amortisation schedule through 30 September 2027;",
+        "maintenance of the 50% LTV covenant, without a waiver;",
+        "continued monitoring of property valuations and refinancing plans; and",
+        "no change to the unpledged status of the HK$50.0 million time deposit.",
     ]:
         para(doc, "•  " + line, space_after=2)
     para(
         doc,
-        "While the account remains fully secured and supported by satisfactory account conduct, the key concerns are "
-        "the continuing breach of the 50% LTV covenant, the debt maturing in 2027 and the borrower's reluctance to "
-        "pledge the HK$50.0 million deposit. " + CLOSE,
+        CLOSE,
     )
     para(doc, "2. Comments from Department Head", bold=True, space_after=2)
     para(doc, "For Christine Wong.", italic=True)
     para(doc, "3. Comments from CRCD (Risk Control Section)", bold=True, space_after=2)
-    para(doc, "All sections in this proposal have been filled in: Yes. Matters for attention: LTV waiver, December 2026 principal, unpledged deposit, and the absence of a binding refinancing commitment.")
+    para(doc, "All sections in this proposal have been filled in: Yes. Matters for attention: property valuation movement, the December 2026 principal, the unpledged deposit, and refinancing of the 2027 maturities. No covenant waiver is requested.")
     para(doc, "4. Comments from Division Head", bold=True, space_after=2)
     para(doc, "For Kelvin Au.", italic=True)
 
@@ -450,10 +451,8 @@ def build():
     para(
         doc,
         "Trading, manufacturing and retail operations are not the business. Income is rent from commercial property. "
-        "Management advises that FY2026 revenue is expected to decline by about 12% year on year on weaker leasing "
-        "demand and negative rental reversion. Office occupancy has fallen from 89% to 83%. Average rental rates have "
-        "fallen by about 8%. Two retail units were sold in 3Q2026. Further properties of about HK$120.0 million are "
-        "being marketed, more slowly than planned.",
+        "Commercial property market sentiment weakened during 2024–2025, particularly in the office and retail sectors. "
+        "The core book continues to produce rent. No disposal completed after this review date is relied on in this paper.",
     )
     subhead(doc, "B3 : Financial analysis — Apex Global Holdings Limited")
     para(
@@ -463,11 +462,11 @@ def build():
     )
     table(
         doc,
-        ["Item", "31 October 2026"],
+        ["Item", "31 October 2025"],
         [
-            ["Charged investment property, Bank valuation", "HK$820.0 million"],
+            ["Charged investment property, latest 2025 appraisal", "HK$870.0 million"],
             ["Term loan outstanding to this Bank", "HK$425.0 million"],
-            ["LTV on charged property", "51.8%"],
+            ["LTV on charged property", "48.9%"],
             ["Clean bank debt of the borrower", "Nil, as informed for this review"],
             ["Other bank loans of the borrower", "Nil on the borrower's own name. Group debt is in section B5."],
         ],
@@ -479,7 +478,7 @@ def build():
         "for the revenue and occupancy comments above.",
     )
     subhead(doc, "B4 : Net worth of the borrower")
-    para(doc, "Not separately stated in the monitoring report. Tangible support relied on in this paper is the charged property of HK$820.0 million and the corporate guarantee.")
+    para(doc, "Not separately stated in the monitoring report. Tangible support relied on in this paper is the charged property of HK$870.0 million and the corporate guarantee.")
     subhead(doc, "B5 : Relationship with other banks")
     para(doc, "The borrower has nil bilateral loans with other banks. Group debt, of which our HK$425.0 million is a part, is as follows.")
     table(
@@ -527,9 +526,9 @@ def build():
             ["Merger or acquisition", "No, not reported"],
             ["Investigation by a regulator or law enforcement", "No, not reported"],
             ["Significant outstanding litigation", "No, not reported"],
-            ["Other irregularity with a credit impact", "Yes. The 50% LTV covenant is breached."],
+            ["Other irregularity with a credit impact", "No. The 50% LTV covenant is complied with at this review."],
             ["Suspicious transaction / money laundering", "No, not reported"],
-            ["Other adverse news", "Yes. Hong Kong office values remain under pressure. See section C6."],
+            ["Other adverse news", "Yes. Office and retail sentiment was softer in 2024–2025. See section C6. This is not a covenant breach."],
         ],
     )
     subhead(doc, "B7 : Country risk")
@@ -549,9 +548,9 @@ def build():
     subhead(doc, "B9 : Tax risk")
     para(doc, "See section C9.")
     subhead(doc, "B10 : Prevailing risk")
-    para(doc, "The prevailing risks are the LTV breach, the 2027 refinancing window and the weaker leasing market. They are assessed above. They are not recorded as a second, unnamed prevailing risk.")
+    para(doc, "The prevailing risks are future valuation pressure on the 50% LTV covenant, the 2027 refinancing window and the weaker leasing market. They are assessed above. They are not recorded as a second, unnamed prevailing risk. There is no covenant breach at this review.")
     subhead(doc, "B11 : Site visit / call report")
-    para(doc, "No call report was attached to the credit monitoring report. The relationship manager is to place the next call note on file before the December 2026 instalment. See section E4.")
+    para(doc, "No call report was attached to the monitoring report. The relationship manager is to place the next call note on file before the December 2026 instalment, covering the source of that principal and the status of refinancing plans. See section E4.")
 
     heading(doc, "C. Guarantor section")
     subhead(doc, "C1 : Company background")
@@ -569,50 +568,47 @@ def build():
     subhead(doc, "C2 : Business operation")
     para(
         doc,
-        "The guarantor is a commercial property investor. The charged assets on our loan are a Central Grade-A office "
-        "and Tsim Sha Tsui retail. Leasing demand is weaker. Occupancy of the office portfolio is 83%, from 89%. "
-        "Rents are down about 8%. Management still expects the core book to produce rent, and the FY2026 revenue "
-        "decline of about 12% is the planning case used in this review. Disposal of non-core retail units is the "
-        "deleveraging tool.",
+        "The guarantor is a commercial property investor. The charged assets on our loan are Apex Central Tower, a "
+        "Grade-A office in Central, and shops in Harbour Retail Plaza, Tsim Sha Tsui. Commercial property market "
+        "sentiment weakened during 2024–2025, particularly in the office and retail sectors. Management still expects "
+        "the core book to produce rent. No disposal completed in a later period is relied on in this review.",
     )
     subhead(doc, "C3 : Financial analysis — Apex Property Limited, consolidated")
     para(
         doc,
-        "The monitoring report states the FY2026 operating outlook and does not attach a three-year audit pack. "
-        "The figures below complete the proposal's financial table. FY2024 and FY2025 are the simulated base against "
-        "which the report's expected 12% revenue decline is applied. HK$ million.",
+        "The monitoring report does not attach a three-year audit pack. The figures below complete the proposal's "
+        "financial table from information available at this 2025 review. They are not a forecast of a later year. HK$ million.",
     )
     table(
         doc,
-        ["", "FY2026 expected", "Change", "FY2025", "FY2024"],
+        ["", "FY2025", "Change", "FY2024", "FY2019"],
         [
-            ["Revenue", "1,003", "-12.0%", "1,140", "1,180"],
-            ["EBITDA", "560", "-13.8%", "650", "670"],
-            ["Net profit", "70", "-26.3%", "95", "110"],
-            ["Total assets", "11,500", "-3.4%", "11,900", "12,400"],
-            ["Shareholders' funds", "3,800", "-2.1%", "3,880", "3,950"],
-            ["Interest-bearing debt", "7,100", "-1.0%", "7,175", "7,350"],
-            ["Net gearing", "1.9x", "", "1.8x", "1.9x"],
-            ["Interest coverage", "2.0x", "", "2.2x", "2.3x"],
-            ["Occupancy", "83%", "", "86%", "87%"],
+            ["Revenue", "1,140", "-3.4%", "1,180", "950"],
+            ["EBITDA", "650", "-3.0%", "670", "650"],
+            ["Net profit", "95", "-13.6%", "110", "390"],
+            ["Total assets", "11,900", "-4.0%", "12,400", "6,750"],
+            ["Shareholders' funds", "3,880", "-1.8%", "3,950", "2,930"],
+            ["Interest-bearing debt", "7,175", "-2.4%", "7,350", "3,100"],
+            ["Net gearing", "1.8x", "", "1.9x", "1.1x"],
+            ["Interest coverage", "2.2x", "", "2.3x", "4.8x"],
+            ["Occupancy", "86%", "", "87%", "92%"],
         ],
     )
     para(doc, "Profitability", bold=True, space_after=4)
     para(
         doc,
-        "Revenue in the expected FY2026 column is 12% below FY2025, which is the figure given in the monitoring report. "
-        "The decline is leasing and rental reversion, not a stoppage of rent. EBITDA is carried down with revenue. "
-        "Net profit falls by more than EBITDA because softer valuations sit below EBITDA. Interest cover in the "
-        "expected year is about 2.0x, at the covenant floor. FY2025 cover of 2.2x is inside the 2.0x minimum.",
+        "Revenue in FY2025 is 3.4% below FY2024. The change is softer leasing, not a stoppage of rent. Interest cover "
+        "in FY2025 is 2.2x, inside the 2.0x minimum. Net profit is lower than EBITDA because valuations are softer "
+        "than at the peak. These figures stop at 2025.",
     )
     para(doc, "Liquidity and capital", bold=True, space_after=4)
     para(
         doc,
-        "Deposits with this Bank are HK$96.0 million, of which HK$50.0 million is the time deposit placed after the "
-        "covenant breach and HK$46.0 million is in operating accounts. Group debt of HK$7,175 million at FY2025 is "
-        "the maturity table. A small reduction is shown in the expected column because HK$48.6 million of disposal "
-        "proceeds has already been applied. Gearing stays high relative to the 1.1x net gearing at origination-era "
-        "FY2019. That increase is the debt-funded expansion since 2020.",
+        "Deposits with this Bank are HK$96.0 million, of which HK$50.0 million is a time deposit and HK$46.0 million "
+        "is in operating accounts. The time deposit is part of the banking relationship. It is not pledged, and it "
+        "was not placed to remedy a covenant breach. Group debt of HK$7,175 million is the maturity table. Gearing "
+        "stays high relative to the 1.1x net gearing at origination-era FY2019. That increase is the debt-funded "
+        "expansion since 2020.",
     )
     para(doc, "Earlier years, for the origination comparison. HK$ million.", bold=True, space_after=4)
     table(
@@ -643,10 +639,15 @@ def build():
     subhead(doc, "C6 : Warning signals and market news")
     para(
         doc,
-        "The Hong Kong office market remained under pressure through 2026, with elevated vacancy and weak leasing. "
-        "Transactions in Central Grade-A buildings have been completed at discounts to older valuation benchmarks. "
-        "Because about 76% of our collateral is that Central office, a further decline would tighten LTV again. "
-        "No rating action on the borrower is recorded in the monitoring report. No litigation or regulatory investigation is recorded.",
+        "Commercial property market sentiment weakened during 2024–2025, particularly in the office and retail sectors. "
+        "While property valuations experienced moderate downward pressure compared with peak levels, the Group's pledged "
+        "properties continued to provide satisfactory collateral coverage. Based on the latest valuation obtained in 2025, "
+        "the aggregate collateral value stood at HK$870.0 million, corresponding to an LTV of approximately 48.9%, which "
+        "remained within the 50% covenant threshold. Although the Group remains compliant with the LTV covenant at the "
+        "review date, continued weakness in Hong Kong commercial property valuations may place pressure on collateral "
+        "coverage in future. Further declines in office and retail property values could reduce the valuation buffer "
+        "currently available under the 50% LTV covenant. Accordingly, property valuation movement remains a key monitoring "
+        "item for the Bank. No rating action, litigation or regulatory investigation is recorded.",
     )
     subhead(doc, "C7 : Country risk")
     para(doc, "Same as section B7. Hong Kong. No cross-border transfer risk on this facility.")
@@ -741,15 +742,15 @@ def build():
             ["Pricing", "HIBOR + 4.3%"],
             ["Maturity", "30 September 2027"],
             ["Repayment", "Interest monthly. Principal HK$25 million on 30 Dec 2026, 30 Mar 2027 and 30 Jun 2027. HK$325 million on 30 Sep 2027."],
-            ["Security", "First charge over the Central Grade-A office and the Tsim Sha Tsui retail, latest value HK$820.0 million."],
-            ["LTV covenant", "Maximum 50%. Presently 51.8%. Waiver requested for the current breach only."],
+            ["Security", "First legal mortgage over Apex Central Tower and the Harbour Retail Plaza shops, latest 2025 appraisal HK$870.0 million."],
+            ["LTV covenant", "Maximum 50%. Presently 48.9%. Complied. No waiver is requested."],
             ["Interest cover", "Minimum 2.0x. FY2025 at 2.2x. Not waived."],
             ["Net worth, negative pledge, pari passu", "Remain in force. No breach is reported."],
-            ["Disposal proceeds", "100% of net proceeds from charged or agreed disposal assets to be applied to prepayment, unless Credit Committee agrees otherwise. The HK$48.6 million already received is to remain applied to debt."],
-            ["Top-up", "If LTV is above 50% after this waiver period, the borrower prepays or delivers additional security so that LTV is back to 50% or below."],
-            ["Deposit", "The HK$50.0 million time deposit is to be pursued as a pledge. Until pledged, it is not security."],
-            ["Information", "Monthly update on refinancing and on the disposal of the remaining HK$120.0 million. Updated valuation within six months."],
-            ["Review", "Next review 31 October 2027, or earlier if the December 2026 principal is missed or a binding refinancing fails."],
+            ["Disposal proceeds", "100% of net proceeds from charged assets are to be applied to prepayment, unless Credit Committee agrees otherwise. No such proceeds are recorded at this review."],
+            ["Top-up", "If LTV is above 50%, the borrower prepays or delivers additional security so that LTV is back to 50% or below."],
+            ["Deposit", "About HK$50.0 million of time deposits are maintained with the Bank. They are not pledged and are not part of the approved security package."],
+            ["Information", "Periodic update on property valuations and on refinancing plans."],
+            ["Review", "Next review 31 October 2026, or earlier if the December 2026 principal is missed or a binding refinancing fails."],
         ],
     )
     subhead(doc, "E3 : Account performance")
@@ -761,19 +762,19 @@ def build():
             ["Principal", "Not yet due"],
             ["Past-due record", "Nil"],
             ["Excesses", "Nil"],
-            ["LTV covenant", "Breached"],
+            ["LTV covenant", "Complied, 48.9% against 50%"],
             ["Early warning", "Pass-14, enhanced monitoring"],
         ],
     )
-    para(doc, "No payment irregularity was observed in the review period. The covenant breach is recorded here so that it is not mistaken for a missed instalment.")
+    para(doc, "No payment irregularity was observed in the review period. The LTV covenant is complied with and is not a missed instalment.")
     subhead(doc, "E4 : Site visit / call report")
-    para(doc, "Not attached to the monitoring report. Action: relationship manager to complete a call report before 30 December 2026, covering the source of the HK$25.0 million principal, the pledge request, and the status of the two refinancing term sheets.")
+    para(doc, "Not attached to the monitoring report. Action: relationship manager to complete a call report before 30 December 2026, covering the source of the HK$25.0 million principal and the status of refinancing plans.")
     subhead(doc, "E5 : Checklists")
     table(
         doc,
         ["Checklist", "Status on this simulated paper"],
         [
-            ["E5.1 Compliance checklist", "Annual review, no new money. Waiver is disclosed in A2 and A9."],
+            ["E5.1 Compliance checklist", "Annual review, no new money. No covenant waiver is requested. See A2 and A9."],
             ["E5.2 ESG and climate checklist", "Completed in C8. No grade impact."],
             ["E5.3 Assessment checklist", "Facility, security, conduct, group debt and guarantor are completed."],
             ["E5.4 KYC checklist", "Identifiers not in the monitoring report. KYC file to be attached before approval."],
@@ -790,7 +791,7 @@ def build():
     footer = section.footer.paragraphs[0]
     set_run(
         footer.add_run(),
-        "Apex Group  ·  FL/1158A  ·  Annual review proposal at 31 October 2026  ·  Simulated, not a credit decision",
+        "Apex Group  ·  FL/1158A  ·  Annual review proposal at 31 October 2025  ·  Simulated, not a credit decision",
         size=8,
         color="888888",
     )
