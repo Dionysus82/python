@@ -449,13 +449,12 @@ def trend_chart() -> str:
 def page(title: str, active: str, body: str) -> bytes:
     nav = [
         ("dashboard", "Portfolio"),
-        ("news", "Adverse news"),
         ("industry", "Industry review"),
-        ("repayment", "Repayments"),
-        ("financial", "Financials and covenants"),
-        ("reports", "Reports"),
-        ("assistant", "Knowledge assistant"),
-        ("drafts", "Email drafts"),
+        ("financial", "Financial and covenants"),
+        ("repayment", "Repayment"),
+        ("reports", "Report"),
+        ("assistant", "Agent portal"),
+        ("drafts", "Email portal"),
     ]
     links = []
     for key, label in nav:
