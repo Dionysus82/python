@@ -2650,6 +2650,9 @@ PUBLIC_FILES = {
     "RIP-Management-Walkthrough.mp3": "audio/mpeg",
     "RIP-Management-Walkthrough.srt": "application/x-subrip; charset=utf-8",
     "RIP-Management-Walkthrough-scenes.zip": "application/zip",
+    "RIP-Management-Walkthrough-v2.mp3": "audio/mpeg",
+    "RIP-Management-Walkthrough-v2.srt": "application/x-subrip; charset=utf-8",
+    "RIP-Management-Walkthrough-v2-scenes.zip": "application/zip",
 }
 
 
