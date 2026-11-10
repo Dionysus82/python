@@ -513,6 +513,15 @@ textarea {{ width:100%; min-height:420px; font:14px/1.45 ui-monospace,monospace;
 .cite {{ font-size:.82rem; color:var(--muted); border-left:3px solid var(--orange); padding-left:10px; margin:8px 0; }}
 form.inline {{ display:flex; gap:8px; flex-wrap:wrap; align-items:end; }}
 .news-tools {{ display:flex; gap:8px; flex-wrap:wrap; align-items:end; justify-content:flex-end; margin:8px 0 12px; }}
+.news-read {{ color:var(--ink); line-height:1.55; display:grid; gap:14px; padding:6px 4px 10px; }}
+.news-read p {{ margin:0; }}
+.news-copy {{ max-width:78ch; }}
+.news-read dl {{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px 18px; margin:0; }}
+.news-read .label {{ margin-bottom:8px; }}
+.news-read dt {{ font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700; }}
+.news-read dl div.wide {{ grid-column:1 / -1; }}
+.news-read dd {{ margin:2px 0 0; }}
+.news-links {{ display:flex; flex-wrap:wrap; gap:8px 16px; }}
 select, input[type=number] {{ font:inherit; padding:8px; border:1px solid var(--line); border-radius:8px; background:#fff; }}
 form.dates {{ display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:16px; }}
 form.dates .label {{ width:100%; }}
@@ -552,7 +561,7 @@ table.trend th {{ font-size:.78rem; letter-spacing:0; text-transform:none; }}
   .shell.collapsed nav {{ transform:translateX(-105%); padding:22px 16px; width:min(280px,86vw); overflow:auto; }}
   .backdrop {{ position:fixed; inset:0; background:rgba(44,40,37,.35); z-index:25; }}
   .shell:not(.collapsed) .backdrop {{ display:block; }}
-  .metrics, .grid, .grid3 {{ grid-template-columns:1fr; }}
+  .metrics, .grid, .grid3, .news-read dl {{ grid-template-columns:1fr; }}
   main {{ padding:16px 16px 72px; }}
 }}
 </style>
@@ -697,27 +706,72 @@ def news_stamp(text: str) -> int:
     return 0
 
 
+def news_fields(body: str) -> tuple[str, dict[str, str]]:
+    marker = " News type: "
+    if marker not in body:
+        return body, {}
+    article, rest = body.split(marker, 1)
+    found = re.match(
+        r"(?P<news_type>.*?)\. Signal: (?P<signal>.*?)\. Severity: (?P<severity>.*?)\. Entities: (?P<entities>.*)\.\s*$",
+        rest,
+        re.S,
+    )
+    if not found:
+        return body, {}
+    return article.strip(), found.groupdict()
+
+
+def news_facts(pairs: list[tuple[str, str]]) -> str:
+    wide = {"Entities", "Signal", "Financial strength", "Collateral"}
+    rows = "".join(
+        f'<div{ " class=\"wide\"" if label in wide else ""}><dt>{escape(label)}</dt><dd>{value}</dd></div>'
+        for label, value in pairs
+    )
+    return f"<dl>{rows}</dl>"
+
+
 def news_detail(item: dict) -> str:
+    article, fields = news_fields(item["body"])
     factors = item["factors"]
+    file_rows = [
+        ("News type", escape(fields.get("news_type", ""))),
+        ("Signal", escape(fields.get("signal", ""))),
+        ("Entities", escape(fields.get("entities", ""))),
+    ]
+    book_rows = [
+        ("Exposure", money(factors["exposure_hkd"])),
+        ("Coverage", escape(str(factors["security_coverage"]))),
+        ("Guarantor", escape(str(factors["guarantor_support"]))),
+        ("Financial strength", escape(str(factors["financial_strength"]))),
+        ("Warnings", escape(str(factors["warning_signals"]))),
+    ]
     if item["customer_id"]:
         person = customer(item["customer_id"])
-        linked = (
-            f'<p><strong>{escape(person["legal_name"])}</strong>. '
-            f'Drawn {money(person["drawn_hkd"])}. Rating {person["prior_rating"]} to {person["rating"]}. '
-            f'Collateral {escape(person["collateral_type"])} {money(person["collateral_hkd"])}. RM {escape(person["rm"])}.</p>'
-            f'<p><a href="/email?id=MAIL-NEWS-APEX">Open the adverse-news email draft</a> · '
-            f'<a href="/industry?name={escape(person["industry"])}">Continue to the {escape(person["industry"])} industry review</a></p>'
+        book_rows = [
+            ("Borrower", escape(person["legal_name"])),
+            ("Rating", escape(f"{person['prior_rating']} to {person['rating']}")),
+            ("Collateral", f"{escape(person['collateral_type'])} {money(person['collateral_hkd'])}"),
+            ("Relationship manager", escape(person["rm"])),
+            ("Drawn", money(person["drawn_hkd"])),
+            ("ECL", money(person["ecl_hkd"])),
+            ("Stage", escape(str(person["stage"]))),
+            ("Days past due", escape(str(person["dpd"]))),
+            *book_rows,
+        ]
+        links = (
+            f'<a href="/email?id=MAIL-NEWS-APEX">Open the adverse-news email draft</a>'
+            f'<a href="/industry?name={escape(person["industry"])}">Continue to the {escape(person["industry"])} industry review</a>'
         )
     else:
-        linked = (
-            f'<p><a href="/industry?name={escape(item["industry"])}">Continue to the {escape(item["industry"])} review</a> · '
-            f'<a href="/email?id=MAIL-IND-WHOLESALE">Open the industry email draft</a></p>'
+        links = (
+            f'<a href="/industry?name={escape(item["industry"])}">Continue to the {escape(item["industry"])} review</a>'
+            f'<a href="/email?id=MAIL-IND-WHOLESALE">Open the industry email draft</a>'
         )
+    file_block = f'<div><div class="label">From the file</div>{news_facts(file_rows)}</div>' if fields else ""
     return (
-        f'{escape(item["body"])} '
-        f'Exposure {money(factors["exposure_hkd"])}. Coverage {factors["security_coverage"]}. '
-        f'Guarantor {factors["guarantor_support"]}. Strength {factors["financial_strength"]}. '
-        f'Warnings {factors["warning_signals"]}.{news_position(item)}{linked}'
+        f'<div class="news-read"><p class="news-copy">{escape(article)}</p>{file_block}'
+        f'<div><div class="label">On the book</div>{news_facts(book_rows)}</div>'
+        f'<p class="news-links">{links}</p></div>'
     )
 
 
@@ -731,7 +785,7 @@ def news_page(selected: list[str]) -> str:
             f'<td>{escape(item["headline"])}'
             f'<div style="color:var(--muted);font-size:.8rem">{escape(item["date"])} · {escape(item["source"])}</div></td>'
             f'<td>{escape(item["industry"])}</td><td>{escape(item["severity"])}</td><td>{flag}</td></tr>'
-            f'<tr class="news-detail" hidden><td colspan="4" style="color:var(--muted)">{news_detail(item)}</td></tr>'
+            f'<tr class="news-detail" hidden><td colspan="4">{news_detail(item)}</td></tr>'
         )
     return f"""
     <div class="label">Step 1 of 3</div><h1>Adverse news</h1>
@@ -816,16 +870,6 @@ def news_page(selected: list[str]) -> str:
       {trend_table([(customer(cid)["legal_name"], lambda iso, cid=cid: str(customer(cid)["series"][view().dates.index(iso)]["dpd"])) for cid in dict.fromkeys(item["customer_id"] for item in BOOK["news"] if item["customer_id"])])}
     </div>
     """
-
-
-def news_position(item: dict) -> str:
-    if not item["customer_id"]:
-        return ""
-    person = customer(item["customer_id"])
-    return (
-        f" At {view().label()}: drawn {money(person['drawn_hkd'])}, ECL {money(person['ecl_hkd'])}, "
-        f"stage {person['stage']}, {person['dpd']} days past due."
-    )
 
 
 def industry_on(iso: str, name: str) -> dict:
