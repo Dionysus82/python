@@ -499,7 +499,7 @@ h1 {{ font-family:"Source Serif 4",serif; color:var(--title); font-weight:560; m
 table {{ width:100%; border-collapse:collapse; font-size:.92rem; }}
 th {{ text-align:left; font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); padding:8px; border-bottom:1px solid var(--line); }}
 td {{ padding:10px 8px; border-bottom:1px solid var(--line); vertical-align:top; }}
-tr.click:hover td {{ background:#FBF7F2; }}
+tr.click:hover td, tr.news-item[data-open="1"] td {{ background:#FBF7F2; }}
 .tag {{ display:inline-block; padding:2px 8px; border-radius:99px; font-size:.75rem; font-weight:700; }}
 .tag-red {{ background:var(--wash); color:var(--red); }}
 .tag-orange {{ background:#FDE8D4; color:var(--deep); }}
@@ -697,48 +697,46 @@ def news_stamp(text: str) -> int:
     return 0
 
 
+def news_detail(item: dict) -> str:
+    factors = item["factors"]
+    if item["customer_id"]:
+        person = customer(item["customer_id"])
+        linked = (
+            f'<p><strong>{escape(person["legal_name"])}</strong>. '
+            f'Drawn {money(person["drawn_hkd"])}. Rating {person["prior_rating"]} to {person["rating"]}. '
+            f'Collateral {escape(person["collateral_type"])} {money(person["collateral_hkd"])}. RM {escape(person["rm"])}.</p>'
+            f'<p><a href="/email?id=MAIL-NEWS-APEX">Open the adverse-news email draft</a> · '
+            f'<a href="/industry?name={escape(person["industry"])}">Continue to the {escape(person["industry"])} industry review</a></p>'
+        )
+    else:
+        linked = (
+            f'<p><a href="/industry?name={escape(item["industry"])}">Continue to the {escape(item["industry"])} review</a> · '
+            f'<a href="/email?id=MAIL-IND-WHOLESALE">Open the industry email draft</a></p>'
+        )
+    return (
+        f'{escape(item["body"])} '
+        f'Exposure {money(factors["exposure_hkd"])}. Coverage {factors["security_coverage"]}. '
+        f'Guarantor {factors["guarantor_support"]}. Strength {factors["financial_strength"]}. '
+        f'Warnings {factors["warning_signals"]}.{news_position(item)}{linked}'
+    )
+
+
 def news_page(selected: list[str]) -> str:
     rows = []
     for order, item in enumerate(BOOK["news"]):
         factors = item["factors"]
-        checked = "checked" if item["id"] in selected else ""
         flag = '<span class="tag tag-red">Material</span>' if factors["material"] else '<span class="tag tag-grey">Below threshold</span>'
         rows.append(
-            f'<tr class="news-item" data-order="{order}" data-severity="{escape(item["severity"])}" data-time="{news_stamp(item["date"])}">'
-            f'<td><label><input type="checkbox" name="selected" value="{escape(item["id"])}" {checked}> {escape(item["headline"])}</label>'
+            f'<tr class="news-item click" data-order="{order}" data-severity="{escape(item["severity"])}" data-time="{news_stamp(item["date"])}">'
+            f'<td>{escape(item["headline"])}'
             f'<div style="color:var(--muted);font-size:.8rem">{escape(item["date"])} · {escape(item["source"])}</div></td>'
             f'<td>{escape(item["industry"])}</td><td>{escape(item["severity"])}</td><td>{flag}</td></tr>'
-            f'<tr class="news-detail"><td colspan="4" style="color:var(--muted)">{escape(item["body"])} '
-            f'Exposure {money(factors["exposure_hkd"])}. Coverage {factors["security_coverage"]}. '
-            f'Guarantor {factors["guarantor_support"]}. Strength {factors["financial_strength"]}. '
-            f'Warnings {factors["warning_signals"]}.{news_position(item)}</td></tr>'
+            f'<tr class="news-detail" hidden><td colspan="4" style="color:var(--muted)">{news_detail(item)}</td></tr>'
         )
-    follow = ""
-    if selected:
-        chosen = [item for item in BOOK["news"] if item["id"] in selected]
-        blocks = []
-        for item in chosen:
-            if item["customer_id"]:
-                row = customer(item["customer_id"])
-                blocks.append(
-                    f'<div class="card" style="margin-top:12px"><div class="label">Group review</div><h2>{escape(row["legal_name"])}</h2>'
-                    f'<p>{escape(item["body"])}</p>'
-                    f'<p>Drawn {money(row["drawn_hkd"])}. Rating {row["prior_rating"]} to {row["rating"]}. '
-                    f'Collateral {escape(row["collateral_type"])} {money(row["collateral_hkd"])}. RM {escape(row["rm"])}.</p>'
-                    f'<p><a href="/email?id=MAIL-NEWS-APEX">Open the adverse-news email draft</a> · '
-                    f'<a href="/industry?name={escape(row["industry"])}">Continue to the {escape(row["industry"])} industry review</a></p></div>'
-                )
-            else:
-                blocks.append(
-                    f'<div class="card" style="margin-top:12px"><div class="label">Selected sector news</div>'
-                    f'<p>{escape(item["headline"])}</p><p><a href="/industry?name={escape(item["industry"])}">Continue to the {escape(item["industry"])} review</a> · '
-                    f'<a href="/email?id=MAIL-IND-WHOLESALE">Open the industry email draft</a></p></div>'
-                )
-        follow = "".join(blocks)
     return f"""
     <div class="label">Step 1 of 3</div><h1>Adverse news</h1>
-    <p class="lead">These headlines are the Apex negative-news file. Materiality uses exposure, security coverage, guarantor support, financial strength and open warnings. Select a news item to open the group review, then the industry review.</p>
-    <form method="get" action="/news">
+    <p class="lead">These headlines are the Apex negative-news file. Click a headline to open its detail here. Materiality uses exposure, security coverage, guarantor support, financial strength and open warnings.</p>
+    <div>
       <div class="news-tools">
         <label><span class="label">Severity</span><br>
           <select id="severity-filter">
@@ -762,8 +760,7 @@ def news_page(selected: list[str]) -> str:
       <table><thead><tr><th>Item</th><th>Industry</th><th>Severity</th><th></th></tr></thead><tbody id="news-body">{''.join(rows)}
         <tr id="news-empty" hidden><td colspan="4">No news at this severity.</td></tr>
       </tbody></table>
-      <p><button type="submit">Review selected news</button></p>
-    </form>
+    </div>
     <script>
     (function () {{
       var rank = {{"CRITICAL": 4, "HIGH": 3, "MEDIUM": 2, "LOW": 1}};
@@ -791,7 +788,7 @@ def news_page(selected: list[str]) -> str:
         items.forEach(function (item) {{
           var visible = !want || item.row.dataset.severity === want;
           item.row.hidden = !visible;
-          item.detail.hidden = !visible;
+          item.detail.hidden = !visible || item.row.dataset.open !== "1";
           if (visible) shown += 1;
           body.appendChild(item.row);
           body.appendChild(item.detail);
@@ -799,11 +796,19 @@ def news_page(selected: list[str]) -> str:
         empty.hidden = shown > 0;
         body.appendChild(empty);
       }}
+      body.addEventListener("click", function (event) {{
+        var row = event.target.closest("tr.news-item");
+        if (!row) return;
+        var detail = row.nextElementSibling;
+        var open = row.dataset.open !== "1";
+        row.dataset.open = open ? "1" : "";
+        detail.hidden = !open;
+        if (open) detail.scrollIntoView({{block: "nearest"}});
+      }});
       filter.addEventListener("change", apply);
       sort.addEventListener("change", apply);
     }})();
     </script>
-    {follow}
     <div class="card" style="margin-top:12px"><div class="label">ECL of the names named in the feed</div>
       {trend_table([(customer(cid)["legal_name"], lambda iso, cid=cid: money(customer(cid)["series"][view().dates.index(iso)]["ecl_hkd"])) for cid in dict.fromkeys(item["customer_id"] for item in BOOK["news"] if item["customer_id"])])}
     </div>
