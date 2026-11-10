@@ -8,6 +8,8 @@ __pycache__/
 data/
 .pytest_data/
 rip/report_files/uploads/
+rip/news_state.json
+rip/news_state.tmp
 dist/
 build/
 *.egg-info/

@@ -291,7 +291,7 @@ def build_proposal(customer: dict, point: dict) -> Document:
     return doc
 
 
-def build_report(customer: dict, point: dict) -> Document:
+def build_report(customer: dict, point: dict, actions: list[dict] | None = None) -> Document:
     doc = blank_doc()
     as_of = label_date(point["date"])
     kicker = doc.add_paragraph()
@@ -346,11 +346,35 @@ def build_report(customer: dict, point: dict) -> Document:
         para(doc, "Extract warnings: " + " ".join(notes))
     else:
         para(doc, "No warning text is stored on this name beyond stage and days past due.")
-    heading(doc, "4. Recommendation")
+    accepted = [item for item in (actions or []) if (item.get("text") or "").strip()]
+    if accepted:
+        heading(doc, "4. Adverse news actions")
+        para(
+            doc,
+            "The actions below were confirmed from adverse-news headlines on BEA - Risk Intelligence. "
+            "Each paragraph is the wording accepted for that headline. The actions record the follow-up. "
+            "They do not, by themselves, change a grade or a limit.",
+        )
+        for action in accepted:
+            para(doc, action.get("headline") or "Adverse news", bold=True, space_after=2)
+            para(
+                doc,
+                f"{action.get('severity') or ''} · {action.get('source') or ''} · {action.get('date') or ''}",
+                size=9,
+                color="666666",
+                space_after=2,
+            )
+            para(doc, action["text"])
+        heading(doc, "5. Recommendation")
+        news_line = " The adverse-news actions in section 4 are part of this report."
+    else:
+        heading(doc, "4. Recommendation")
+        news_line = ""
     para(
         doc,
         f"Input to this report is the annual-review proposal for {customer['legal_name']} at {as_of}. "
         + stance(point)
+        + news_line
         + " Download either file from BEA - Risk Intelligence after the borrower is selected.",
     )
     return doc
