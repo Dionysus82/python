@@ -726,17 +726,17 @@ def news_page(selected: list[str]) -> str:
         follow = "".join(blocks)
     return f"""
     <div class="label">Step 1 of 3</div><h1>Adverse news</h1>
-    <p class="lead">These four headlines are placeholders for the Credit Risk Alert Portal. Materiality uses exposure, security coverage, guarantor support, financial strength and open warnings. Select a news item to open the group review, then the industry review. Replace the feed when it is provided.</p>
+    <p class="lead">These headlines are the Apex negative-news file. Materiality uses exposure, security coverage, guarantor support, financial strength and open warnings. Select a news item to open the group review, then the industry review.</p>
     <form method="get" action="/news">
       <table><thead><tr><th>Item</th><th>Industry</th><th>Score</th><th></th></tr></thead><tbody>{''.join(rows)}</tbody></table>
       <p><button type="submit">Review selected news</button></p>
     </form>
     {follow}
     <div class="card" style="margin-top:12px"><div class="label">ECL of the names named in the feed</div>
-      {trend_table([(customer(item["customer_id"])["legal_name"], lambda iso, cid=item["customer_id"]: money(customer(cid)["series"][view().dates.index(iso)]["ecl_hkd"])) for item in BOOK["news"] if item["customer_id"]])}
+      {trend_table([(customer(cid)["legal_name"], lambda iso, cid=cid: money(customer(cid)["series"][view().dates.index(iso)]["ecl_hkd"])) for cid in dict.fromkeys(item["customer_id"] for item in BOOK["news"] if item["customer_id"])])}
     </div>
     <div class="card" style="margin-top:12px"><div class="label">Days past due of the names named in the feed</div>
-      {trend_table([(customer(item["customer_id"])["legal_name"], lambda iso, cid=item["customer_id"]: str(customer(cid)["series"][view().dates.index(iso)]["dpd"])) for item in BOOK["news"] if item["customer_id"]])}
+      {trend_table([(customer(cid)["legal_name"], lambda iso, cid=cid: str(customer(cid)["series"][view().dates.index(iso)]["dpd"])) for cid in dict.fromkeys(item["customer_id"] for item in BOOK["news"] if item["customer_id"])])}
     </div>
     """
 
@@ -1277,8 +1277,11 @@ def live_letter(draft: dict) -> str:
         )
     else:
         apex = customer("BOR-AGHL")
+        linked = [item for item in BOOK["news"] if item["customer_id"] == apex["customer_id"]]
+        lines = "\n".join(f"{item['date']}. {item['headline']}" for item in linked)
         body = (
-            f"Adverse-news placeholders are not a live feed. At {view().label()}, {apex['legal_name']} is drawn {money(apex['drawn_hkd'])}, "
+            f"Adverse news on file for {apex['legal_name']}:\n{lines}\n\n"
+            f"At {view().label()}, {apex['legal_name']} is drawn {money(apex['drawn_hkd'])}, "
             f"ECL {money(apex['ecl_hkd'])}, stage {apex['stage']}, {apex['dpd']} days past due.\n"
         )
     return intro + body + "\nPlease send this from your own mailbox if you want it delivered.\n"

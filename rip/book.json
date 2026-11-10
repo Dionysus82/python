@@ -94152,74 +94152,560 @@
   ],
   "news": [
     {
-      "id": "NEWS-AGHL-LEASE",
-      "headline": "Office leasing at Apex Global's Kowloon towers is behind budget",
-      "source": "Credit Risk Alert Portal (placeholder feed)",
-      "date": "12 Sep 2026",
+      "id": "NEWS-XLS-1-01",
+      "headline": "穆迪下調Apex Water Solutions評級至Ba1跌出投資級別 展望負面",
+      "source": "穆迪",
+      "date": "5 Nov 2026",
       "customer_id": "BOR-AGHL",
       "industry": "Property Development",
-      "body": "A placeholder alert says two commercial floors in the Kowloon towers leased by Apex Global Holdings are still vacant against the budget used at the last review. No loss amount is stated. Replace this item when the live feed is connected.",
+      "body": "穆迪投資者服務公司今日將「Apex Water Solutions Ltd. (3768.HK)」的長期發行人評級由「Baa1」下調三級至「Ba1」，即跌出投資級別，前景展望為「負面」。報告指出，評級下調主要由於其核心水務處理業務毛利率急劇收縮，加之其子公司「Apex Global Holdings Limited」在東南亞的基礎設施項目出現重大合同違約，導致集團合併槓桿率及或有負債風險急劇惡化。 News type: Credit Rating. Signal: Credit Rating Downgrade (Downgrade of 2 notches or more / BBB- or below). Severity: CRITICAL. Entities: Apex Water Solutions Ltd. (3768.HK), Apex Global Holdings Limited.",
       "factors": {
         "exposure_hkd": 517465000.0,
         "security_coverage": 1.52,
         "guarantor_support": "Apex Group parent comfort letter, unsecured",
         "financial_strength": "rating 14, interest cover 1.7 times",
         "warning_signals": 4,
-        "score": 85,
+        "score": 95,
         "material": true
       }
     },
     {
-      "id": "NEWS-IDIC-CLAIM",
-      "headline": "Contractor files a payment claim against Industrial Development Investment Corp.",
-      "source": "Credit Risk Alert Portal (placeholder feed)",
-      "date": "21 Sep 2026",
-      "customer_id": "BOR-IDIC",
-      "industry": "Property Investment",
-      "body": "A placeholder court-list note names a contractor claim. The claim amount is not in the property extract. Days past due and stage follow the reporting dates selected on the page.",
+      "id": "NEWS-XLS-1-02",
+      "headline": "Apex Global Holdings違反8億美元銀團貸款契約 觸發利息覆蓋率警報",
+      "source": "德勤",
+      "date": "4 Nov 2026",
+      "customer_id": "BOR-AGHL",
+      "industry": "Property Development",
+      "body": "據獨立核數師報告，Apex Water Solutions Ltd. (3768.HK) 旗下主要附屬公司「Apex Global Holdings Limited」已違反其一筆8億美元銀團貸款中的關鍵財務契約。其「利息覆蓋率」已跌至1.1倍，低於契約要求的1.5倍；同時，「貸款與價值比率」因其抵押資產價值下跌而升至78%，超出70%的上限。貸款人已發出違約保留權利函。 News type: EOD / Top-up provision. Signal: Event of default / top-up provision triggered (Breach of LTV, DSR or other covenants). Severity: CRITICAL. Entities: Apex Global Holdings Limited, Apex Water Solutions Ltd. (3768.HK).",
       "factors": {
-        "exposure_hkd": 512405000.0,
-        "security_coverage": 1.53,
-        "guarantor_support": "Sponsor completion guarantee on one development site",
-        "financial_strength": "rating 11, interest cover 1.4 times",
-        "warning_signals": 3,
-        "score": 85,
+        "exposure_hkd": 517465000.0,
+        "security_coverage": 1.52,
+        "guarantor_support": "Apex Group parent comfort letter, unsecured",
+        "financial_strength": "rating 14, interest cover 1.7 times",
+        "warning_signals": 4,
+        "score": 95,
         "material": true
       }
     },
     {
-      "id": "NEWS-PROP-VACANCY",
-      "headline": "Hong Kong commercial vacancy stayed high through the third quarter",
-      "source": "Credit Risk Alert Portal (placeholder feed)",
+      "id": "NEWS-XLS-1-03",
+      "headline": "Apex Global Holdings緊急叫停5億美元債券發行計劃 再融資受阻",
+      "source": "彭博",
+      "date": "2 Nov 2026",
+      "customer_id": "BOR-AGHL",
+      "industry": "Property Development",
+      "body": "市場消息透露，「Apex Global Holdings Limited」原定於本週定價的5億美元債券發行計劃已被緊急叫停。聯席牽頭經辦人表示，由於其母公司(3768.HK)盈利預警及行業前景不明朗，潛在投資者的認購意向遠遜預期，新債發行成本飆升超過300個基點，迫使公司擱置再融資計劃。 News type: Warning Signals. Signal: Failure of the borrower / guarantor to seek fund raising or refinancing / Expected adverse cash flow. Severity: HIGH. Entities: Apex Global Holdings Limited, Apex Water Solutions Ltd. (3768.HK).",
+      "factors": {
+        "exposure_hkd": 517465000.0,
+        "security_coverage": 1.52,
+        "guarantor_support": "Apex Group parent comfort letter, unsecured",
+        "financial_strength": "rating 14, interest cover 1.7 times",
+        "warning_signals": 4,
+        "score": 80,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-04",
+      "headline": "Apex Water Solutions大股東質押35%股份 融資缺口引發股權變動疑慮",
+      "source": "香港交易所披露易",
+      "date": "30 Oct 2026",
+      "customer_id": null,
+      "industry": "Irregularities",
+      "body": "根據權益披露，「Apex Water Solutions Ltd. (3768.HK)」的控股股東兼主席已將其持有的2.5億股公司股份（佔已發行股本約35%）抵押予一家離岸私人信貸基金，以獲取個人流動性貸款。此舉引發市場對其財務壓力及潛在股權變動的憂慮。 News type: Irregularities. Signal: Irregularities leading adverse impact on credit standing (Substantial share pledge by major shareholder). Severity: HIGH. Entities: Apex Water Solutions Ltd. (3768.HK).",
+      "factors": {
+        "exposure_hkd": 0,
+        "security_coverage": "not a book obligor",
+        "guarantor_support": "not a book obligor",
+        "financial_strength": "not a book obligor",
+        "warning_signals": 0,
+        "score": 80,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-05",
+      "headline": "Apex Infrastructure新加坡面臨1.8億美元重大海水化淡工程索賠仲裁",
+      "source": "新加坡海峽時報",
+      "date": "28 Oct 2026",
+      "customer_id": null,
+      "industry": "Litigation",
+      "body": "新加坡國際仲裁中心已受理一宗針對「Apex Infrastructure (SEA) Pte. Ltd.」的重大仲裁申請。原告方為一東南亞國家政府機構，指控該公司承建的海水化淡廠項目存在嚴重工程延誤及質量缺陷，索賠金額高達1.8億美元。 News type: Litigation. Signal: Significant outstanding litigation. Severity: HIGH. Entities: Apex Infrastructure (SEA) Pte. Ltd..",
+      "factors": {
+        "exposure_hkd": 0,
+        "security_coverage": "not a book obligor",
+        "guarantor_support": "not a book obligor",
+        "financial_strength": "not a book obligor",
+        "warning_signals": 0,
+        "score": 80,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-06",
+      "headline": "Apex Water Solutions宣布全面退出內地工業廢水業務 出售主營資產",
+      "source": "公司公告",
+      "date": "26 Oct 2026",
+      "customer_id": null,
+      "industry": "Change in Business",
+      "body": "Apex Water Solutions Ltd. (3768.HK) 發布公告，宣布將全面退出其位於中國內地的工業廢水處理業務，並計劃出售相關資產「Apex Environmental Tech (Shenzhen) Ltd.」。公司稱此舉為「戰略重組」，但該業務分部佔集團去年總收入的28%。 News type: Change in Business. Signal: Cease of business / substantial merger and acquisition / significant non-core expansion. Severity: HIGH. Entities: Apex Water Solutions Ltd. (3768.HK), Apex Environmental Tech (Shenzhen) Ltd..",
+      "factors": {
+        "exposure_hkd": 0,
+        "security_coverage": "not a book obligor",
+        "guarantor_support": "not a book obligor",
+        "financial_strength": "not a book obligor",
+        "warning_signals": 0,
+        "score": 80,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-07",
+      "headline": "Apex-TerraForm JV未能按時支付租賃款 遭列為逾期違約賬戶",
+      "source": "財經新聞",
+      "date": "23 Oct 2026",
+      "customer_id": null,
+      "industry": "Account Performance",
+      "body": "據內幕消息披露，「Apex-TerraForm JV」因未能按時支付一筆價值4500萬美元的設備租賃款項，已被第三方融資租賃公司列為逾期賬戶。這是該合資項目首次出現對外融資的違約記錄。 News type: Account Performance. Signal: Past due or irregular record relating to third party financing (loan / bond). Severity: HIGH. Entities: Apex-TerraForm JV.",
+      "factors": {
+        "exposure_hkd": 0,
+        "security_coverage": "not a book obligor",
+        "guarantor_support": "not a book obligor",
+        "financial_strength": "not a book obligor",
+        "warning_signals": 0,
+        "score": 80,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-08",
+      "headline": "合規部門向監管呈報Apex Capital Management跨境可疑跨境交易",
+      "source": "內部風險通報",
+      "date": "21 Oct 2026",
+      "customer_id": null,
+      "industry": "AML Issue",
+      "body": "銀行反洗錢合規部（MLRO）已向上級呈報一宗關於「Apex Capital Management Ltd.」的可疑交易報告（STR）。報告指出，該公司近期有多筆大額資金通過其在避稅港註冊的關聯賬戶進行不尋常的跨境劃轉，其資金來源與商業目的存疑。 News type: AML Issue. Signal: Suspicious transaction in relation to money laundering. Severity: HIGH. Entities: Apex Capital Management Ltd..",
+      "factors": {
+        "exposure_hkd": 0,
+        "security_coverage": "not a book obligor",
+        "guarantor_support": "not a book obligor",
+        "financial_strength": "not a book obligor",
+        "warning_signals": 0,
+        "score": 80,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-09",
+      "headline": "Apex Water Solutions發盈警 預期第三季淨利潤重挫達70%",
+      "source": "香港交易所公告",
+      "date": "20 Oct 2026",
+      "customer_id": "BOR-AGHL",
+      "industry": "Property Development",
+      "body": "Apex Water Solutions Ltd. (3768.HK) 發布第三季度業績預警，預計季度淨利潤按年將大幅下跌約60%至70%。公告解釋，盈利下跌主要由於中國內地市場競爭加劇導致新項目毛利率受壓，以及其附屬公司「Apex Global Holdings Limited」為應對海外項目訴訟而計提大額撥備。 News type: Warning Signals. Signal: Expected adverse cash flow / Financial performance worsen from guarantor. Severity: HIGH. Entities: Apex Water Solutions Ltd. (3768.HK), Apex Global Holdings Limited.",
+      "factors": {
+        "exposure_hkd": 517465000.0,
+        "security_coverage": 1.52,
+        "guarantor_support": "Apex Group parent comfort letter, unsecured",
+        "financial_strength": "rating 14, interest cover 1.7 times",
+        "warning_signals": 4,
+        "score": 80,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-10",
+      "headline": "反滲透膜供應商收緊Apex深圳子公司信用額度 要求貨到付款(COD)",
+      "source": "行業新聞",
+      "date": "18 Oct 2026",
+      "customer_id": null,
+      "industry": "Irregularities",
+      "body": "多間向「Apex Environmental Tech (Shenzhen) Ltd.」供應反滲透膜的核心供應商，近期已將其信貸條款由原來的90日賬期收緊至「貨到付款」（COD）。此舉反映供應鏈對該公司短期償付能力的信心正在減弱。 News type: Irregularities. Signal: Irregularities leading adverse impact (Credit squeeze by suppliers or losing major orders). Severity: HIGH. Entities: Apex Environmental Tech (Shenzhen) Ltd..",
+      "factors": {
+        "exposure_hkd": 0,
+        "security_coverage": "not a book obligor",
+        "guarantor_support": "not a book obligor",
+        "financial_strength": "not a book obligor",
+        "warning_signals": 0,
+        "score": 80,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-11",
+      "headline": "標普將Apex Water Solutions評級列入負面信用觀察名單",
+      "source": "標普全球評級",
+      "date": "16 Oct 2026",
+      "customer_id": null,
+      "industry": "Credit Rating",
+      "body": "標普將「Apex Water Solutions Ltd. (3768.HK)」的「BBB」長期發行人信用評級列入「負面信用觀察名單」。標普表示，若該公司無法在未來三個月內有效緩解其子公司的法律訴訟及流動性壓力，其評級將有可能被下調一至兩個級別。 News type: Credit Rating. Signal: Adverse change of rating outlook for any credit rating of BBB / Baa2 or below. Severity: MEDIUM. Entities: Apex Water Solutions Ltd. (3768.HK).",
+      "factors": {
+        "exposure_hkd": 0,
+        "security_coverage": "not a book obligor",
+        "guarantor_support": "not a book obligor",
+        "financial_strength": "not a book obligor",
+        "warning_signals": 0,
+        "score": 60,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-12",
+      "headline": "Apex Global Holdings因商譽減值淨資產跌破下限 申請銀團豁免契約",
+      "source": "貸款銀團內部備忘",
+      "date": "14 Oct 2026",
+      "customer_id": "BOR-AGHL",
+      "industry": "Property Development",
+      "body": "「Apex Global Holdings Limited」已向其銀團貸款代理行申請豁免其「有形淨資產」不得低於10億美元的財務契約。公司表示，由於對深圳子公司的商譽進行減值，其淨資產已跌破契約下限。 News type: EOD / Top-up provision. Signal: Event of default / top-up provision triggered (Breach of undertaking covenants). Severity: MEDIUM. Entities: Apex Global Holdings Limited.",
+      "factors": {
+        "exposure_hkd": 517465000.0,
+        "security_coverage": 1.52,
+        "guarantor_support": "Apex Group parent comfort letter, unsecured",
+        "financial_strength": "rating 14, interest cover 1.7 times",
+        "warning_signals": 4,
+        "score": 60,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-13",
+      "headline": "Apex Water Solutions洽售Apex-TerraForm合資股權以回籠資金",
+      "source": "路透社",
+      "date": "12 Oct 2026",
+      "customer_id": null,
+      "industry": "Change in Business",
+      "body": "Apex Water Solutions Ltd. (3768.HK) 證實正與一家私募基金進行深入談判，計劃出售其持有的「Apex-TerraForm JV」50%股權。市場分析認為，此舉意在快速回籠資金以應對母公司的財務壓力，但可能影響集團長期增長潛力。 News type: Change in Business. Signal: Substantial merger and acquisition / Significant non-core asset divestment. Severity: MEDIUM. Entities: Apex Water Solutions Ltd. (3768.HK), Apex-TerraForm JV.",
+      "factors": {
+        "exposure_hkd": 0,
+        "security_coverage": "not a book obligor",
+        "guarantor_support": "not a book obligor",
+        "financial_strength": "not a book obligor",
+        "warning_signals": 0,
+        "score": 60,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-14",
+      "headline": "Apex深圳子公司涉侵犯水質淨化專利 遭索賠8000萬人民幣",
+      "source": "深圳法院網",
+      "date": "10 Oct 2026",
+      "customer_id": null,
+      "industry": "Litigation",
+      "body": "「Apex Environmental Tech (Shenzhen) Ltd.」因涉嫌侵犯一項核心水質淨化技術的知識產權，被競爭對手告上法庭，索賠金額為人民幣8000萬元。 News type: Litigation. Signal: Significant outstanding litigation threat. Severity: MEDIUM. Entities: Apex Environmental Tech (Shenzhen) Ltd..",
+      "factors": {
+        "exposure_hkd": 0,
+        "security_coverage": "not a book obligor",
+        "guarantor_support": "not a book obligor",
+        "financial_strength": "not a book obligor",
+        "warning_signals": 0,
+        "score": 60,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-15",
+      "headline": "Apex Capital Management私募債券利息逾期 召開持有人會議申請延期",
+      "source": "債券持有人會議通知",
+      "date": "8 Oct 2026",
+      "customer_id": null,
+      "industry": "Account Performance",
+      "body": "「Apex Capital Management Ltd.」發行的一期私募債券，因未能按時支付利息，已觸發交叉違約條款。公司正尋求召開債券持有人會議，以申請延期付息。 News type: Account Performance. Signal: Past due or irregular record relating to third party financing. Severity: MEDIUM. Entities: Apex Capital Management Ltd..",
+      "factors": {
+        "exposure_hkd": 0,
+        "security_coverage": "not a book obligor",
+        "guarantor_support": "not a book obligor",
+        "financial_strength": "not a book obligor",
+        "warning_signals": 0,
+        "score": 60,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-16",
+      "headline": "全國水環境治理規劃投資規模收縮15% 重心轉向設施升級",
+      "source": "信報",
+      "date": "6 Oct 2026",
+      "customer_id": null,
+      "industry": "Sector Related News",
+      "body": "中國生態環境部今日發布「十四五」期間全國水環境治理投資規劃，預計總投資規模將較「十三五」期間收縮約15%。報告指出，未來投資重點將從大規模新建項目轉向現有設施的升級改造，行業整體增速面臨放緩壓力。 News type: Sector Related News. Signal: Macro Environment / Sector Downside Risk. Severity: LOW. Entities: Apex Water Solutions Ltd. (3768.HK).",
+      "factors": {
+        "exposure_hkd": 0,
+        "security_coverage": "not a book obligor",
+        "guarantor_support": "not a book obligor",
+        "financial_strength": "not a book obligor",
+        "warning_signals": 0,
+        "score": 35,
+        "material": false
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-17",
+      "headline": "申萬宏源下調環保水務板塊評級至中性 地方回款周期延長",
+      "source": "申萬宏源研究報告",
+      "date": "3 Oct 2026",
+      "customer_id": null,
+      "industry": "Sector Related News",
+      "body": "申萬宏源發表研究報告，下調環保水務板塊的行業評級至「中性」。報告預測，由於地方政府財政壓力增大，未來水務項目的回款周期將普遍延長，行業整體營運資金壓力將會上升。 News type: Sector Related News. Signal: Expected adverse cash flow due to market condition changes. Severity: LOW. Entities: Apex Water Solutions Ltd. (3768.HK).",
+      "factors": {
+        "exposure_hkd": 0,
+        "security_coverage": "not a book obligor",
+        "guarantor_support": "not a book obligor",
+        "financial_strength": "not a book obligor",
+        "warning_signals": 0,
+        "score": 35,
+        "material": false
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-18",
+      "headline": "全球利率攀升導致重資產基建項目融資成本按年飆升120基點",
+      "source": "華爾街日報",
+      "date": "1 Oct 2026",
+      "customer_id": null,
+      "industry": "Sector Related News",
+      "body": "受全球利率上升環境影響，重資產類型的基礎設施項目融資成本持續攀升。據統計，今年第三季度亞洲基礎設施項目的銀團貸款平均利率較去年同期上升超過120個基點，對依賴槓桿擴張的公司構成挑戰。 News type: Sector Related News. Signal: Large increase in borrowing interest rate / cost of funding. Severity: LOW. Entities: Apex Infrastructure (SEA) Pte. Ltd..",
+      "factors": {
+        "exposure_hkd": 0,
+        "security_coverage": "not a book obligor",
+        "guarantor_support": "not a book obligor",
+        "financial_strength": "not a book obligor",
+        "warning_signals": 0,
+        "score": 35,
+        "material": false
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-19",
+      "headline": "Apex Water Solutions首席財務官因個人理由辭任 繼任人選未定",
+      "source": "財經雜誌",
       "date": "28 Sep 2026",
       "customer_id": null,
+      "industry": "Irregularities",
+      "body": "有媒體報道，「Apex Water Solutions Ltd. (3768.HK)」的首席財務官（CFO）已於上週因「個人理由」辭職，而公司至今尚未公布繼任人選。頻繁的高層變動引發市場對其內部管理穩定性的關注。 News type: Irregularities. Signal: Management irregularities / High-level management sudden departure. Severity: LOW. Entities: Apex Water Solutions Ltd. (3768.HK).",
+      "factors": {
+        "exposure_hkd": 0,
+        "security_coverage": "not a book obligor",
+        "guarantor_support": "not a book obligor",
+        "financial_strength": "not a book obligor",
+        "warning_signals": 0,
+        "score": 35,
+        "material": false
+      }
+    },
+    {
+      "id": "NEWS-XLS-1-20",
+      "headline": "恆指累跌8% 公用事業及高負債基建板塊跌幅顯著",
+      "source": "香港經濟日報",
+      "date": "25 Sep 2026",
+      "customer_id": null,
+      "industry": "General News",
+      "body": "香港恆生指數本月累計下跌超過8%，其中公用事業及基建板塊因其高負債及利率敏感性，跌幅尤為顯著。分析師預期，在宏觀經濟不確定性下，投資者對該板塊的避險情緒將會升溫。 News type: General News. Signal: Macro market decline impact. Severity: LOW. Entities: Apex Water Solutions Ltd. (3768.HK).",
+      "factors": {
+        "exposure_hkd": 0,
+        "security_coverage": "not a book obligor",
+        "guarantor_support": "not a book obligor",
+        "financial_strength": "not a book obligor",
+        "warning_signals": 0,
+        "score": 35,
+        "material": false
+      }
+    },
+    {
+      "id": "NEWS-XLS-2-01",
+      "headline": "穆迪維持Apex Property評級但下調展望至負面",
+      "source": "Moody's",
+      "date": "Feb 2026",
+      "customer_id": "BOR-APL",
+      "industry": "Property Development",
+      "body": "穆迪確認 Apex Property Limited（3768.HK）長期發行人評級為 Baa1，並將評級展望由「穩定」調整為「負面」。穆迪指出香港商業地產估值持續受壓及未來兩年再融資需求增加，但認為集團租金收入及流動性狀況仍然穩定。 News type: 評級消息. Signal: 評級展望調整. Severity: 中. Entities: Apex Property Limited.",
+      "factors": {
+        "exposure_hkd": 245505000.0,
+        "security_coverage": 1.34,
+        "guarantor_support": "None on the extract",
+        "financial_strength": "rating 7, interest cover 3.2 times",
+        "warning_signals": 0,
+        "score": 60,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-2-02",
+      "headline": "標普維持BBB評級並調整展望至負面",
+      "source": "S&P",
+      "date": "Mar 2026",
+      "customer_id": "BOR-APL",
+      "industry": "Property Development",
+      "body": "標普維持 Apex Property Limited BBB 長期發行人評級不變，並將展望由「穩定」調整至「負面」，主要反映香港寫字樓市場估值回落及再融資風險上升，而非營運表現惡化。 News type: 評級消息. Signal: 評級展望調整. Severity: 中. Entities: Apex Property Limited.",
+      "factors": {
+        "exposure_hkd": 245505000.0,
+        "security_coverage": 1.34,
+        "guarantor_support": "None on the extract",
+        "financial_strength": "rating 7, interest cover 3.2 times",
+        "warning_signals": 0,
+        "score": 60,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-2-03",
+      "headline": "Apex Property發布第一季度營運更新",
+      "source": "HKEX公告",
+      "date": "May 2026",
+      "customer_id": "BOR-APL",
+      "industry": "Property Development",
+      "body": "Apex Property Limited表示其核心投資物業組合出租率維持於80%以上，租金收入保持穩定。管理層預期全年經常性租金收入將維持平穩。 News type: 財務表現. Signal: 營運表現穩定. Severity: 低. Entities: Apex Property Limited.",
+      "factors": {
+        "exposure_hkd": 245505000.0,
+        "security_coverage": 1.34,
+        "guarantor_support": "None on the extract",
+        "financial_strength": "rating 7, interest cover 3.2 times",
+        "warning_signals": 0,
+        "score": 35,
+        "material": false
+      }
+    },
+    {
+      "id": "NEWS-XLS-2-04",
+      "headline": "Apex Property預計第三季度盈利輕微下跌",
+      "source": "HKEX公告",
+      "date": "Jul 2026",
+      "customer_id": "BOR-APL",
+      "industry": "Property Development",
+      "body": "Apex Property Limited預計2026年第三季度純利按年下跌約2%-5%，主要受到投資物業公平值調整影響。集團核心租賃業務表現大致穩定。 News type: 財務表現. Signal: 盈利輕微下跌. Severity: 低. Entities: Apex Property Limited.",
+      "factors": {
+        "exposure_hkd": 245505000.0,
+        "security_coverage": 1.34,
+        "guarantor_support": "None on the extract",
+        "financial_strength": "rating 7, interest cover 3.2 times",
+        "warning_signals": 0,
+        "score": 35,
+        "material": false
+      }
+    },
+    {
+      "id": "NEWS-XLS-2-05",
+      "headline": "Apex Property完成出售九龍東商業物業",
+      "source": "HKEX公告",
+      "date": "Aug 2026",
+      "customer_id": "BOR-APL",
+      "industry": "Property Development",
+      "body": "Apex Property Limited完成出售一項位於九龍東的商業物業，交易金額約4.8億港元，較賬面價值低約17%。管理層表示出售所得資金將優先用於降低銀行借款及提升流動性。交易反映商業地產市場持續調整，同時顯示集團正積極推動資產變現及去槓桿計劃。 News type: 資產出售. Signal: 資產折價出售／流動性管理. Severity: 中. Entities: Apex Property Limited.",
+      "factors": {
+        "exposure_hkd": 245505000.0,
+        "security_coverage": 1.34,
+        "guarantor_support": "None on the extract",
+        "financial_strength": "rating 7, interest cover 3.2 times",
+        "warning_signals": 0,
+        "score": 60,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-2-06",
+      "headline": "Apex Global Holdings啟動12億港元資產出售計劃",
+      "source": "公司公告",
+      "date": "Sep 2026",
+      "customer_id": "BOR-AGHL",
+      "industry": "Property Development",
+      "body": "Apex Global Holdings Limited宣布未來12個月將出售若干非核心商業及零售物業，目標出售金額約12億港元。所得資金將主要用於降低負債及改善財務指標。 News type: 策略發展. Signal: 去槓桿措施. Severity: 低. Entities: Apex Global Holdings Limited.",
+      "factors": {
+        "exposure_hkd": 517465000.0,
+        "security_coverage": 1.52,
+        "guarantor_support": "Apex Group parent comfort letter, unsecured",
+        "financial_strength": "rating 14, interest cover 1.7 times",
+        "warning_signals": 4,
+        "score": 35,
+        "material": false
+      }
+    },
+    {
+      "id": "NEWS-XLS-2-07",
+      "headline": "Apex Property成功引入國際金融機構承租中環旗艦項目",
+      "source": "市場消息",
+      "date": "Oct 2026",
+      "customer_id": "BOR-APL",
+      "industry": "Property Development",
+      "body": "Apex Property Limited旗下中環寫字樓項目成功與一家跨國金融機構簽訂長期租約，涉及約8萬平方呎樓面面積，有助穩定出租率及租金收入。 News type: 業務發展. Signal: 正面營運消息. Severity: 低. Entities: Apex Property Limited.",
+      "factors": {
+        "exposure_hkd": 245505000.0,
+        "security_coverage": 1.34,
+        "guarantor_support": "None on the extract",
+        "financial_strength": "rating 7, interest cover 3.2 times",
+        "warning_signals": 0,
+        "score": 35,
+        "material": false
+      }
+    },
+    {
+      "id": "NEWS-XLS-2-08",
+      "headline": "中環甲級寫字樓價格持續下跌",
+      "source": "仲量聯行市場報告",
+      "date": "Sep 2026",
+      "customer_id": null,
       "industry": "Property Investment",
-      "body": "A sector placeholder says grade-A and fringe office vacancy did not improve in the quarter. It does not name a default. It is here so the industry step has a headline until a live feed arrives.",
+      "body": "最新市場研究顯示，中環甲級寫字樓成交呎價於2026年累計下跌約15%-18%，主要受寫字樓空置率高企、租戶需求疲弱及投資氣氛審慎影響。市場普遍預期短期內資產估值仍將面臨壓力。 News type: 行業消息. Signal: 抵押品估值下跌. Severity: 中. Entities: 香港商業地產市場.",
       "factors": {
         "exposure_hkd": 1996813000.0,
         "security_coverage": "1.47 times market value over drawn, from the collateral extract",
         "guarantor_support": "not an industry-level fact",
         "financial_strength": "property investment names carry grades 9 to 11 on the portfolio file",
-        "warning_signals": "leasing, vacancy and one contractor claim on the placeholder feed",
-        "score": 74,
+        "warning_signals": "see the Apex negative-news file",
+        "score": 60,
         "material": true
       }
     },
     {
-      "id": "NEWS-GOV-LAND",
-      "headline": "Commentary notes slower land-premium receipts for local authorities",
-      "source": "Credit Risk Alert Portal (placeholder feed)",
-      "date": "4 Sep 2026",
-      "customer_id": "BOR-MGAA",
-      "industry": "Government",
-      "body": "A short commentary mentions land premiums. It does not name Metro Gov Authority A in a default, and it does not give a figure. Scored below the materiality line.",
+      "id": "NEWS-XLS-2-09",
+      "headline": "尖沙咀核心零售物業成交價持續回落",
+      "source": "世邦魏理仕市場報告",
+      "date": "Jul 2026",
+      "customer_id": null,
+      "industry": "Property Investment",
+      "body": "尖沙咀一線街舖及商場零售物業成交呎價於2026年累計下跌約12%-16%，主要受消費模式轉變及旅客消費復甦速度低於預期影響。市場成交量維持偏低水平。 News type: 行業消息. Signal: 抵押品估值下跌. Severity: 中. Entities: 香港零售物業市場.",
       "factors": {
-        "exposure_hkd": 449133000.0,
-        "security_coverage": 1.61,
-        "guarantor_support": "Municipal revenue assignment",
-        "financial_strength": "rating 3, interest cover 4.1 times",
-        "warning_signals": 0,
-        "score": 25,
+        "exposure_hkd": 1996813000.0,
+        "security_coverage": "1.47 times market value over drawn, from the collateral extract",
+        "guarantor_support": "not an industry-level fact",
+        "financial_strength": "property investment names carry grades 9 to 11 on the portfolio file",
+        "warning_signals": "see the Apex negative-news file",
+        "score": 60,
+        "material": true
+      }
+    },
+    {
+      "id": "NEWS-XLS-2-10",
+      "headline": "Apex Global Holdings獲兩家區域性銀行提供再融資意向書",
+      "source": "公司更新",
+      "date": "Oct 2026",
+      "customer_id": "BOR-AGHL",
+      "industry": "Property Development",
+      "body": "Apex Global Holdings Limited已收到兩家區域性銀行就2027年到期貸款提供的非約束性再融資意向書，目前正就貸款條款進行磋商。 News type: 融資安排. Signal: 再融資進展. Severity: 低. Entities: Apex Global Holdings Limited.",
+      "factors": {
+        "exposure_hkd": 517465000.0,
+        "security_coverage": 1.52,
+        "guarantor_support": "Apex Group parent comfort letter, unsecured",
+        "financial_strength": "rating 14, interest cover 1.7 times",
+        "warning_signals": 4,
+        "score": 35,
+        "material": false
+      }
+    },
+    {
+      "id": "NEWS-XLS-2-11",
+      "headline": "商業物業投資市場成交量回升",
+      "source": "戴德梁行研究報告",
+      "date": "Oct 2026",
+      "customer_id": null,
+      "industry": "Property Investment",
+      "body": "2026年第三季商業物業市場成交量較上半年有所改善，部分投資者開始趁估值調整而入市，市場流動性較年初有所回升。 News type: 行業消息. Signal: 市場流動性改善. Severity: 低. Entities: 香港商業地產市場.",
+      "factors": {
+        "exposure_hkd": 1996813000.0,
+        "security_coverage": "1.47 times market value over drawn, from the collateral extract",
+        "guarantor_support": "not an industry-level fact",
+        "financial_strength": "property investment names carry grades 9 to 11 on the portfolio file",
+        "warning_signals": "see the Apex negative-news file",
+        "score": 35,
         "material": false
       }
     }
